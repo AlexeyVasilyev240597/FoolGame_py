@@ -11,6 +11,7 @@ CLOTH_COLOR = (46, 139, 87)
 FRAME_COLOR = (128, 128, 0)
 CARD_ACTIVE_COLOR = (173, 255, 47)
 CARD_WRONG_COLOR = (139, 0, 0)
+MESSAGE_BOX_COLOR = (152, 251, 152)
 
 # "magic" for Fool game
 MAGIC_CONST = 6
@@ -104,23 +105,32 @@ class PlayerHand(pygame.sprite.LayeredUpdates):
                 if self.active_card >= 0:
                     self.chosen_card = self.active_card
 
+        class MessageBox:
+            def __init__(self, pos, name):
+                self.surf = pygame.display.set_mode((pos[0], pos[1]))
+                self.font = pygame.font.Font('freesansbold.ttf', 32)
+                self.text = self.font.render(name, True, (0,0,0), MESSAGE_BOX_COLOR)
+                self.rect = self.text.get_rect()
 
-        def __init__(self, MAX_IN_ROW, id, type):            
+        def __init__(self, MAX_IN_ROW, id, name, type):            
             self.MAX_IN_ROW = MAX_IN_ROW
             self.id = id
             self.type = type
-            self.joystick = self.Joystick()
+            self.joystick = self.Joystick()            
             self.wrong_choice = False
             
             self.width = MAGIC_CONST*CARD_W            
             self.height = 3/2*CARD_H
             self.thickness = 4   
+            x = WIDTH/2 - self.width/2
             if id == 1:
-                self.pos = [WIDTH/2 - self.width/2, HEIGHT-self.height-self.thickness]
+                y = HEIGHT - self.height - self.thickness
             elif id == 2:
-                self.pos = [WIDTH/2 - self.width/2, self.thickness]
-            self.rect = pygame.Rect(self.pos[0], self.pos[1], self.width, self.height)
-            
+                y = self.thickness
+            self.pos = [x, y]
+            self.rect = pygame.Rect(x, y, self.width, self.height)
+            # pos_mb = [x + self.width + CARD_W/4, y]
+            # self.message_box = self.MessageBox(pos_mb, name)
         
         def getCardPos(self, i, n):
             if n == 1:
@@ -157,9 +167,10 @@ class PlayerHand(pygame.sprite.LayeredUpdates):
                 rect = cards[self.joystick.chosen_card].rect
                 pygame.draw.rect(screen, CARD_WRONG_COLOR, rect, self.thickness)
 
-    def __init__(self, id, type = "user"):
-        pygame.sprite.LayeredUpdates.__init__(self)        
-        self.manager = self.DrawingManager(2*MAGIC_CONST, id, type)   
+    def __init__(self, id, name, type = "user"):
+        pygame.sprite.LayeredUpdates.__init__(self)
+        self.name = name        
+        self.manager = self.DrawingManager(2*MAGIC_CONST, id, name, type)   
         
     def draw(self, screen):
         pygame.sprite.LayeredUpdates.draw(self, screen)
@@ -176,7 +187,7 @@ class PlayerHand(pygame.sprite.LayeredUpdates):
         self.manager.joystick.active_card = -1
         self.manager.joystick.chosen_card = -1
         l = 0
-        print("user #" + str(self.manager.id))
+        # print("user #" + str(self.manager.id))
         for c in cards:
             self.change_layer(c, l)
             l += 1
@@ -213,8 +224,7 @@ class Player(PlayerHand):
         TAKE_AWAY = 3
         
     def __init__(self, id, name):
-        PlayerHand.__init__(self, id)
-        self.name = name
+        PlayerHand.__init__(self, id, name)
         self.status = self.Status(id)
         
     def sayWord(self):
@@ -372,7 +382,25 @@ def reactToChoise(player, table, trump):
         else:
             player.manager.wrong_choice = True
 
-def reactToWord(word, players, table, pile):
+def isGameOver(stock, players):
+    stock_vol = len(stock.sprites())
+    p1_vol    = len(players['active'].sprites())
+    p2_vol    = len(players['passive'].sprites())
+    return stock_vol == 0 and (p1_vol == 0 or p2_vol == 0)
+
+def howIsFool(players):
+    p1_vol = len(players['active'].sprites())
+    p2_vol = len(players['passive'].sprites())
+    if p1_vol == 0 and p2_vol == 0:
+        return 'neither'
+    elif p2_vol == 0:
+        return players['active'].name
+    elif p1_vol == 0:
+        return players['passive'].name
+    else:
+        return 'neither_yet'
+
+def reactToWord(word, players, table, pile, stock):
     if word == Player.Word.BEATEN:
         table.getAllCards(pile)
         players['active'].status =  Player.Status.DEFENDING
@@ -388,7 +416,12 @@ def reactToWord(word, players, table, pile):
         table.getAllCards(players['passive'], True)
         players['active'].status =  Player.Status.ATTACKER
         players['passive'].status =  Player.Status.DEFENDING
-        addFromStock(players, stock)        
+        addFromStock(players, stock)    
+    if isGameOver(stock, players):
+        print(howIsFool(players))
+        return GameStage.GAME_OVER
+    else:
+        return GameStage.PLAYING
         
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -401,7 +434,7 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 
 deck = Deck()
-# deck.shuffle()
+deck.shuffle()
 for c in deck.cards:
     all_sprites.add(c)
     
@@ -418,14 +451,14 @@ class GameStage(Enum):
     GAME_OVER = 3
     
 game_stage = GameStage(1)
-
-while not game_stage == GameStage.GAME_OVER:
+running = True
+while running:
     clock.tick(FPS)
         
     for event in pygame.event.get():        
         # check for closing window
         if event.type == pygame.QUIT:
-            game_stage = GameStage.GAME_OVER
+            running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n and game_stage == GameStage.START:
                 deck.deal(pl1, MAGIC_CONST, True)
@@ -435,7 +468,7 @@ while not game_stage == GameStage.GAME_OVER:
                 game_stage = GameStage.PLAYING        
             
             if players['active'] == pl1:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_s:
                     reactToChoise(pl1, table, trump)
                             
                 if event.key == pygame.K_a:
@@ -444,13 +477,13 @@ while not game_stage == GameStage.GAME_OVER:
                 if event.key == pygame.K_d:
                     pl1.manager.joystick.shiftRight()
                     
-                if event.key == pygame.K_s:
+                if event.key == pygame.K_w:
                     if len(table.sprites()) > 0:
                         word = pl1.sayWord()                
-                        reactToWord(word, players, table, pile)
+                        game_stage = reactToWord(word, players, table, pile, stock)
             
             if players['active'] == pl2:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_DOWN:
                     reactToChoise(pl2, table, trump)              
                                     
                 if event.key == pygame.K_LEFT:
@@ -462,19 +495,13 @@ while not game_stage == GameStage.GAME_OVER:
                 if event.key == pygame.K_UP:
                     if len(table.sprites()) > 0:
                         word = pl2.sayWord()   
-                        reactToWord(word, players, table, pile)
+                        game_stage = reactToWord(word, players, table, pile, stock)
 
-            if event.key == pygame.K_x:            
-                pl1.addCard(stock.getCard(True))
+            # if event.key == pygame.K_x:            
+            #     pl1.addCard(stock.getCard(True))
                 
-            if event.key == pygame.K_c:
-                pl2.addCard(stock.getCard(True))
-
-    # stock_vol = len(stock.sprites())
-    # u1_vol    = len(pl1.sprites())
-    # u2_vol    = len(pl2.sprites())
-    # if game_stage == "playing" and stock_vol == 0 and (u1_vol == 0 or u2_vol == 0):
-    #     game_over = True
+            # if event.key == pygame.K_c:
+            #     pl2.addCard(stock.getCard(True))
 
     all_sprites.update()
     pl1.update()
