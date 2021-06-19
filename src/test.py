@@ -1,14 +1,8 @@
 import pygame
 
-from cards import Deck
-
-WIDTH = 960
-HEIGHT = 640
-FPS = 30
-
-CLOTH_COLOR = (46, 139, 87)
-FRAME_COLOR = (128, 128, 0)
-
+from params import WIDTH, HEIGHT, FPS, CLOTH_COLOR, FRAME_COLOR
+from cards import Suit, Rank, Deck, Badge
+from game_elems import Pile, Stock, Table
   
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -19,10 +13,23 @@ clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
 
+k = 0
+badges = []
+for s in Suit:
+    b = Badge(s)
+    b.setTargetPos([200*k, 3*HEIGHT/4])
+    badges.append(b)
+    all_sprites.add(b)
+    k += 1
+
 deck = Deck()
 # deck.shuffle()
 for c in deck.cards:
     all_sprites.add(c)
+    
+pille = Pile()
+stock = Stock()
+table = Table()
     
 n = 1
 running = True
@@ -36,12 +43,17 @@ while running:
        
 
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and n < 36:
+            if event.key == pygame.K_SPACE and n <= 36:
                 c = deck.cards.pop()
-                c.turnOver()
-                c.setTargetPos([10*n, 0])
+                c.flip()
+                c.setTargetPos([20*n, 0])
                 n += 1
-                print(n)
+                
+            # TODO: write test for stock!
+            if event.key == pygame.K_n:
+                deck.putToPile(stock)
+                trump = stock.showTrump()
+
             
 
     all_sprites.update()

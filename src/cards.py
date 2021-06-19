@@ -40,7 +40,7 @@ class Card:
         else:
             return repr('unknown')
         
-    def turnOver(self):
+    def flip(self):
         self.side = Side(not self.side)
 
 class ItemS(pygame.sprite.Sprite):
@@ -68,15 +68,15 @@ class ItemS(pygame.sprite.Sprite):
 class CardS(Card, ItemS):        
     def __init__(self, suit, rank):
         Card.__init__(self, suit, rank)        
-        p = os.path.join(img_folder, suit.name[0], str(rank.value) + '.png')
+        p = os.path.join(img_folder, suit.value, str(rank.value) + '.png')
         # print(p)
         face = pygame.image.load(p).convert()
         back = pygame.image.load(os.path.join(img_folder, 'back.png')).convert()
         self.sides = [back, face]
         ItemS.__init__(self, self.sides[0])
         
-    def turnOver(self):
-        Card.turnOver(self)
+    def flip(self):
+        Card.flip(self)
         self.sides[0], self.sides[1] = self.sides[1], self.sides[0]
         self.image = self.sides[0]
         
@@ -84,7 +84,7 @@ class CardS(Card, ItemS):
 class Badge(ItemS):
     def __init__(self, suit):
         pygame.sprite.Sprite.__init__(self)
-        b = pygame.image.load(os.path.join(suit.value, 'badge.png')).convert()
+        b = pygame.image.load(os.path.join(img_folder, suit.value, 'badge.png')).convert()
         ItemS.__init__(self, b)
 
 class Deck:
@@ -103,7 +103,7 @@ class Deck:
             for n in range(num):
                 c = self.cards.pop(0)
                 if by_open:
-                    c.turnOver()
+                    c.flip()
                 cards_set.addCard(c)
     
     def putToPile(self, pile):
