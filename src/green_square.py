@@ -1,83 +1,16 @@
 import pygame
-import random
-import os
+# import random
+# import os
 from enum import Enum
 
-WIDTH = 960
-HEIGHT = 640
-FPS = 30
+from params import WIDTH, HEIGHT, FPS, CLOTH_COLOR, FRAME_COLOR, MAGIC_CONST, CARD_W, CARD_H
+from items import Suit, Rank, Card
+from elems import Deck, Pile, Stock, Table, Dealer
 
-CLOTH_COLOR = (46, 139, 87)
-FRAME_COLOR = (128, 128, 0)
+
 CARD_ACTIVE_COLOR = (173, 255, 47)
 CARD_WRONG_COLOR = (139, 0, 0)
 MESSAGE_BOX_COLOR = (152, 251, 152)
-
-# "magic" for Fool game
-MAGIC_CONST = 6
-
-game_folder = os.path.dirname(__file__)
-img_folder = os.path.join(game_folder, 'pic')
-
-ranks = range(6, 15)
-suits = ['S', 'H', 'D', 'C']
-
-class Card(pygame.sprite.Sprite):        
-    def __init__(self, suit, rank):
-        pygame.sprite.Sprite.__init__(self)
-        self.suit = suit
-        self.rank = rank        
-        face = pygame.image.load(os.path.join(img_folder, suit, str(rank) + '.png')).convert()
-        back = pygame.image.load(os.path.join(img_folder, 'back.png')).convert()        
-        self.sides = [back, face]
-        self.image = self.sides[0]
-        self.rect = self.image.get_rect()
-        self.target_pos = [self.rect.x, self.rect.y]        
-        
-    def __repr__(self):
-        return repr((self.suit, self.rank))
-        
-    def turnOver(self):
-        self.sides[0], self.sides[1] = self.sides[1], self.sides[0]
-        self.image = self.sides[0]
-        
-    # moving funcs
-    def setTargetPos(self, pos):
-        self.target_pos = pos
-
-    def update(self):
-        if not (self.target_pos[0] == self.rect.x and self.target_pos[1] == self.rect.y):
-            N = [self.target_pos[0] - self.rect.x, self.target_pos[1] - self.rect.y]
-            L = abs(N[0]) + abs(N[1])
-            # number of pixels per shot
-            dl = min(10, L)
-            dx = round(N[0]/L*dl)
-            dy =   int(N[1]/L*dl)
-            self.rect.x += dx
-            self.rect.y += dy
-            
-class Deck:
-    def __init__(self):
-        self.cards = []
-        for s in suits:
-            for r in ranks:
-                c = Card(s, r)
-                self.cards.append(c)
-                
-    def shuffle(self):
-        random.shuffle(self.cards)
-    
-    def deal(self, cards_set, num = 1, by_open = False):
-        if len(self.cards) >= num:
-            for n in range(num):
-                c = self.cards.pop(0)
-                if by_open:
-                    c.turnOver()
-                cards_set.addCard(c)
-    
-    def putToPile(self, pile):
-        while len(self.cards) > 0:
-            pile.addCard(self.cards.pop())
 
 class PlayerHand(pygame.sprite.LayeredUpdates):
     class DrawingManager:
@@ -208,7 +141,8 @@ class PlayerHand(pygame.sprite.LayeredUpdates):
         self.updateCards()
 
     def updateCards(self):        
-        cards = sorted(self.sprites(), key=lambda card: ((card.suit == self.trump)*ranks[-1] + card.rank))
+        get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
+        cards = sorted(self.sprites(), key = get_weight)
         n = len(cards)
         self.manager.joystick.active_card = -1
         self.manager.joystick.chosen_card = -1
@@ -242,6 +176,7 @@ class Player(PlayerHand):
         DEFENDING = 2
         ADDING    = 3
         TAKING    = 4
+        FOOL      = 5
         
     class Word(Enum):
         BEATEN    = 1
@@ -261,100 +196,6 @@ class Player(PlayerHand):
             return self.Word.TAKE_AWAY
         return []
 
-
-class Pile(pygame.sprite.LayeredUpdates):
-    def __init__(self):
-        pygame.sprite.LayeredUpdates.__init__(self)
-        self.pos = [WIDTH - CARD_W, HEIGHT/2 - CARD_H/2]
-    
-    def addCard(self, card):
-        self.add(card)        
-        card.setTargetPos(self.pos)        
-        self.change_layer(card, 1)
-
-    def putToDeck(self, deck):
-        while len(self.sprites()) > 0:
-            card = self.get_top_sprite()
-            deck.cards.append(card)
-            card.setTargetPos([0, 0])
-            self.remove(card)
-    
-
-class Stock(pygame.sprite.LayeredUpdates):
-    def __init__(self):
-        pygame.sprite.LayeredUpdates.__init__(self)  
-        self.pos = [0, HEIGHT/2 - CARD_H/2]
-        
-    def addCard(self, card):
-        self.add(card)
-        card.setTargetPos(self.pos)        
-        self.change_layer(card, 1)
-    
-    def showTrump(self):        
-        last_card = self.get_top_sprite()
-        last_card.turnOver()
-        last_card.setTargetPos([self.pos[0], self.pos[1] + CARD_W/4])
-        last_card.image = pygame.transform.rotate(last_card.image, -90)
-        self.change_layer(last_card, 0)
-        return last_card.suit
-    
-    def getCard(self, by_open = False):
-        n = len(self.sprites())        
-        if n > 0:
-            card = self.get_top_sprite()              
-            if n == 1:
-                card.image = pygame.transform.rotate(card.image, 90)
-                self.move_to_front(card)
-            else:
-                card.turnOver()
-            if not by_open:
-                card.turnOver()
-            self.remove(card)
-        else:
-            card = []
-        return card
-        
-class Table(pygame.sprite.LayeredUpdates):
-    def __init__(self):
-        pygame.sprite.LayeredUpdates.__init__(self)  
-        self.pos = [WIDTH/2 -  MAGIC_CONST*CARD_W/2, 13/8*CARD_H]
-        self.last_down = 0
-        self.last_up   = 0
-        
-    def addCard(self, card, atop):
-        if atop:
-            l = 2*(self.last_up + 1)
-            self.last_up += 1
-        else:
-            l = 2*self.last_down + 1
-            self.last_down += 1
-        
-        self.add(card, layer = l)
-        pos = self.getCardPos(l)
-        card.setTargetPos(pos)
-        
-    def getCardPos(self, layer):
-        i    = layer - 1
-        atop = layer % 2
-        x = (i %  MAGIC_CONST) * CARD_W        
-        y = (i // MAGIC_CONST) * CARD_H
-        if atop:
-            x += CARD_W / 4
-            y += CARD_H / 4
-        x += self.pos[0]
-        y += self.pos[1]
-        pos = [x, y]
-        return pos
-        
-    def getAllCards(self, cards_set, by_open = False):
-        while len(self.sprites()) > 0:
-            card = self.get_top_sprite()
-            if not by_open:
-                card.turnOver()
-            cards_set.addCard(card)
-            self.remove(card)
-        self.last_down = 0
-        self.last_up   = 0
 
 # ----------------- Fool methods -----------------
 def swapRole(players):
@@ -459,7 +300,6 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Fool Game")
 
-(CARD_W, CARD_H) = Card('S', 6).image.get_rect().size
 
 clock = pygame.time.Clock()
 
@@ -470,7 +310,7 @@ deck.shuffle()
 for c in deck.cards:
     all_sprites.add(c)
     
-pl1 = Player(1, "Alexey")
+pl1 = Player(1, "Alexey V")
 pl2 = Player(2, "Robert")
 players = {'active': pl1, 'passive': pl2}
 stock     = Stock()
@@ -493,9 +333,7 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n and game_stage == GameStage.START:
-                deck.deal(pl1, MAGIC_CONST, True)
-                deck.deal(pl2, MAGIC_CONST, True)
-                deck.putToPile(stock)
+                Dealer.deal(deck, players, stock)
                 trump = stock.showTrump()
                 pl1.setTrump(trump)
                 pl2.setTrump(trump)
@@ -542,6 +380,7 @@ while running:
     pl2.update()
     stock.update()
     table.update()
+    pile.update()
     
     screen.fill(CLOTH_COLOR)
     
@@ -550,6 +389,7 @@ while running:
     pl2.draw(screen)  
     stock.draw(screen)
     table.draw(screen)
+    pile.draw(screen)
     
     pygame.display.flip()
     
