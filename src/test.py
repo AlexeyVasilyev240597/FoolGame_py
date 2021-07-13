@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
 deck = Deck()
-deck.shuffle()
+# deck.shuffle()
 for c in deck.cards:
     all_sprites.add(c)    
 
@@ -36,12 +36,11 @@ while running:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and n <= 36:
-                # c = deck.getFromTop(True)
+                # c = deck.getCard(True)
                 # c = deck.getFromBottom()
                 c = stock.getCard(True)
                 # print(c)
                 # c = stock.getCard()
-                # c.flip()
                 c.setTargetPos([20*n, 0])
                 n += 1
 

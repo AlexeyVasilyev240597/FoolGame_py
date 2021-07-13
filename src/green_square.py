@@ -220,6 +220,7 @@ def isChoiceCorrect(status, table, card, trump):
             else:
                 return card.suit == last.suit and card.rank > last.rank
             
+# TODO: rewrite with switch by all Status values
 def canCardBeThrown(players, table):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards

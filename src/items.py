@@ -74,9 +74,10 @@ class ItemS(pygame.sprite.Sprite):
 class CardS(Card, ItemS):        
     def __init__(self, suit, rank):
         Card.__init__(self, suit, rank)        
-        p = os.path.join(img_folder, suit.value, str(rank.value) + '.png')
-        face = pygame.image.load(p).convert()
-        back = pygame.image.load(os.path.join(img_folder, 'back.png')).convert()
+        p2f = os.path.join(img_folder, suit.value, str(rank.value) + '.png')
+        face = pygame.image.load(p2f).convert()
+        p2b = os.path.join(img_folder, 'back.png')
+        back = pygame.image.load(p2b).convert()
         self.sides = [back, face]
         ItemS.__init__(self, self.sides[0], [0, 0])      
         #TODO: set background color CLOTH_COLOR
@@ -88,26 +89,27 @@ class CardS(Card, ItemS):
 
 class Badge(ItemS):
     def __init__(self, suit, pos):
-        b = pygame.image.load(os.path.join(img_folder, suit.value, 'badge.png')).convert()
+        p2b = os.path.join(img_folder, suit.value, 'badge.png')
+        b = pygame.image.load(p2b).convert()
         ItemS.__init__(self, b, pos)
         
-class TextBox(ItemS):
+class TextBox:
     def __init__(self, pos, size):
         self.font = pygame.font.Font('freesansbold.ttf', 16)
-        img = pygame.Surface(size)
-        img.fill(MESSAGE_BOX_COLOR)
-        ItemS.__init__(self, img, pos)
+        # img = pygame.Surface(size)
+        # img.fill(MESSAGE_BOX_COLOR)
+        # ItemS.__init__(self, img, pos)
+        self.pos = pos
+        self.size = size
+        self.center = [self.pos[0] + self.size[0]/2, self.pos[1] + self.size[1]/2]
         self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+        self.text = []
         
     def setText(self, text):
         self.text = self.font.render(text, True, (0,0,0)) 
         
     def draw(self, screen):
-        pygame.draw.rect(screen, MESSAGE_BOX_COLOR, self.rect)
-        text_rect = self.text.get_rect(center = self.getCenter())
-        screen.blit(self.text, text_rect)
-    
-    def getCenter(self):
-        s = self.image.get_size()
-        p = [self.rect.x, self.rect.y]
-        return [p[0] + s[0]/2, p[1] + s[1]/2]
+        if not self.text == []:
+            pygame.draw.rect(screen, MESSAGE_BOX_COLOR, self.rect)
+            text_rect = self.text.get_rect(center = self.center)
+            screen.blit(self.text, text_rect)    

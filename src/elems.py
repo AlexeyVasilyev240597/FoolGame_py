@@ -14,6 +14,13 @@ class Element:
         card.setTargetPos(pos)
         self.cards.add(card)
         self.cards.change_layer(card, layer)
+        
+    def getCard(self, to_flip = False, index = -1):        
+        c = self.cards.sprites()[index]
+        if to_flip:
+            c.flip()
+        self.cards.remove(c)
+        return c
 
     def loc2glob(self, pos_loc):
         return [self.pos[0] + pos_loc[0], self.pos[1] + pos_loc[1]]
@@ -33,27 +40,16 @@ class Deck(Element):
         for s in Suit:
             for r in Rank:
                 c = CardS(s, r)
-                self.addCard(c, DECK_VOLUME-self.vol()-1)
+                self.addCard(c)
+
+    def addCard(self, card):
+        Element.addCard(self, card, DECK_VOLUME-self.vol()-1)
 
     def shuffle(self):
         lrs = self.cards.layers()
         random.shuffle(lrs)
         for n in range(len(lrs)):
             self.cards.switch_layer(n, lrs[n])
-
-    def getFromTop(self, by_open = False):
-        c = self.cards.get_top_sprite()
-        if by_open:
-            c.flip()        
-        self.cards.remove(c)
-        return c
-
-    def getFromBottom(self, by_open = False):        
-        c = self.cards.get_sprite(0)
-        if by_open:
-            c.flip()
-        self.cards.remove(c)
-        return c
 
 class Pile(Element):
     def __init__(self):
@@ -66,8 +62,8 @@ class Stock(Element):
         self.trump_badge = pygame.sprite.Group()
         self.counter = []
     
-    def showTrump(self):        
-        last_card = self.cards.get_top_sprite()       
+    def showTrump(self):
+        last_card = self.cards.get_top_sprite()
         last_card.flip()
         last_card.setTargetPos([self.pos[0], self.pos[1] + CARD_W/4])
         last_card.image = pygame.transform.rotate(last_card.image, -90)
@@ -81,25 +77,17 @@ class Stock(Element):
         # init counter
         self.counter = TextBox(box_pos, box_size)
         self.counter.setText(str(self.vol()))
-        # self.info_box.add(self.counter)
         return last_card.suit
     
     def getCard(self, by_open = False):
         n = self.vol()
-        if n > 0:
-            card = self.cards.get_top_sprite()
-            if n == 1:
-                card.image = pygame.transform.rotate(card.image, 90)                
-            else:
-                card.flip()
-            if not by_open:
-                card.flip()
-            self.cards.remove(card)
-        else:
-            card = []
+        card = Element.getCard(self, by_open)
+        if n == 1:
+            card.image = pygame.transform.rotate(card.image, 90)  
+            card.flip()
         self.counter.setText(str(self.vol()))
         return card
-        
+
     def draw(self, screen):
         self.cards.draw(screen)        
         if self.vol() > 1 and not self.counter == []:
@@ -111,7 +99,6 @@ class Stock(Element):
 class Table(Element):
     def __init__(self):
         Element.__init__(self, [WIDTH/2 - MAGIC_CONST*CARD_W/2, 13/8*CARD_H])
-        print(self.pos)
         self.last_down = 0
         self.last_up   = 0
         
@@ -139,37 +126,31 @@ class Table(Element):
         
     def getAllCards(self, cards_set, by_open = False):
         while self.vol() > 0:
-            card = self.cards.get_top_sprite()
-            if not by_open:
-                card.flip()
+            card = Element.getCard(self, not by_open)
             cards_set.addCard(card)
-            self.cards.remove(card)
         self.last_down = 0
         self.last_up   = 0
 
 
-class Dealer:       
+class Dealer: 
     def deck2player(deck, player, by_open = False):
         for n in range(MAGIC_CONST):
-            card = deck.getFromTop(by_open)
+            card = deck.getCard(by_open, 0)
             player.addCard(card)
     
     def deck2stock(deck, stock):
         while len(deck.cards) > 0:
-            card = deck.getFromBottom()
-            # stock.addCard(card, stock.vol())
+            card = deck.getCard(False, 0)
             stock.addCard(card)
 
     # call in start of Fool Game
     def deal(deck, players, stock):
-        Dealer.deck2player(deck, players['active'],  True)
-        Dealer.deck2player(deck, players['passive'], True)
+        Dealer.deck2player(deck, players['passive'],  True)
+        Dealer.deck2player(deck, players['active'], True)
         Dealer.deck2stock(deck, stock)
-        
+
     # call in finish of Fool Game
     def pile2deck(pile, deck):
         while len(pile.sprites()) > 0:
-            card = pile.get_top_sprite()
+            card = pile.getCard()
             deck.addCard(card)
-            card.setTargetPos(deck.pos)
-            pile.cards.remove(card)
