@@ -24,6 +24,8 @@ class Suit(Enum):
     HEARTS   = 'H'
     CLUBS    = 'C'
     SPADES   = 'S'
+
+DECK_VOLUME = len(Rank)*len(Suit)
     
 class Side(Flag):
     BACK = 0
@@ -73,7 +75,6 @@ class CardS(Card, ItemS):
     def __init__(self, suit, rank):
         Card.__init__(self, suit, rank)        
         p = os.path.join(img_folder, suit.value, str(rank.value) + '.png')
-        # print(p)
         face = pygame.image.load(p).convert()
         back = pygame.image.load(os.path.join(img_folder, 'back.png')).convert()
         self.sides = [back, face]

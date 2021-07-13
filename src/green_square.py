@@ -1,16 +1,14 @@
 import pygame
-# import random
-# import os
 from enum import Enum
 
-from params import WIDTH, HEIGHT, FPS, CLOTH_COLOR, FRAME_COLOR, MAGIC_CONST, CARD_W, CARD_H
+from params import WIDTH, HEIGHT, CARD_W, CARD_H, FPS, MAGIC_CONST
+from params import CLOTH_COLOR, FRAME_COLOR, MESSAGE_BOX_COLOR
 from items import Suit, Rank, Card
 from elems import Deck, Pile, Stock, Table, Dealer
 
 
 CARD_ACTIVE_COLOR = (173, 255, 47)
 CARD_WRONG_COLOR = (139, 0, 0)
-MESSAGE_BOX_COLOR = (152, 251, 152)
 
 class PlayerHand(pygame.sprite.LayeredUpdates):
     class DrawingManager:
@@ -202,21 +200,30 @@ def swapRole(players):
     players['active'], players['passive'] = players['passive'], players['active']
 
 def isChoiceCorrect(status, table, card, trump):
-    if len(table.sprites()) == 0:
+    if table.vol() == 0:
         return True
     if status == Player.Status.ATTACKER or status == Player.Status.ADDING:
-        for c in table.sprites():
+        for c in table.cards.sprites():
             if card.rank == c.rank:
                 return True
         return False
     if status == Player.Status.DEFENDING:
-        last = table.sprites()[-1]
-        return card.suit == last.suit and card.rank > last.rank or card.suit == trump
-
+        last = table.cards.sprites()[-1]
+        if last.suit == trump:
+            if card.suit == trump:
+                return card.rank > last.rank
+            else:
+                return False
+        else:
+            if card.suit == trump:
+                return True
+            else:
+                return card.suit == last.suit and card.rank > last.rank
+            
 def canCardBeThrown(players, table):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
-    if table.last_up == MAGIC_CONST or len(players['passive'].sprites()) == 0:
+    if table.last_up == MAGIC_CONST or (players['passive'].status == Player.Status.DEFENDING and len(players['passive'].sprites()) == 0):
         return False
     # number of cards added by ADDING player on table equals 
     # number of TAKING player's cards => ADDING should say TAKE_AWAY
@@ -229,7 +236,7 @@ def canCardBeThrown(players, table):
 #       distribute equally for players after the last fight
 def addFromStock(players, stock):
     for role in players:
-        ns = len(stock.sprites())    
+        ns = stock.vol()   
         if ns > 0:            
             n = len(players[role].sprites())
             if n < MAGIC_CONST:
@@ -250,7 +257,7 @@ def reactToChoise(player, table, trump):
             player.manager.wrong_choice = True
 
 def isGameOver(stock, players):
-    stock_vol = len(stock.sprites())
+    stock_vol = stock.vol()
     p1_vol    = len(players['active'].sprites())
     p2_vol    = len(players['passive'].sprites())
     return stock_vol == 0 and (p1_vol == 0 or p2_vol == 0)
@@ -350,7 +357,7 @@ while running:
                     pl1.manager.joystick.shiftRight()
                     
                 if event.key == pygame.K_w:
-                    if len(table.sprites()) > 0:
+                    if table.vol() > 0:
                         word = pl1.sayWord()                
                         game_stage = reactToWord(word, players, table, pile, stock)
             
@@ -365,7 +372,7 @@ while running:
                     pl2.manager.joystick.shiftRight()              
 
                 if event.key == pygame.K_UP:
-                    if len(table.sprites()) > 0:
+                    if table.vol() > 0:
                         word = pl2.sayWord()   
                         game_stage = reactToWord(word, players, table, pile, stock)
 
