@@ -129,6 +129,9 @@ class PlayerHand(pygame.sprite.LayeredUpdates):
     def setTrump(self, suit):
         self.trump = suit
         
+    def vol(self):
+        return len(self.sprites())
+        
     def draw(self, screen):
         pygame.sprite.LayeredUpdates.draw(self, screen)
         self.manager.drawAllStuff(screen, self.sprites(), self.message_box)        
@@ -192,7 +195,6 @@ class Player(PlayerHand):
             return self.Word.TAKE
         if self.status == self.Status.ADDING:
             return self.Word.TAKE_AWAY
-        return []
 
 
 # ----------------- Fool methods -----------------
@@ -209,18 +211,10 @@ def isChoiceCorrect(status, table, card, trump):
         return False
     if status == Player.Status.DEFENDING:
         last = table.cards.sprites()[-1]
-        if last.suit == trump:
-            if card.suit == trump:
-                return card.rank > last.rank
-            else:
-                return False
-        else:
-            if card.suit == trump:
-                return True
-            else:
-                return card.suit == last.suit and card.rank > last.rank
+        return last.suit == card.suit and last.rank < card.rank or not last.suit == card.suit and card.suit == trump
             
-# TODO: rewrite with switch by all Status values
+# TODO: rewrite with switch by all Status values 
+# and check last case because there is BUG!
 def canCardBeThrown(players, table):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
@@ -233,16 +227,21 @@ def canCardBeThrown(players, table):
             return False
     return True
 
-# TODO: rewrite this func that cards will 
-#       distribute equally for players after the last fight
 def addFromStock(players, stock):
-    for role in players:
-        ns = stock.vol()   
-        if ns > 0:            
-            n = len(players[role].sprites())
-            if n < MAGIC_CONST:
-                for i in range(min(MAGIC_CONST-n, ns)):
-                    players[role].addCard(stock.getCard(True))
+    pv = {'active': players['active'].vol(), 'passive': players['passive'].vol()}
+    dv = {'active': 0, 'passive': 0}
+    s  = stock.vol()
+    while s > 0 and (pv['active'] < MAGIC_CONST or pv['passive'] < MAGIC_CONST):
+        if pv['active'] < pv['passive']:
+            dv['active'] += 1
+            pv['active'] += 1
+        else:
+            dv['passive'] += 1
+            pv['passive'] += 1
+        s -= 1    
+    for role in players:       
+        for i in range(dv[role]):
+            players[role].addCard(stock.getCard(True))
         
 def reactToChoise(player, table, trump):
     player.manager.joystick.chooseCard()
