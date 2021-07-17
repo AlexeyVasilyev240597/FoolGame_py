@@ -1,7 +1,8 @@
 import pygame
 import random
 
-from params import WIDTH, HEIGHT, CARD_W, CARD_H, BADGE_S, MAGIC_CONST
+from params import CARD_W, CARD_H, BADGE_S, MAGIC_CONST
+from params import POS_STOCK, POS_PILE, POS_TABLE
 from items import Rank, Suit, CardS, TextBox, Badge, DECK_VOLUME
 
 class Element:
@@ -9,7 +10,7 @@ class Element:
         self.pos = pos
         self.cards = pygame.sprite.LayeredUpdates()
     
-    def addCard(self, card, layer = 0, pos_loc = [0, 0]):        
+    def addCard(self, card, layer = 0, pos_loc = [0, 0]):
         pos = self.loc2glob(pos_loc)
         card.setTargetPos(pos)
         self.cards.add(card)
@@ -53,12 +54,12 @@ class Deck(Element):
 
 class Pile(Element):
     def __init__(self):
-        Element.__init__(self, [WIDTH - CARD_W, HEIGHT/2 - CARD_H/2])
+        Element.__init__(self, POS_PILE)
     
 
 class Stock(Element):
     def __init__(self):
-        Element.__init__(self, [0, HEIGHT/2 - CARD_H/2])
+        Element.__init__(self, POS_STOCK)
         self.trump_badge = pygame.sprite.Group()
         self.counter = []
     
@@ -98,7 +99,7 @@ class Stock(Element):
 
 class Table(Element):
     def __init__(self):
-        Element.__init__(self, [WIDTH/2 - MAGIC_CONST*CARD_W/2, 13/8*CARD_H])
+        Element.__init__(self, POS_TABLE)
         self.last_down = 0
         self.last_up   = 0
         
@@ -148,7 +149,11 @@ class Dealer:
         Dealer.deck2player(deck, players['passive'],  True)
         Dealer.deck2player(deck, players['active'], True)
         Dealer.deck2stock(deck, stock)
-
+        trump = stock.showTrump()
+        players['active'].setTrump(trump)
+        players['passive'].setTrump(trump)
+        return trump
+    
     # call in finish of Fool Game
     def pile2deck(pile, deck):
         while len(pile.sprites()) > 0:

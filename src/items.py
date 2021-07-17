@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from enum import IntEnum, Enum, Flag
 
-from params import MESSAGE_BOX_COLOR
+from params import COLOR_MESSAGE_BOX
 
 game_folder = Path(os.path.dirname(__file__)).parent
 img_folder = os.path.join(game_folder, 'pic')
@@ -61,7 +61,9 @@ class ItemS(pygame.sprite.Sprite):
 
     def update(self):
         if not (self.target_pos[0] == self.rect.x and self.target_pos[1] == self.rect.y):
+            # Normal
             N = [self.target_pos[0] - self.rect.x, self.target_pos[1] - self.rect.y]
+            # length of way to target position in pixels
             L = abs(N[0]) + abs(N[1])
             # number of pixels per shot
             dl = min(10, L)
@@ -96,9 +98,6 @@ class Badge(ItemS):
 class TextBox:
     def __init__(self, pos, size):
         self.font = pygame.font.Font('freesansbold.ttf', 16)
-        # img = pygame.Surface(size)
-        # img.fill(MESSAGE_BOX_COLOR)
-        # ItemS.__init__(self, img, pos)
         self.pos = pos
         self.size = size
         self.center = [self.pos[0] + self.size[0]/2, self.pos[1] + self.size[1]/2]
@@ -106,10 +105,11 @@ class TextBox:
         self.text = []
         
     def setText(self, text):
-        self.text = self.font.render(text, True, (0,0,0)) 
+        self.text = text
         
     def draw(self, screen):
         if not self.text == []:
-            pygame.draw.rect(screen, MESSAGE_BOX_COLOR, self.rect)
-            text_rect = self.text.get_rect(center = self.center)
-            screen.blit(self.text, text_rect)    
+            text_r = self.font.render(self.text, True, (0,0,0)) 
+            pygame.draw.rect(screen, COLOR_MESSAGE_BOX, self.rect)
+            text_rect = text_r.get_rect(center = self.center)
+            screen.blit(text_r, text_rect)    
