@@ -1,12 +1,13 @@
-import pygame
-from elems import Element
-from player import Player
-from rules import isChoiceCorrect, canCardBeThrown
+# import pygame
+from params import FLAG_DEBUG
+from elems  import Element
+from player import Player, Type
+from rules  import isChoiceCorrect, canCardBeThrown
 
 # Artificial Intelligence 
 class ArtInt(Player):
     def __init__(self, name, id):
-        Player.__init__(self, name, id, 'ai')
+        Player.__init__(self, name, id, Type.AI)
     
     def move(self, table, stock_vol, rival_vol):
         print('WARNING: abstract method of ArtInt does nothing')
@@ -23,7 +24,7 @@ class ArtInt(Player):
 
 class NikitaA(ArtInt):
     def __init__(self, id):
-        Player.__init__(self, 'Nikita A', id, 'ai')
+        Player.__init__(self, 'Nikita A', id, Type.AI)
     
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
@@ -31,8 +32,10 @@ class NikitaA(ArtInt):
             word = self.sayWord()
             ans = {'word': word}
         else:
-            # DEBUG            
-            card = Element.getCard(self, False, indxs[0])
+            if FLAG_DEBUG:
+                card = Element.getCard(self, False, indxs[0])
+            else:
+                card = Element.getCard(self, True, indxs[0])
             self.updateCards()
             ans = {'card': card}
         return ans

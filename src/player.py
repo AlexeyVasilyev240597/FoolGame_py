@@ -19,6 +19,10 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
+class Type(IntEnum):
+    AI   = 0
+    USER = 1
+
 class Player(Element):        
     def __init__(self, name, id, type):
         # main params
@@ -89,8 +93,6 @@ class Player(Element):
         if self.status == Status.ADDING:
             self.mess_box.setText('Забирай!')
             return Word.TAKE_AWAY
-        # if self.status == Status.FOOL:
-        #     self.mess_box.setText('Дурак!')
         
     def setTrump(self, suit):
         self.trump = suit

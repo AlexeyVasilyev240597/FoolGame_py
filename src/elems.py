@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from params import CARD_W, CARD_H, BADGE_S, MAGIC_CONST
+from params import CARD_W, CARD_H, BADGE_S, MAGIC_CONST, FLAG_DEBUG
 from params import POS_STOCK, POS_PILE, POS_TABLE
 from items import Rank, Suit, CardS, TextBox, Badge, DECK_VOLUME
 
@@ -146,8 +146,12 @@ class Dealer:
 
     # call in start of Fool Game
     def deal(deck, players, stock):
-        Dealer.deck2player(deck, players['passive'],  True)
-        Dealer.deck2player(deck, players['active'], True)
+        if FLAG_DEBUG:
+            Dealer.deck2player(deck, players['passive'], True)
+            Dealer.deck2player(deck, players['active'],  True)
+        else:
+            Dealer.deck2player(deck, players['passive'], players['passive'].type)
+            Dealer.deck2player(deck, players['active'],  players['active'].type)
         Dealer.deck2stock(deck, stock)
         trump = stock.showTrump()
         players['active'].setTrump(trump)
@@ -155,7 +159,15 @@ class Dealer:
         return trump
     
     # call in finish of Fool Game
-    def pile2deck(pile, deck):
-        while len(pile.sprites()) > 0:
+    def all2deck(players, table, pile, deck):
+        for role in players:
+            while players[role].vol() > 0:
+                # TODO: how to get card from player not while playing?
+                # maybe in player import GameStage from rules 
+                # and modify its method getCard()?
+                card = players[role].getCard()
+                deck.addCard(card)
+        table.getAllCards(deck)
+        while pile.vol() > 0:
             card = pile.getCard()
             deck.addCard(card)

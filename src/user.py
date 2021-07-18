@@ -1,6 +1,6 @@
 import pygame
 from elems import Element
-from player import Player
+from player import Player, Type
 from params import COLOR_CARD_ACTIVE, COLOR_CARD_WRONG
 
 class Joystick:
@@ -25,7 +25,7 @@ class Joystick:
 
 class User(Player):
     def __init__(self, name, id):
-        Player.__init__(self, name, id, 'user')
+        Player.__init__(self, name, id, Type.USER)
         self.joystick = Joystick()
         self.wrong_choice = False
 
@@ -49,8 +49,6 @@ class User(Player):
     def getCard(self):
         cci = self.joystick.chosen_card
         if cci >= 0:
-            # for AI
-            # card = Element.getCard(self, self.type == 'ai', self.cci)
             card = Element.getCard(self, False, cci)        
             self.joystick.num -= 1
             self.updateCards()
