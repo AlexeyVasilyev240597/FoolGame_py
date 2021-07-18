@@ -1,12 +1,15 @@
 import pygame
 from enum import Enum
 
-from params import WIDTH, HEIGHT, FPS, MAGIC_CONST
-from params import COLOR_CLOTH 
-from elems import Deck, Pile, Stock, Table, Dealer
+from params import WIDTH, HEIGHT, FPS, MAGIC_CONST, COLOR_CLOTH 
+from elems  import Deck, Pile, Stock, Table, Dealer
 from player import Status, Word
-from user import User
+from user   import User
+from ai     import NikitaA
 
+
+# TODO: write log file contained all moves of players and their cards on hands
+# TODO: customize 'new game' by press 'N' key after 'game over'
 
 # ----------------- Fool methods -----------------
 def swapRole(players):
@@ -24,9 +27,6 @@ def isChoiceCorrect(status, table, card, trump):
         last = table.cards.sprites()[-1]
         return last.suit == card.suit and last.rank < card.rank or not last.suit == card.suit and card.suit == trump
 
-# TODO: rewrite with switch by all Status values 
-# and check last case because there is BUG!
-#def canCardBeThrown(players, table):
 def canCardBeThrown(status, table, rival_vol):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
@@ -59,11 +59,10 @@ def reactToChoise(player, table, trump):
     player.chooseCard()
     card = player.showChosenCard()
     if not card == []:
-        
         right_card = isChoiceCorrect(player.status, table, card, trump)
-        print(right_card)
+        # print(right_card)
         enough_space = canCardBeThrown(players['active'].status, table, players['passive'].vol())
-        print(enough_space)
+        # print(enough_space)
         move_correct = right_card and enough_space
         if move_correct:
             card = player.getCard()
@@ -83,18 +82,17 @@ def howIsFool(players):
     p1_vol    = players['active'].vol()
     p2_vol    = players['passive'].vol()
     if p1_vol == 0 and p2_vol == 0:
-        players['active'].box.setResult(0)
-        players['passive'].box.setResult(0)
+        players['active'].mess_box.setText('Ничья!')
+        players['passive'].mess_box.setText('Ничья!')
         return 'neither'
     elif p2_vol == 0:
-        players['active'].box.setResult(-1)
-        players['passive'].box.setResult(1)
+        players['active'].status = Status.FOOL
+        players['active'].mess_box.setText('Дурак!')
         return players['active'].name
     elif p1_vol == 0:
-        players['active'].box.setResult(1)
-        players['passive'].box.setResult(-1)
+        players['passive'].mess_box.setText('Дурак!')
         return players['passive'].name
-    else:
+    else: # wrong call
         return 'neither yet'
 
 def reactToWord(word, players, table, pile, stock):
@@ -134,7 +132,7 @@ for c in deck.cards:
     all_sprites.add(c)
     
 pl1 = User("Alexey V", 1)
-pl2 = User("Robert", 2)
+pl2 = NikitaA(2)
 players = {'active': pl1, 'passive': pl2}
 stock     = Stock()
 pile      = Pile()
@@ -145,7 +143,7 @@ class GameStage(Enum):
     PLAYING   = 2
     GAME_OVER = 3
     
-game_stage = GameStage(1)
+game_stage = GameStage.START
 running = True
 while running:
     clock.tick(FPS)
@@ -159,41 +157,63 @@ while running:
                 trump = Dealer.deal(deck, players, stock)
                 game_stage = GameStage.PLAYING        
             
-            if players['active'] == pl1:
-                if event.key == pygame.K_s:
-                    reactToChoise(pl1, table, trump)
-
+            if players['active'] == pl1 and game_stage == GameStage.PLAYING:
                 if event.key == pygame.K_a:
                     pl1.joystick.shiftLeft()
                     
                 if event.key == pygame.K_d:
                     pl1.joystick.shiftRight()
                     
+                if event.key == pygame.K_s:
+                    reactToChoise(pl1, table, trump)
+                    start_ticks = pygame.time.get_ticks()
+                    pl2.mess_box.setText('')
+
                 if event.key == pygame.K_w:
                     if table.vol() > 0:
                         word = pl1.sayWord()                
                         game_stage = reactToWord(word, players, table, pile, stock)
-            
-            if players['active'] == pl2:
-                if event.key == pygame.K_DOWN:
-                    reactToChoise(pl2, table, trump)              
-                                    
-                if event.key == pygame.K_LEFT:
-                    pl2.joystick.shiftLeft()
-                    
-                if event.key == pygame.K_RIGHT:
-                    pl2.joystick.shiftRight()              
-
-                if event.key == pygame.K_UP:
-                    if table.vol() > 0:
-                        word = pl2.sayWord()   
-                        game_stage = reactToWord(word, players, table, pile, stock)
-
-            # if event.key == pygame.K_x:            
-            #     pl1.addCard(stock.getCard(True))
+                        if game_stage == GameStage.PLAYING:
+                            start_ticks = pygame.time.get_ticks()
+                            pl2.mess_box.setText('')
+    
+    # if pl2 is AI
+    if players['active'] == pl2 and game_stage == GameStage.PLAYING:
+        sec = (pygame.time.get_ticks()-start_ticks)/1000
+        if sec > 1:
+            mv = pl2.move(table, stock.vol(), players['passive'].vol())
+            if 'card' in mv:
+                card = mv.get('card')
+                # print(card)
+                table.addCard(card, pl2.status == Status.DEFENDING)
+                if not pl2.status == Status.ADDING:
+                    swapRole(players)
+                start_ticks = pygame.time.get_ticks()
+                pl1.mess_box.setText('')
+            if 'word' in mv:
+                word = mv.get('word')
+                # print(word.name)
+                game_stage = reactToWord(word, players, table, pile, stock)
+                if game_stage == GameStage.PLAYING:
+                    start_ticks = pygame.time.get_ticks()
+                    pl1.mess_box.setText('')
                 
-            # if event.key == pygame.K_c:
-            #     pl2.addCard(stock.getCard(True))
+            
+            # is pl2 is User
+            # if players['active'] == pl2:
+            #     if event.key == pygame.K_DOWN:
+            #         reactToChoise(pl2, table, trump)              
+                                    
+            #     if event.key == pygame.K_LEFT:
+            #         pl2.joystick.shiftLeft()
+                    
+            #     if event.key == pygame.K_RIGHT:
+            #         pl2.joystick.shiftRight()              
+
+            #     if event.key == pygame.K_UP:
+            #         if table.vol() > 0:
+            #             word = pl2.sayWord()   
+            #             game_stage = reactToWord(word, players, table, pile, stock)
 
     all_sprites.update()
     pl1.update()
