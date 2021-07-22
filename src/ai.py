@@ -24,7 +24,7 @@ class ArtInt(Player):
 
 class NikitaA(ArtInt):
     def __init__(self, id):
-        Player.__init__(self, 'Nikita A', id, Type.AI)
+        Player.__init__(self, 'Nikita_A', id, Type.AI)
     
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)

@@ -68,13 +68,13 @@ def addFromStock(players, stock):
             else:
                 players[role].addCard(stock.getCard(players[role].type))
 
-def isGameOver(stock, players, word):
+def isGameOver(stock, players):
     stock_vol = stock.vol()
     p1_vol    = players['active'].vol()
     p2_vol    = players['passive'].vol()
     return stock_vol == 0 and (p1_vol == 0 or p2_vol == 0)
 
-def howIsFool(players):
+def whoIsFool(players):
     p1_vol    = players['active'].vol()
     p2_vol    = players['passive'].vol()
     if p1_vol == 0 and p2_vol == 0:
@@ -112,9 +112,21 @@ def reactToWord(word, players, table, pile, stock):
             table.getAllCards(players['passive'], players['passive'].type)
         players['active'].status  = Status.ATTACKER
         players['passive'].status = Status.DEFENDING
-        addFromStock(players, stock)    
-    if isGameOver(stock, players, word):
-        print(howIsFool(players) + ' is Fool!')
+        addFromStock(players, stock)
+    if isGameOver(stock, players):
+        print(whoIsFool(players) + ' is the Fool!')
         return GameStage.GAME_OVER
     else:
         return GameStage.PLAYING
+
+def reactToMove(players, table, pile, stock, mv):
+    game_stage = GameStage.PLAYING
+    if 'card' in mv:
+        card = mv.get('card')
+        table.addCard(card, players['active'].status == Status.DEFENDING)
+        if not players['active'].status == Status.ADDING:
+            swapRole(players)
+    if 'word' in mv:
+        word = mv.get('word')
+        game_stage = reactToWord(word, players, table, pile, stock)
+    return game_stage

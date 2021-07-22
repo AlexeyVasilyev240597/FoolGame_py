@@ -19,6 +19,17 @@ class Rank(IntEnum):
     KING  = 13
     ACE   = 14
 
+#class Rank(Enum):
+#    SIX   = '6'
+#    SEVEN = '7'
+#    EIGHT = '8'
+#    NINE  = '9'
+#    TEN   = '10'
+#    JACK  = 'J'
+#    QUEEN = 'Q'
+#    KING  = 'K'
+#    ACE   = 'A'
+
 class Suit(Enum):
     DIAMONDS = 'D'
     HEARTS   = 'H'
@@ -36,13 +47,14 @@ class Card:
         self.suit = suit
         self.rank = rank         
         self.side = Side.BACK
-        
+
     def __repr__(self):
         if self.side == Side.FACE:
             return repr(self.rank.name + ' of ' + self.suit.name)
+            #return repr(self.suit.value + self.rank.value)
         else:
             return repr('unknown')
-        
+
     def flip(self):
         self.side = Side(not self.side)
 
@@ -66,7 +78,7 @@ class ItemS(pygame.sprite.Sprite):
             # length of way to target position in pixels
             L = abs(N[0]) + abs(N[1])
             # number of pixels per shot
-            dl = min(10, L)
+            dl = min(15, L)
             dx = round(N[0]/L*dl)
             dy =   int(N[1]/L*dl)
             self.rect.x += dx
@@ -83,7 +95,7 @@ class CardS(Card, ItemS):
         self.sides = [back, face]
         ItemS.__init__(self, self.sides[0], [0, 0])      
         #TODO: set background color CLOTH_COLOR
-        
+
     def flip(self):
         Card.flip(self)
         self.sides[0], self.sides[1] = self.sides[1], self.sides[0]
@@ -94,7 +106,7 @@ class Badge(ItemS):
         p2b = os.path.join(img_folder, suit.value, 'badge.png')
         b = pygame.image.load(p2b).convert()
         ItemS.__init__(self, b, pos)
-        
+
 class TextBox:
     def __init__(self, pos, size):
         self.font = pygame.font.Font('freesansbold.ttf', 16)
@@ -103,13 +115,13 @@ class TextBox:
         self.center = [self.pos[0] + self.size[0]/2, self.pos[1] + self.size[1]/2]
         self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         self.text = []
-        
+
     def setText(self, text):
         self.text = text
-        
+
     def draw(self, screen):
         if not self.text == []:
             text_r = self.font.render(self.text, True, (0,0,0)) 
             pygame.draw.rect(screen, COLOR_MESSAGE_BOX, self.rect)
             text_rect = text_r.get_rect(center = self.center)
-            screen.blit(text_r, text_rect)    
+            screen.blit(text_r, text_rect)
