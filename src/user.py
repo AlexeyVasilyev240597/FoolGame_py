@@ -1,6 +1,6 @@
 import pygame
 from elems  import Element
-from player import Player, Type
+from player import Player, Type, Status
 from params import COLOR_CARD_ACTIVE, COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
 
@@ -10,14 +10,14 @@ class Joystick:
         self.chosen_card = -1
         self.num = 0
         self.wrong_choice = False
-        
+
     def shiftRight(self):
         if not self.chosen_card == -1:
             self.chosen_card = -1
         self.active_card += 1            
         if self.active_card == self.num:
             self.active_card = self.num-1
-        
+
     def shiftLeft(self):
         if not self.chosen_card == -1:
             self.chosen_card = -1
@@ -49,9 +49,7 @@ class User(Player):
             card = self.showChosenCard()
             if not card == []:
                 right_card = isChoiceCorrect(self.status, table, card, self.trump)
-                # print(right_card)
                 enough_space = canCardBeThrown(self.status, table, rival_vol)
-                # print(enough_space)
                 move_correct = right_card and enough_space
                 if move_correct:
                     card = self.getCard()
@@ -77,13 +75,16 @@ class User(Player):
         return card
 
     def getCard(self):
-        cci = self.joystick.chosen_card
-        if cci >= 0:
-            card = Element.getCard(self, False, cci)        
-            self.joystick.num -= 1
-            self.updateCards()
+        if self.status == Status.FOOL:
+            card = Element.getCard(self, True, 0)
         else:
-            card = []
+            cci = self.joystick.chosen_card
+            if cci >= 0:
+                card = Element.getCard(self, False, cci)        
+                self.joystick.num -= 1
+                self.updateCards()
+            else:
+                card = []
         return card
     
     def sayWord(self):
@@ -99,7 +100,7 @@ class User(Player):
         if self.joystick.chosen_card >= 0 and self.joystick.wrong_choice:
             rect = self.cards.sprites()[self.joystick.chosen_card].rect                
             pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)
-            
+
     def updateCards(self):
         Player.updateCards(self)
         self.joystick.active_card = -1

@@ -162,9 +162,6 @@ class Dealer:
     def all2deck(players, table, pile, deck):
         for role in players:
             while players[role].vol() > 0:
-                # TODO: how to get card from player not while playing?
-                # maybe in player import GameStage from rules 
-                # and modify its method getCard()?
                 card = players[role].getCard()
                 deck.addCard(card)
         table.getAllCards(deck)

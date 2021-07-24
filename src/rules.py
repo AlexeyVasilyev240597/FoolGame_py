@@ -83,10 +83,12 @@ def whoIsFool(players):
         return 'neither'
     elif p2_vol == 0:
         players['active'].status = Status.FOOL
-        players['active'].mess_box.setText('Я Дурак!')
+        players['active'].mess_box.setText('Я Дурак!')        
         players['passive'].mess_box.setText('Ты Дурак!')
-        return players['active'].name
+        swapRole(players)
+        return players['passive'].name
     elif p1_vol == 0:
+        players['passive'].status = Status.FOOL
         players['passive'].mess_box.setText('Я Дурак!')
         players['active'].mess_box.setText('Ты Дурак!')
         return players['passive'].name

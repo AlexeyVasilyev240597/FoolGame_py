@@ -27,7 +27,7 @@ class Player(Element):
     def __init__(self, name, id, type):
         # main params
         self.name = name
-        self.status = Status(id)
+        self.status = []#Status(id)
         self.type = type
         # geometric params
         self.MAX_IN_ROW = 2*MAGIC_CONST
@@ -55,7 +55,7 @@ class Player(Element):
     def addCard(self, card):
         Element.addCard(self, card)
         self.updateCards() 
-        
+                
     def getCardPos(self, layer):
         n = self.vol()
         if n == 1:
@@ -97,9 +97,6 @@ class Player(Element):
     def setTrump(self, suit):
         self.trump = suit
         self.updateCards()
-    
-    def choseCard(self, table = [], stock_vol = 0, rival_vol = 0):
-        print('WARNING: method of abstract palyer does nothing')
 
     def updateCards(self):        
         get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)

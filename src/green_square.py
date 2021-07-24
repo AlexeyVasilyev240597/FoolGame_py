@@ -2,6 +2,7 @@ import pygame
 
 from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH 
 from elems  import Deck, Pile, Stock, Table, Dealer
+from player import Status
 from user   import User
 from ai     import NikitaA
 from rules  import GameStage, reactToMove, isGameOver, whoIsFool
@@ -18,7 +19,6 @@ pygame.display.set_caption("Fool Game")
 clock = pygame.time.Clock()
 
 deck = Deck()
-deck.shuffle()
     
 pl1 = User("Alexey_V", 1)
 pl2 = NikitaA(2)
@@ -36,11 +36,21 @@ while running:
         # check for closing window
         if event.type == pygame.QUIT:
             running = False
+        
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n and game_stage == GameStage.START:
+                deck.shuffle()
                 trump = Dealer.deal(deck, players, stock)
-                game_stage = GameStage.PLAYING        
-            
+                game_stage = GameStage.PLAYING  
+                players['active'].status  = Status.ATTACKER
+                players['passive'].status = Status.DEFENDING                    
+                
+            if event.key == pygame.K_SPACE and game_stage == GameStage.GAME_OVER:
+                Dealer.all2deck(players, table, pile, deck)
+                game_stage = GameStage.START
+                pl1.mess_box.setText('')
+                pl2.mess_box.setText('')
+                
             if players['active'] == pl1 and game_stage == GameStage.PLAYING:
                 mv = pl1.move(event, table, stock.vol(), pl2.vol())
                 if not mv == []:
