@@ -2,14 +2,12 @@ import pygame
 
 from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH 
 from elems  import Deck, Pile, Stock, Table, Dealer
-from player import Status
 from user   import User
-from ai     import NikitaA
-from rules  import GameStage, reactToMove, isGameOver, whoIsFool
+from ai     import NikitaA, AlexanderP, GeorgeP
+from rules  import GameStage, reactToMove, setStatusInNewGame
 
 # TODO: write log file contained all moves of players and their cards on hands
 # TODO: create a text file with a win score between each AI and user
-# TODO: customize 'new game' by press 'N' key after 'game over'
      
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -20,8 +18,10 @@ clock = pygame.time.Clock()
 
 deck = Deck()
     
-pl1 = User("Alexey_V", 1)
-pl2 = NikitaA(2)
+pl1 = User("Alexey_V")
+# pl2 = NikitaA()
+# pl2 = AlexanderP()
+pl2 = GeorgeP()
 players = {'active': pl1, 'passive': pl2}
 stock     = Stock()
 pile      = Pile()
@@ -42,8 +42,7 @@ while running:
                 deck.shuffle()
                 trump = Dealer.deal(deck, players, stock)
                 game_stage = GameStage.PLAYING  
-                players['active'].status  = Status.ATTACKER
-                players['passive'].status = Status.DEFENDING                    
+                setStatusInNewGame(players)
                 
             if event.key == pygame.K_SPACE and game_stage == GameStage.GAME_OVER:
                 Dealer.all2deck(players, table, pile, deck)
@@ -51,7 +50,7 @@ while running:
                 pl1.mess_box.setText('')
                 pl2.mess_box.setText('')
                 
-            if players['active'] == pl1 and game_stage == GameStage.PLAYING:
+            if players['active'].is_user and game_stage == GameStage.PLAYING:
                 mv = pl1.move(event, table, stock.vol(), pl2.vol())
                 if not mv == []:
                     game_stage = reactToMove(players, table, pile, stock, mv)
@@ -60,7 +59,7 @@ while running:
                         pl2.mess_box.setText('')
     
     # if pl2 is AI
-    if players['active'] == pl2 and game_stage == GameStage.PLAYING:
+    if not players['active'].is_user and game_stage == GameStage.PLAYING:
         sec = (pygame.time.get_ticks()-start_ticks)/1000
         if sec > 1:
             mv = pl2.move(table, stock.vol(), pl1.vol())

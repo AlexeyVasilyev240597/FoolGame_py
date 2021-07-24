@@ -1,6 +1,6 @@
 import pygame
 from elems  import Element
-from player import Player, Type, Status
+from player import Player, Status
 from params import COLOR_CARD_ACTIVE, COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
 
@@ -26,8 +26,8 @@ class Joystick:
             self.active_card = 0
 
 class User(Player):
-    def __init__(self, name, id):
-        Player.__init__(self, name, id, Type.USER)
+    def __init__(self, name):
+        Player.__init__(self, name)
         self.joystick = Joystick()        
 
     def addCard(self, card):        
@@ -48,9 +48,13 @@ class User(Player):
                 self.joystick.chosen_card = self.joystick.active_card
             card = self.showChosenCard()
             if not card == []:
-                right_card = isChoiceCorrect(self.status, table, card, self.trump)
-                enough_space = canCardBeThrown(self.status, table, rival_vol)
-                move_correct = right_card and enough_space
+                move_correct = (isChoiceCorrect(self.status, 
+                                                table, 
+                                                card, 
+                                                self.trump) and
+                                canCardBeThrown(self.status, 
+                                                table, 
+                                                rival_vol))
                 if move_correct:
                     card = self.getCard()
                     self.updateCards()

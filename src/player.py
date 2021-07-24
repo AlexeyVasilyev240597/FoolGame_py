@@ -19,21 +19,19 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
-class Type(IntEnum):
-    AI   = 0
-    USER = 1
-
-class Player(Element):        
-    def __init__(self, name, id, type):
-        # main params
+class Player(Element):
+    counter = 0
+    def __init__(self, name, is_user = True):
+        Player.counter += 1
+        # main params        
         self.name = name
         self.status = []#Status(id)
-        self.type = type
+        self.is_user = is_user
         # geometric params
         self.MAX_IN_ROW = 2*MAGIC_CONST
-        if id == 1:
+        if Player.counter == 1:
             pos = POS_PLAYERS['down']
-        else: # id == 2
+        else: # Player.counter == 2
             pos = POS_PLAYERS['up']
         self.h = PLAYER_H
         self.w = PLAYER_W
@@ -51,6 +49,7 @@ class Player(Element):
         self.mess_box.setText('')
         # game params
         self.trump = []
+        self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
         
     def addCard(self, card):
         Element.addCard(self, card)
@@ -91,7 +90,8 @@ class Player(Element):
             self.mess_box.setText('Беру!')
             return Word.TAKE
         if self.status == Status.ADDING:
-            self.mess_box.setText('Забирай!')
+            # self.mess_box.setText('Забирай!')
+            self.mess_box.setText('Бери!')
             return Word.TAKE_AWAY
         
     def setTrump(self, suit):
@@ -99,13 +99,10 @@ class Player(Element):
         self.updateCards()
 
     def updateCards(self):        
-        get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
-        cards = sorted(self.cards, key = get_weight)
-        # self.cci = -1
-        l = 0
-        for c in cards:
+        cards = sorted(self.cards, key = self.get_weight)
+        v = self.vol()
+        for l, c in zip(range(v), cards):
             self.cards.change_layer(c, l)
-            l += 1
             pos_loc = self.getCardPos(self.cards.get_layer_of_sprite(c))
             pos = self.loc2glob(pos_loc)
             c.setTargetPos(pos)

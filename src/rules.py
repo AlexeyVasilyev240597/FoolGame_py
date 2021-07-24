@@ -10,6 +10,10 @@ class GameStage(IntEnum):
 
 def swapRole(players):
     players['active'], players['passive'] = players['passive'], players['active']
+    
+def setStatusInNewGame(players):
+    players['active'].status  = Status.ATTACKER
+    players['passive'].status = Status.DEFENDING
 
 # PARAM INPUT:
 #   status of active player (which threw card)
@@ -28,7 +32,7 @@ def isChoiceCorrect(status, table, card, trump):
         return False
     if status == Status.DEFENDING:
         last = table.cards.sprites()[-1]
-        return last.suit == card.suit and last.rank < card.rank or not last.suit == card.suit and card.suit == trump
+        return ((last.suit == card.suit) and (last.rank < card.rank)) or (not (last.suit == card.suit) and (card.suit == trump))
 
 # PARAM IN:
 #   status of active player (which threw card)
@@ -43,7 +47,7 @@ def canCardBeThrown(status, table, rival_vol):
         return False
     # number of cards added by ADDING player on table equals 
     # number of TAKING player's cards => ADDING should say TAKE_AWAY
-    if status == Status.ADDING:
+    if status == Status.ATTACKER or status == Status.ADDING:
         if (table.last_down - table.last_up) == rival_vol:
             return False
     return True
@@ -66,7 +70,7 @@ def addFromStock(players, stock):
             if FLAG_DEBUG:
                 players[role].addCard(stock.getCard(True))
             else:
-                players[role].addCard(stock.getCard(players[role].type))
+                players[role].addCard(stock.getCard(players[role].is_user))
 
 def isGameOver(stock, players):
     stock_vol = stock.vol()
@@ -111,7 +115,7 @@ def reactToWord(word, players, table, pile, stock):
         if FLAG_DEBUG:
             table.getAllCards(players['passive'], True)
         else:
-            table.getAllCards(players['passive'], players['passive'].type)
+            table.getAllCards(players['passive'], players['passive'].is_user)
         players['active'].status  = Status.ATTACKER
         players['passive'].status = Status.DEFENDING
         addFromStock(players, stock)

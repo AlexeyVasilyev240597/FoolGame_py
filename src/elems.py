@@ -150,8 +150,8 @@ class Dealer:
             Dealer.deck2player(deck, players['passive'], True)
             Dealer.deck2player(deck, players['active'],  True)
         else:
-            Dealer.deck2player(deck, players['passive'], players['passive'].type)
-            Dealer.deck2player(deck, players['active'],  players['active'].type)
+            Dealer.deck2player(deck, players['passive'], players['passive'].is_user)
+            Dealer.deck2player(deck, players['active'],  players['active'].is_user)
         Dealer.deck2stock(deck, stock)
         trump = stock.showTrump()
         players['active'].setTrump(trump)
