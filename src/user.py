@@ -24,6 +24,13 @@ class Joystick:
         self.active_card -= 1
         if self.active_card < 0:
             self.active_card = 0
+            
+    def chooseCard(self):
+        if self.active_card >= 0:
+            self.chosen_card = self.active_card
+            return True
+        return False
+
 
 class User(Player):
     def __init__(self, name):
@@ -44,10 +51,8 @@ class User(Player):
             self.joystick.shiftRight()
             
         if event.key == pygame.K_s:
-            if self.joystick.active_card >= 0:
-                self.joystick.chosen_card = self.joystick.active_card
-            card = self.showChosenCard()
-            if not card == []:
+            if self.joystick.chooseCard():
+                card = self.cards.sprites()[self.joystick.chosen_card]
                 move_correct = (isChoiceCorrect(self.status, 
                                                 table, 
                                                 card, 
@@ -69,26 +74,14 @@ class User(Player):
         
         return ans
 
-    def showChosenCard(self):
-        # chosen card index
-        cci = self.joystick.chosen_card
-        if cci >= 0:
-            card = self.cards.sprites()[cci]
-        else:
-            card = []
-        return card
-
     def getCard(self):
         if self.status == Status.FOOL:
             card = Element.getCard(self, True, 0)
         else:
             cci = self.joystick.chosen_card
-            if cci >= 0:
-                card = Element.getCard(self, False, cci)        
-                self.joystick.num -= 1
-                self.updateCards()
-            else:
-                card = []
+            card = Element.getCard(self, False, cci)        
+            self.joystick.num -= 1
+            self.updateCards()
         return card
     
     def sayWord(self):

@@ -3,6 +3,8 @@ from enum import IntEnum
 from params import MAGIC_CONST, FLAG_DEBUG
 from player import Status, Word
 
+# TODO: create structure for working with players
+
 class GameStage(IntEnum):
     START     = 1
     PLAYING   = 2
@@ -46,7 +48,7 @@ def canCardBeThrown(status, table, rival_vol):
     if table.last_down == MAGIC_CONST:
         return False
     # number of cards added by ADDING player on table equals 
-    # number of TAKING player's cards => ADDING should say TAKE_AWAY
+    # number of taking player's cards => ADDING should say TAKE_AWAY
     if status == Status.ATTACKER or status == Status.ADDING:
         if (table.last_down - table.last_up) == rival_vol:
             return False
@@ -84,7 +86,7 @@ def whoIsFool(players):
     if p1_vol == 0 and p2_vol == 0:
         players['active'].mess_box.setText('Ничья!')
         players['passive'].mess_box.setText('Ничья!')
-        return 'neither'
+        return 'nobody'
     elif p2_vol == 0:
         players['active'].status = Status.FOOL
         players['active'].mess_box.setText('Я Дурак!')        
@@ -108,7 +110,6 @@ def reactToWord(word, players, table, pile, stock):
         addFromStock(players, stock)
         swapRole(players)
     if word == Word.TAKE:
-        players['active'].status  = Status.TAKING
         players['passive'].status = Status.ADDING
         swapRole(players)
     if word == Word.TAKE_AWAY:

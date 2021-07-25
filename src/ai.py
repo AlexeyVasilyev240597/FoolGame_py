@@ -7,7 +7,8 @@ from rules  import isChoiceCorrect, canCardBeThrown
 
 # Artificial Intelligence 
 class ArtInt(Player):
-    def __init__(self, name):
+    def __init__(self):
+        name = str(self.__class__.__name__)
         Player.__init__(self, name, False)
     
     def getCard(self, indx = 0):
@@ -34,11 +35,10 @@ class ArtInt(Player):
                 indxs.append(i)
         return indxs
         
-# TODO: write factory of AI that creates object by name of AI
 
-class NikitaA(ArtInt):
+class Nikita_A(ArtInt):
     def __init__(self):
-        ArtInt.__init__(self, 'Nikita_A')
+        ArtInt.__init__(self)
     
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
@@ -51,9 +51,9 @@ class NikitaA(ArtInt):
         return ans
     
     
-class AlexanderP(ArtInt):
+class Alexander_P(ArtInt):
     def __init__(self):
-        ArtInt.__init__(self, 'Alexander_P')
+        ArtInt.__init__(self)
     
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
@@ -75,9 +75,9 @@ class AlexanderP(ArtInt):
         return ans
     
     
-class GeorgeP(ArtInt):
+class George_P(ArtInt):
     def __init__(self):
-        ArtInt.__init__(self, 'George_P')
+        ArtInt.__init__(self)
     
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
@@ -99,4 +99,35 @@ class GeorgeP(ArtInt):
             ans = {'word': word}
         return ans
 
+
+class Sergey_C(ArtInt):
+    def __init__(self):
+        ArtInt.__init__(self)
     
+    def move(self, table, stock_vol, rival_vol):
+        indxs = self.getAvailableCards(table, stock_vol, rival_vol)
+        decision = False
+        if len(indxs) > 0:
+            # if no cards on table he throws smallest by weight card
+            if table.vol() > 0 and not self.status == Status.DEFENDING:
+                indx = -1
+            # else he throws biggest one (no matter what status)
+            else:
+                indx = 0
+            decision = True
+        
+        if decision:
+            card = self.getCard(indxs[indx])
+            ans = {'card': card}
+        else:
+            word = self.sayWord()
+            ans = {'word': word}
+        return ans
+
+
+AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C]
+def getAIinstance(ai_name):
+    for ai_c in AI_list:
+        ai_o = ai_c()
+        if ai_name == ai_o.name:
+            return ai_o

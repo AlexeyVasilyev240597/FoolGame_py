@@ -11,9 +11,8 @@ class Status(IntEnum):
     ATTACKER  = 1
     DEFENDING = 2
     ADDING    = 3
-    TAKING    = 4
-    FOOL      = 5
-    
+    FOOL      = 4
+
 class Word(IntEnum):
     BEATEN    = 1
     TAKE      = 2
