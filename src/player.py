@@ -43,7 +43,7 @@ class Player(Element):
         self.name_box = TextBox(box_pos, box_size)
         self.name_box.setText(name)
         box_size = [2*CARD_W, CARD_H/3]
-        box_pos  = self.loc2glob([self.w + self.t, self.h/2-box_size[1]/2])        
+        box_pos  = self.loc2glob([self.w + self.t, box_size[1] + self.t])        
         self.mess_box = TextBox(box_pos, box_size)
         self.mess_box.setText('')
         # game params

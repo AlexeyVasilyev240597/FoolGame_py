@@ -1,18 +1,19 @@
 import pygame
 
-from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH 
+from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH, TIME_DELAY
 from elems  import Deck, Pile, Stock, Table, Dealer
 from user   import User
 from ai     import getAIinstance
 from rules  import GameStage, reactToMove, setStatusInNewGame
 
-# TODO: write log file contained all moves of players and their cards on hands
+# TODO: write log file (json) contained all moves of players and their cards on hands
 # TODO: create a text file with a win score between each AI and user
 # TODO: create a ring for AIs fighting 
 #       (for minimization allocated resouces maybe it needs splitting 
 #        kernel and graphic parts of Element class and its childern)
 # TODO: write class Fool() or function fool() with all this code;
 #       its params will be names of players
+#       it will run in __main__ like here https://habr.com/ru/post/456214/
 # TODO: put .py files to folders and write __init__ and __main__ funcs
      
 pygame.init()
@@ -25,7 +26,7 @@ clock = pygame.time.Clock()
 deck = Deck()
     
 pl1 = User("Alexey_V")
-# pl2 = getAIinstance('Nikita_A')
+# pl1 = getAIinstance('Nikita_A')
 pl2 = getAIinstance('Sergey_C')
 players = {'active': pl1, 'passive': pl2}
 stock     = Stock()
@@ -48,14 +49,17 @@ while running:
                 trump = Dealer.deal(deck, players, stock)
                 game_stage = GameStage.PLAYING  
                 setStatusInNewGame(players)
+                start_ticks = pygame.time.get_ticks()
                 
             if game_stage == GameStage.PLAYING and players['active'].is_user:
-                mv = pl1.move(event, table, stock.vol(), pl2.vol())
+                pl_cur = players['active']
+                pl_riv = players['passive']
+                mv = pl_cur.move(event, table, stock.vol(), pl_riv.vol())
                 if not mv == []:
                     game_stage = reactToMove(players, table, pile, stock, mv)
                     if game_stage == GameStage.PLAYING:
                         start_ticks = pygame.time.get_ticks()
-                        pl2.mess_box.setText('')
+                        pl_riv.mess_box.setText('')
             
             if game_stage == GameStage.GAME_OVER and event.key == pygame.K_SPACE:
                 Dealer.all2deck(players, table, pile, deck)
@@ -66,13 +70,15 @@ while running:
                 
     
     if not players['active'].is_user and game_stage == GameStage.PLAYING:
+        pl_cur = players['active']
+        pl_riv = players['passive']
         sec = (pygame.time.get_ticks()-start_ticks)/1000
-        if sec > 1:
-            mv = pl2.move(table, stock.vol(), pl1.vol())
+        if sec > TIME_DELAY:
+            mv = pl_cur.move(table, stock.vol(), pl_riv.vol())
             game_stage = reactToMove(players, table, pile, stock, mv)
             if game_stage == GameStage.PLAYING:
                 start_ticks = pygame.time.get_ticks()
-                pl1.mess_box.setText('')
+                pl_riv.mess_box.setText('')
     
     pl1.update()
     pl2.update()

@@ -13,6 +13,10 @@ class GameStage(IntEnum):
 def swapRole(players):
     players['active'], players['passive'] = players['passive'], players['active']
     
+# now first move is given
+#   to first by order player in first game,
+#   to winner if he is,
+#   to player which throws last card if dead heat
 def setStatusInNewGame(players):
     players['active'].status  = Status.ATTACKER
     players['passive'].status = Status.DEFENDING

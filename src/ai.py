@@ -22,24 +22,19 @@ class ArtInt(Player):
         
     def getAvailableCards(self, table, stock_vol, rival_vol):
         indxs = []
-        cards = self.cards.sprites()
-        for i in range(self.vol()):
-            move_correct = (isChoiceCorrect(self.status, 
-                                            table, 
-                                            cards[i], 
-                                            self.trump) and
-                            canCardBeThrown(self.status, 
-                                            table, 
-                                            rival_vol))
-            if move_correct:
-                indxs.append(i)
+        if canCardBeThrown(self.status, table, rival_vol):
+            cards = self.cards.sprites()
+            for i in range(self.vol()):
+                move_correct = (isChoiceCorrect(self.status, 
+                                                table, 
+                                                cards[i], 
+                                                self.trump))
+                if move_correct:
+                    indxs.append(i)
         return indxs
-        
 
-class Nikita_A(ArtInt):
-    def __init__(self):
-        ArtInt.__init__(self)
-    
+
+class Nikita_A(ArtInt): 
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
         if len(indxs) > 0:
@@ -52,9 +47,6 @@ class Nikita_A(ArtInt):
     
     
 class Alexander_P(ArtInt):
-    def __init__(self):
-        ArtInt.__init__(self)
-    
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
         decision = False
@@ -76,9 +68,6 @@ class Alexander_P(ArtInt):
     
     
 class George_P(ArtInt):
-    def __init__(self):
-        ArtInt.__init__(self)
-    
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
         decision = False
@@ -101,9 +90,6 @@ class George_P(ArtInt):
 
 
 class Sergey_C(ArtInt):
-    def __init__(self):
-        ArtInt.__init__(self)
-    
     def move(self, table, stock_vol, rival_vol):
         indxs = self.getAvailableCards(table, stock_vol, rival_vol)
         decision = False
