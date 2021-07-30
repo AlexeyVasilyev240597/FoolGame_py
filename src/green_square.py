@@ -1,10 +1,13 @@
 import pygame
 
-from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH, TIME_DELAY
+from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
 from elems  import Deck, Pile, Stock, Table, Dealer
 from user   import User
 from ai     import getAIinstance
 from rules  import GameStage, reactToMove, setStatusInNewGame
+
+# in seconds
+TIME_DELAY = 1
 
 # TODO: write log file (json) contained all moves of players and their cards on hands
 # TODO: create a text file with a win score between each AI and user

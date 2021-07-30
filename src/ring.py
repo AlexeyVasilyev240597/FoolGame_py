@@ -5,6 +5,8 @@ from elems  import Deck, Pile, Stock, Table, Dealer
 from ai     import getAIinstance
 from rules  import GameStage, reactToMove, setStatusInNewGame
 
+NUMBER_OF_GAMES = 10
+
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Fool Game")
@@ -21,33 +23,47 @@ pile      = Pile()
 table     = Table()
 
 game_stage = GameStage.START
-while not game_stage == GameStage.GAME_OVER:
+running = True
+games_counter = 0
+start_ticks = pygame.time.get_ticks()
+while running:
     clock.tick(FPS)
+    
+    for event in pygame.event.get():        
+        # check for closing window
+        if event.type == pygame.QUIT:
+            running = False
     
     if game_stage == GameStage.START:
         deck.shuffle()
         trump = Dealer.deal(deck, players, stock)
         game_stage = GameStage.PLAYING  
-        setStatusInNewGame(players)
-        start_ticks = pygame.time.get_ticks()
+        setStatusInNewGame(players)        
                 
     if game_stage == GameStage.GAME_OVER:
         Dealer.all2deck(players, table, pile, deck)
-        game_stage = GameStage.START                
+        games_counter += 1
+        if games_counter < NUMBER_OF_GAMES:
+            game_stage = GameStage.START
     
     if not players['active'].is_user and game_stage == GameStage.PLAYING:
         pl_cur = players['active']
         pl_riv = players['passive']
         mv = pl_cur.move(table, stock.vol(), pl_riv.vol())
         game_stage = reactToMove(players, table, pile, stock, mv)
-        if game_stage == GameStage.PLAYING:
-            start_ticks = pygame.time.get_ticks()
-            pl_riv.mess_box.setText('')
+
+    if games_counter == NUMBER_OF_GAMES:
+        pl1.name_box.draw(screen)
+        pl1.score_box.draw(screen)
+        pl2.name_box.draw(screen)
+        pl2.score_box.draw(screen)        
 
     screen.fill(COLOR_CLOTH)
+        
     pygame.display.flip()
+    
 
-msec = pygame.time.get_ticks()-start_ticks    
+msec = pygame.time.get_ticks() - start_ticks    
 print('one game: ', msec, ' ms')
 
 pygame.quit()

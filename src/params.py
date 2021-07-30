@@ -27,5 +27,3 @@ POS_PLAYERS = {'down': [WIDTH/2 - PLAYER_W /2, HEIGHT - PLAYER_H],
 
 FLAG_DEBUG = True
 # FLAG_DEBUG = False
-# in seconds
-TIME_DELAY = 1

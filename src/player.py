@@ -19,13 +19,16 @@ class Word(IntEnum):
     TAKE_AWAY = 3       
 
 class Player(Element):
+    # counter of players
     counter = 0
     def __init__(self, name, is_user = True):
         Player.counter += 1
+        
         # main params        
         self.name = name
         self.status = []#Status(id)
         self.is_user = is_user
+        
         # geometric params
         self.MAX_IN_ROW = 2*MAGIC_CONST
         if Player.counter == 1:
@@ -37,22 +40,45 @@ class Player(Element):
         self.rect = pygame.Rect(pos[0], pos[1], self.w, self.h)
         self.t = 4
         Element.__init__(self, pos)
-        # info boxes params
-        box_size = [2*CARD_W, CARD_H/3]
-        box_pos  = self.loc2glob([self.w + self.t, 0])        
-        self.name_box = TextBox(box_pos, box_size)
-        self.name_box.setText(name)
-        box_size = [2*CARD_W, CARD_H/3]
-        box_pos  = self.loc2glob([self.w + self.t, box_size[1] + self.t])        
-        self.mess_box = TextBox(box_pos, box_size)
-        self.mess_box.setText('')
+        
         # game params
         self.trump = []
         self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
+        self.losing_counter = 0
+        
+        # info boxes params
+        box_size = [2*CARD_W, CARD_H/3]
+        box_pos  = self.loc2glob([self.w + self.t, 0])    
+        
+        self.name_box = TextBox(box_pos, box_size)
+        self.name_box.setText(name)
+        
+        box_pos  = self.loc2glob([self.w + self.t, box_size[1] + self.t])        
+        self.mess_box = TextBox(box_pos, box_size)
+        
+        box_pos  = self.loc2glob([self.w + self.t, 2*box_size[1] + self.t])        
+        self.score_box = TextBox(box_pos, box_size)
+        self.setScore()
         
     def addCard(self, card):
         Element.addCard(self, card)
         self.updateCards() 
+        
+    def sayWord(self):
+        if self.status == Status.ATTACKER:
+            self.mess_box.setText('Бито!')
+            return Word.BEATEN
+        if self.status == Status.DEFENDING:
+            self.mess_box.setText('Беру!')
+            return Word.TAKE
+        if self.status == Status.ADDING:
+            # self.mess_box.setText('Забирай!')
+            self.mess_box.setText('Бери!')
+            return Word.TAKE_AWAY
+        
+    def setTrump(self, suit):
+        self.trump = suit
+        self.updateCards()
                 
     def getCardPos(self, layer):
         n = self.vol()
@@ -80,22 +106,9 @@ class Player(Element):
                 x = int((MAGIC_CONST-1)*CARD_W*ic/(nr-1))
         pos = [x, y]
         return pos
-        
-    def sayWord(self):
-        if self.status == Status.ATTACKER:
-            self.mess_box.setText('Бито!')
-            return Word.BEATEN
-        if self.status == Status.DEFENDING:
-            self.mess_box.setText('Беру!')
-            return Word.TAKE
-        if self.status == Status.ADDING:
-            # self.mess_box.setText('Забирай!')
-            self.mess_box.setText('Бери!')
-            return Word.TAKE_AWAY
-        
-    def setTrump(self, suit):
-        self.trump = suit
-        self.updateCards()
+    
+    def setScore(self):
+        self.score_box.setText('Дурак ' + str(self.losing_counter) + ' раз(а)')
 
     def updateCards(self):        
         cards = sorted(self.cards, key = self.get_weight)
@@ -111,3 +124,4 @@ class Player(Element):
         Element.draw(self, screen)
         self.name_box.draw(screen)
         self.mess_box.draw(screen)
+        self.score_box.draw(screen)

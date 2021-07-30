@@ -120,8 +120,8 @@ class TextBox:
         self.text = text
 
     def draw(self, screen):
+        pygame.draw.rect(screen, COLOR_MESSAGE_BOX, self.rect)
         if not self.text == []:
             text_r = self.font.render(self.text, True, (0,0,0)) 
-            pygame.draw.rect(screen, COLOR_MESSAGE_BOX, self.rect)
             text_rect = text_r.get_rect(center = self.center)
             screen.blit(text_r, text_rect)

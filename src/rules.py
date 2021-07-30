@@ -92,14 +92,22 @@ def whoIsFool(players):
         players['passive'].mess_box.setText('Ничья!')
         return 'nobody'
     elif p2_vol == 0:
+        # call yourself Fool
         players['active'].status = Status.FOOL
-        players['active'].mess_box.setText('Я Дурак!')        
+        players['active'].mess_box.setText('Я Дурак!') 
+        players['active'].losing_counter += 1
+        players['active'].setScore()
+        # call him Fool
         players['passive'].mess_box.setText('Ты Дурак!')
         swapRole(players)
         return players['passive'].name
     elif p1_vol == 0:
+        # call yourself Fool
         players['passive'].status = Status.FOOL
         players['passive'].mess_box.setText('Я Дурак!')
+        players['passive'].losing_counter += 1
+        players['passive'].setScore()
+        # call him Fool
         players['active'].mess_box.setText('Ты Дурак!')
         return players['passive'].name
     else: # wrong call
