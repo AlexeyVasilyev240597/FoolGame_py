@@ -1,105 +1,37 @@
-import pygame
-
-from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
 from elems  import Deck, Pile, Stock, Table, Dealer
-from user   import User
-from ai     import getAIinstance
-from rules  import GameStage, reactToMove, setStatusInNewGame
+from ai     import AIGenerator
+from rules  import GameStage, setStatusInNewGame, reactToMove, isGameOver, whoIsFool
+from logger import Logger, LogMode
 
-# in seconds
-TIME_DELAY = 1
+NUM_OF_GAMES = 1
 
-# TODO: write log file (json) contained all moves of players and their cards on hands
-# TODO: create a text file with a win score between each AI and user
-# TODO: create a ring for AIs fighting 
-#       (for minimization allocated resouces maybe it needs splitting 
-#        kernel and graphic parts of Element class and its childern)
-# TODO: write class Fool() or function fool() with all this code;
-#       its params will be names of players
-#       it will run in __main__ like here https://habr.com/ru/post/456214/
-# TODO: put .py files to folders and write __init__ and __main__ funcs
-     
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Fool Game")
-
-
-clock = pygame.time.Clock()
-
-deck = Deck()
-    
-pl1 = User("Alexey_V")
-# pl1 = getAIinstance('Nikita_A')
-pl2 = getAIinstance('Sergey_C')
-players = {'active': pl1, 'passive': pl2}
+deck = Deck()    
+pl1 = AIGenerator('Nikita_A')
+pl2 = AIGenerator('George_P')
+players = {'actv': pl1, 'pssv': pl2}
 stock     = Stock()
 pile      = Pile()
 table     = Table()
 
-game_stage = GameStage.START
-running = True
-while running:
-    clock.tick(FPS)
-        
-    for event in pygame.event.get():        
-        # check for closing window
-        if event.type == pygame.QUIT:
-            running = False
-        
-        elif event.type == pygame.KEYDOWN:
-            if game_stage == GameStage.START and event.key == pygame.K_n:
-                deck.shuffle()
-                trump = Dealer.deal(deck, players, stock)
-                game_stage = GameStage.PLAYING  
-                setStatusInNewGame(players)
-                start_ticks = pygame.time.get_ticks()
-                
-            if game_stage == GameStage.PLAYING and players['active'].is_user:
-                pl_cur = players['active']
-                pl_riv = players['passive']
-                mv = pl_cur.move(event, table, stock.vol(), pl_riv.vol())
-                if not mv == []:
-                    game_stage = reactToMove(players, table, pile, stock, mv)
-                    if game_stage == GameStage.PLAYING:
-                        start_ticks = pygame.time.get_ticks()
-                        pl_riv.mess_box.setText('')
-            
-            if game_stage == GameStage.GAME_OVER and event.key == pygame.K_SPACE:
-                Dealer.all2deck(players, table, pile, deck)
-                game_stage = GameStage.START
-                pl1.mess_box.setText('')
-                pl2.mess_box.setText('')
-                stock.trump_badge.empty()
-                
-    
-    if not players['active'].is_user and game_stage == GameStage.PLAYING:
-        pl_cur = players['active']
-        pl_riv = players['passive']
-        sec = (pygame.time.get_ticks()-start_ticks)/1000
-        if sec > TIME_DELAY:
-            mv = pl_cur.move(table, stock.vol(), pl_riv.vol())
-            game_stage = reactToMove(players, table, pile, stock, mv)
-            if game_stage == GameStage.PLAYING:
-                start_ticks = pygame.time.get_ticks()
-                pl_riv.mess_box.setText('')
-    
-    pl1.update()
-    pl2.update()
-    stock.update()
-    table.update()
-    pile.update()
-    deck.update()
-    
-    screen.fill(COLOR_CLOTH)
-        
-    pl1.draw(screen)  
-    pl2.draw(screen)  
-    stock.draw(screen)
-    table.draw(screen)
-    pile.draw(screen)
-    deck.draw(screen)
-    
-    pygame.display.flip()
-    
+log = Logger(LogMode.SCORE)
 
-pygame.quit()
+game_stage = GameStage.START
+for n in range(NUM_OF_GAMES):
+    deck.shuffle()
+    trump = Dealer.deal(deck, players, stock)
+    setStatusInNewGame(players)
+    log.newGame(pl1, pl2, stock)
+
+    game_stage = GameStage.PLAYING      
+    while game_stage == GameStage.PLAYING:
+        mv = players['actv'].move(table, stock.vol(), players['pssv'].vol())        
+        reactToMove(players, table, pile, stock, mv)
+        game_stage = isGameOver(stock, players)
+        log.setMove(mv, players['actv'], table, stock)
+    
+    fool_name = whoIsFool(players)
+    log.setFool(fool_name)
+    Dealer.all2deck(players, table, pile, deck)
+    
+log.setScore()  
+log.saveToFile()

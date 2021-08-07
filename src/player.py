@@ -1,11 +1,9 @@
-import pygame
 from enum import IntEnum
 
-from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS
-from params import COLOR_FRAME
-from params import MAGIC_CONST
-from items import Rank, TextBox
-from elems import Element
+from params import MAGIC_CONST, FLAG_DEBUG
+from items  import Rank
+from elems  import Pile
+
 
 class Status(IntEnum):
     ATTACKER  = 1
@@ -18,110 +16,88 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
-class Player(Element):
+class Player(Pile):
     # counter of players
     counter = 0
     def __init__(self, name, is_user = True):
         Player.counter += 1
         
+        Pile.__init__(self)
+        
         # main params        
         self.name = name
-        self.status = []#Status(id)
+        self.status = []
         self.is_user = is_user
-        
-        # geometric params
-        self.MAX_IN_ROW = 2*MAGIC_CONST
-        if Player.counter == 1:
-            pos = POS_PLAYERS['down']
-        else: # Player.counter == 2
-            pos = POS_PLAYERS['up']
-        self.h = PLAYER_H
-        self.w = PLAYER_W
-        self.rect = pygame.Rect(pos[0], pos[1], self.w, self.h)
-        self.t = 4
-        Element.__init__(self, pos)
-        
+                
         # game params
         self.trump = []
         self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
         self.losing_counter = 0
         
-        # info boxes params
-        box_size = [2*CARD_W, CARD_H/3]
-        box_pos  = self.loc2glob([self.w + self.t, 0])    
-        
-        self.name_box = TextBox(box_pos, box_size)
-        self.name_box.setText(name)
-        
-        box_pos  = self.loc2glob([self.w + self.t, box_size[1] + self.t])        
-        self.mess_box = TextBox(box_pos, box_size)
-        
-        box_pos  = self.loc2glob([self.w + self.t, 2*box_size[1] + self.t])        
-        self.score_box = TextBox(box_pos, box_size)
-        self.setScore()
-        
     def addCard(self, card):
-        Element.addCard(self, card)
-        self.updateCards() 
+        Pile.addCard(self, card)
+        self.cards.sort(key = self.get_weight)
+        
+    def getCard(self, indx = 0):
+        flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
+        card = Pile.getCard(self, flip_flag, indx)
+        self.cards.sort(key = self.get_weight)
+        return card
         
     def sayWord(self):
         if self.status == Status.ATTACKER:
-            self.mess_box.setText('Бито!')
+            # print(self.name + ': Бито!')
             return Word.BEATEN
         if self.status == Status.DEFENDING:
-            self.mess_box.setText('Беру!')
+            # print(self.name + ': Беру!')
             return Word.TAKE
         if self.status == Status.ADDING:
-            # self.mess_box.setText('Забирай!')
-            self.mess_box.setText('Бери!')
+            # print(self.name + ': Бери!')
             return Word.TAKE_AWAY
         
     def setTrump(self, suit):
         self.trump = suit
-        self.updateCards()
-                
-    def getCardPos(self, layer):
-        n = self.vol()
-        if n == 1:
-            x = 0
-            y = 0
-        else:
-            # index of row
-            ir = layer // self.MAX_IN_ROW
-            y = int(CARD_H*ir/4)
-                        
-            # row number
-            rn = n // self.MAX_IN_ROW
-            if ir == rn:
-                # number of elems in row
-                nr = n % self.MAX_IN_ROW
-            else:
-                nr = self.MAX_IN_ROW
-            
-            # index of column
-            ic = layer % self.MAX_IN_ROW
-            if nr < MAGIC_CONST:
-                x = ic*CARD_W
-            else: # squeeze mode
-                x = int((MAGIC_CONST-1)*CARD_W*ic/(nr-1))
-        pos = [x, y]
-        return pos
+        self.cards.sort(key = self.get_weight)
     
-    def setScore(self):
-        self.score_box.setText('Дурак ' + str(self.losing_counter) + ' раз(а)')
+    def iAmFool(self):
+        self.status = Status.FOOL
+        self.losing_counter += 1
+        # print(self.name + ': я дурак ' + str(self.losing_counter) + ' раз(а)')
+        
+# class PlayersFaceToFace:
+#     def __init__(self, pl_1, pl_2):
+#         self.plrs = [pl_1, pl_2]
+#         self.actv = pl_1
+#         self.pssv = pl_2
 
-    def updateCards(self):        
-        cards = sorted(self.cards, key = self.get_weight)
-        v = self.vol()
-        for l, c in zip(range(v), cards):
-            self.cards.change_layer(c, l)
-            pos_loc = self.getCardPos(self.cards.get_layer_of_sprite(c))
-            pos = self.loc2glob(pos_loc)
-            c.setTargetPos(pos)
-            
-    def draw(self, screen):
-        pygame.draw.rect(screen, COLOR_FRAME, self.rect, self.t)  
-        Element.draw(self, screen)
-        self.name_box.draw(screen)
-        self.mess_box.draw(screen)
-        self.score_box.draw(screen)
+#     def swapRole(self):
+#         self.actv, self.pssv = self.pssv, self.actv
+
+#     # now first move is given
+#     #   to first by order player in first game,
+#     #   to winner if he is,
+#     #   to player which throws last card if dead heat
+#     def setStatusInNewGame(self):
+#         self.actv.status = Status.ATTACKER
+#         self.pssv.status = Status.DEFENDING
+
+#     def getNumToAdd(self, stock_vol):
+#         pv = {'actv': self.actv.vol(), 'pssv': self.pssv.vol()}
+#         dv = {'actv': 0, 'pssv': 0}
+#         s  = stock_vol
+#         while (s > 0 and (pv['actv'] < MAGIC_CONST or
+#                           pv['pssv'] < MAGIC_CONST)):
+#             if pv['actv'] < pv['pssv']:
+#                 dv['actv'] += 1
+#                 pv['actv'] += 1
+#             else:
+#                 dv['pssv'] += 1
+#                 pv['pssv'] += 1
+#             s -= 1
+#         return dv
+
+# #    def changeStatus(self):
+# #        ...
+
+# # TODO: class for playing with 3 players
+# #class PlayersThreesome

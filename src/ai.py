@@ -1,9 +1,11 @@
 # import pygame
-from params import FLAG_DEBUG
 from items  import Rank
-from elems  import Element
 from player import Player, Status
 from rules  import isChoiceCorrect, canCardBeThrown
+
+# TODO: create abstract method
+#       def makeDecision(...): ... return index
+#       and rewrite method 'move' of ArtInt 
 
 # Artificial Intelligence 
 class ArtInt(Player):
@@ -11,23 +13,17 @@ class ArtInt(Player):
         name = str(self.__class__.__name__)
         Player.__init__(self, name, False)
     
-    def getCard(self, indx = 0):
-        flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
-        card = Element.getCard(self, flip_flag, indx)
-        self.updateCards()
-        return card
-    
     def move(self, table, stock_vol, rival_vol):
         print('WARNING: abstract method of ArtInt does nothing')
         
+    # PARAM IN: stock_vol for detecting of Endspiel
     def getAvailableCards(self, table, stock_vol, rival_vol):
         indxs = []
         if canCardBeThrown(self.status, table, rival_vol):
-            cards = self.cards.sprites()
             for i in range(self.vol()):
                 move_correct = (isChoiceCorrect(self.status, 
                                                 table, 
-                                                cards[i], 
+                                                self.cards[i], 
                                                 self.trump))
                 if move_correct:
                     indxs.append(i)
@@ -52,7 +48,7 @@ class Alexander_P(ArtInt):
         decision = False
         if len(indxs) > 0:
             if self.status == Status.DEFENDING:
-                w = self.get_weight(self.cards.sprites()[indxs[0]])
+                w = self.get_weight(self.cards[indxs[0]])
                 if w <= Rank.TEN.value:
                     decision = True
             else:
@@ -74,7 +70,7 @@ class George_P(ArtInt):
         if len(indxs) > 0:
             if (self.status == Status.ATTACKER and table.vol() > 0 or
                 self.status == Status.ADDING):
-                w = self.get_weight(self.cards.sprites()[indxs[0]])
+                w = self.get_weight(self.cards[indxs[0]])
                 if w <= Rank.TEN.value:
                     decision = True
             else:
@@ -112,7 +108,7 @@ class Sergey_C(ArtInt):
 
 
 AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C]
-def getAIinstance(ai_name):
+def AIGenerator(ai_name):
     for ai_c in AI_list:
         ai_o = ai_c()
         if ai_name == ai_o.name:
