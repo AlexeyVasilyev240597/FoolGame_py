@@ -44,15 +44,15 @@ class Player(Pile):
         self.cards.sort(key = self.get_weight)
         return card
         
+    def showCard(self, indx):
+        return self.cards[indx]
+        
     def sayWord(self):
         if self.status == Status.ATTACKER:
-            # print(self.name + ': Бито!')
             return Word.BEATEN
         if self.status == Status.DEFENDING:
-            # print(self.name + ': Беру!')
             return Word.TAKE
         if self.status == Status.ADDING:
-            # print(self.name + ': Бери!')
             return Word.TAKE_AWAY
         
     def setTrump(self, suit):
@@ -62,7 +62,6 @@ class Player(Pile):
     def iAmFool(self):
         self.status = Status.FOOL
         self.losing_counter += 1
-        # print(self.name + ': я дурак ' + str(self.losing_counter) + ' раз(а)')
         
 # class PlayersFaceToFace:
 #     def __init__(self, pl_1, pl_2):

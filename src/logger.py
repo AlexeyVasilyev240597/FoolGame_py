@@ -30,8 +30,10 @@ class Logger:
     def setParty(self, stock):
         self.games['games'][self.game_indx]['parties'].append(
             {'stock':   {'trump': stock.trump.value, 'vol': stock.vol()},
-             self.plrs[0].name: {'vol': self.plrs[0].vol()},
-             self.plrs[1].name: {'vol': self.plrs[1].vol()},
+             self.plrs[0].name: {'vol': self.plrs[0].vol(),
+                                 'cards': repr(self.plrs[0].cards)},
+             self.plrs[1].name: {'vol': self.plrs[1].vol(),
+                                 'cards': repr(self.plrs[1].cards)},
              'moves': []})
 
     def setMove(self, mv, pl_actv, table, stock):
@@ -39,10 +41,8 @@ class Logger:
             self.mode == LogMode.ENDSPIEL and stock.vol() == 0):
             if 'card' in mv:
                 self.games['games'][self.game_indx]['parties'][-1]['moves'].append(
-                    {self.plrs[0].name: repr(self.plrs[0].cards), 
-                     'table':           {'up':   repr(table.cards['up']),
-                                         'down': repr(table.cards['down'])},        
-                     self.plrs[1].name: repr(self.plrs[1].cards)})
+                    {'table':           {'up':   repr(table.cards['up']),
+                                         'down': repr(table.cards['down'])}})
             if 'word' in mv:
                 self.games['games'][self.game_indx]['parties'][-1]['moves'].append(
                     {pl_actv.name: mv['word'].name})
