@@ -3,7 +3,7 @@ import pygame
 from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
 from elems  import Deck, Pile, Stock, Table, Dealer
 from user   import User
-from ai     import getAIinstance
+from ai     import AIGenerator
 from rules  import GameStage, reactToMove, setStatusInNewGame
 
 # in seconds
@@ -27,10 +27,10 @@ pygame.display.set_caption("Fool Game")
 clock = pygame.time.Clock()
 
 deck = Deck()
-    
+
+# AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]    
 pl1 = User("Alexey_V")
-# pl1 = getAIinstance('Nikita_A')
-pl2 = getAIinstance('Sergey_C')
+pl2 = AIGenerator('Gregory_P')
 players = {'active': pl1, 'passive': pl2}
 stock     = Stock()
 pile      = Pile()

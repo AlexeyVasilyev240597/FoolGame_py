@@ -4,6 +4,9 @@ from player import Player, Status
 from params import COLOR_CARD_ACTIVE, COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
 
+# BUG: во время попытки выбрать последнюю карту в наборе
+#   line 94, in draw: rect = self.cards.sprites()[self.joystick.active_card].rect
+
 class Joystick:
     def __init__(self):
         self.active_card = -1
@@ -42,7 +45,6 @@ class User(Player):
         self.joystick.num += 1
 
     def move(self, event, table, stock_vol, rival_vol):
-        # print('i am in move of user')
         ans = []
         if event.key == pygame.K_a:
             self.joystick.shiftLeft()
@@ -52,7 +54,7 @@ class User(Player):
             
         if event.key == pygame.K_s:
             if self.joystick.chooseCard():
-                card = self.cards.sprites()[self.joystick.chosen_card]
+                card = self.showCard(self.joystick.chosen_card)
                 move_correct = (isChoiceCorrect(self.status, 
                                                 table, 
                                                 card, 
@@ -81,7 +83,7 @@ class User(Player):
             cci = self.joystick.chosen_card
             card = Element.getCard(self, False, cci)        
             self.joystick.num -= 1
-            self.updateCards()
+        self.updateCards()
         return card
     
     def sayWord(self):

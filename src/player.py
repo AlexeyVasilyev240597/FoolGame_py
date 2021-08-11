@@ -1,7 +1,7 @@
 import pygame
 from enum import IntEnum
 
-from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS
+from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS, FLAG_DEBUG
 from params import COLOR_FRAME
 from params import MAGIC_CONST
 from items import Rank, TextBox
@@ -26,7 +26,7 @@ class Player(Element):
         
         # main params        
         self.name = name
-        self.status = []#Status(id)
+        self.status = []
         self.is_user = is_user
         
         # geometric params
@@ -63,6 +63,15 @@ class Player(Element):
     def addCard(self, card):
         Element.addCard(self, card)
         self.updateCards() 
+        
+    def getCard(self, indx = 0):
+        flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
+        card = Element.getCard(self, flip_flag, indx)
+        self.updateCards()
+        return card
+        
+    def showCard(self, indx):
+        return self.cards.sprites()[indx]
         
     def sayWord(self):
         if self.status == Status.ATTACKER:

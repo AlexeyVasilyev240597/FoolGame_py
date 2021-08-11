@@ -25,5 +25,5 @@ PLAYER_H    = 3/2*CARD_H
 POS_PLAYERS = {'down': [WIDTH/2 - PLAYER_W /2, HEIGHT - PLAYER_H], 
                'up':   [WIDTH/2 - PLAYER_W /2, 0]}
 
-FLAG_DEBUG = True
-# FLAG_DEBUG = False
+# FLAG_DEBUG = True
+FLAG_DEBUG = False
