@@ -16,6 +16,13 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
+class PlayerAsRival:
+    def __init__(self, name, vol, status, last_move):
+        self.name      = name
+        self.vol       = vol
+        self.status    = status
+        self.last_move = last_move
+
 class Player(Pile):
     # counter of players
     counter = 0
@@ -25,14 +32,18 @@ class Player(Pile):
         Pile.__init__(self)
         
         # main params        
-        self.name = name
+        self.name = name#str(Player.counter) + ': ' + name
         self.status = []
         self.is_user = is_user
                 
         # game params
         self.trump = []
-        self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
+        self.table = []
+        self.get_weight = lambda card : ((card.suit == self.trump)*
+                                         Rank.ACE.value +
+                                         card.rank.value)
         self.losing_counter = 0
+        self.last_move = {}
         
     def addCard(self, card):
         Pile.addCard(self, card)
@@ -42,6 +53,7 @@ class Player(Pile):
         flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
         card = Pile.getCard(self, flip_flag, indx)
         self.cards.sort(key = self.get_weight)
+        self.last_move = {'card': card}
         return card
         
     def showCard(self, indx):
@@ -49,19 +61,29 @@ class Player(Pile):
         
     def sayWord(self):
         if self.status == Status.ATTACKER:
-            return Word.BEATEN
+            word = Word.BEATEN
         if self.status == Status.DEFENDING:
-            return Word.TAKE
+            word = Word.TAKE
         if self.status == Status.ADDING:
-            return Word.TAKE_AWAY
+            word = Word.TAKE_AWAY
+        self.last_move = {'word': word}
+        return word
         
-    def setTrump(self, suit):
-        self.trump = suit
+    def setNewGameParams(self, trump, table, status):
+        self.trump  = trump        
+        self.table  = table
+        self.status = status
         self.cards.sort(key = self.get_weight)
     
     def iAmFool(self):
         self.status = Status.FOOL
         self.losing_counter += 1
+        
+    def getMeAsRival(self):
+        return PlayerAsRival(self.name, 
+                             self.vol(), 
+                             self.status, 
+                             self.last_move)
         
 # class PlayersFaceToFace:
 #     def __init__(self, pl_1, pl_2):

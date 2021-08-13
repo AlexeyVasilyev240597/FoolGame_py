@@ -17,9 +17,9 @@ def swapRole(players):
 #   to player which throws last card if dead heat
 # TODO: create func what checking least trump card of players and 
 #       make decision after dead heat and in 1st game
-def setStatusInNewGame(players):
-    players['actv'].status = Status.ATTACKER
-    players['pssv'].status = Status.DEFENDING
+def setNewGame(players, trump, table):    
+    players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
+    players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
 
 # PARAM INPUT:
 #   @status of actv player (which threw card)

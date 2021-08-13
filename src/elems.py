@@ -84,12 +84,12 @@ class Dealer:
     
     # call in start of Fool Game
     def deal(deck, players, stock):
-        Dealer.deck2player(deck, players['pssv'], FLAG_DEBUG or players['pssv'].is_user)
-        Dealer.deck2player(deck, players['actv'], FLAG_DEBUG or players['actv'].is_user)
+        Dealer.deck2player(deck, players['pssv'], 
+                           FLAG_DEBUG or players['pssv'].is_user)
+        Dealer.deck2player(deck, players['actv'], 
+                           FLAG_DEBUG or players['actv'].is_user)
         deck.shift(stock)
         trump = stock.showTrump()
-        players['actv'].setTrump(trump)
-        players['pssv'].setTrump(trump)
         return trump
     
     # call in finish of Fool Game

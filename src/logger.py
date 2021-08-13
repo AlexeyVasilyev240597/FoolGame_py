@@ -60,7 +60,7 @@ class Logger:
                                self.plrs[1].name: self.plrs[1].losing_counter,
                                'dead heat':       self.dead_heat_counter}
     
-    def saveToFile(self):
+    def saveToJson(self):
         file_name = '../log/' + self.plrs[0].name + '_vs_' + self.plrs[1].name + '.json'
         with open(file_name, 'w') as json_file:
           json.dump(self.games, json_file, indent = 4)
