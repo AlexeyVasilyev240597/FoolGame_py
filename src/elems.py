@@ -147,15 +147,13 @@ class Dealer:
     # call in start of Fool Game
     def deal(deck, players, stock):
         if FLAG_DEBUG:
-            Dealer.deck2player(deck, players['passive'], True)
-            Dealer.deck2player(deck, players['active'],  True)
+            Dealer.deck2player(deck, players['pssv'], True)
+            Dealer.deck2player(deck, players['actv'],  True)
         else:
-            Dealer.deck2player(deck, players['passive'], players['passive'].is_user)
-            Dealer.deck2player(deck, players['active'],  players['active'].is_user)
+            Dealer.deck2player(deck, players['pssv'], players['pssv'].is_user)
+            Dealer.deck2player(deck, players['actv'],  players['actv'].is_user)
         Dealer.deck2stock(deck, stock)
         trump = stock.showTrump()
-        players['active'].setTrump(trump)
-        players['passive'].setTrump(trump)
         return trump
     
     # call in finish of Fool Game

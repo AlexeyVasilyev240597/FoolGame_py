@@ -11,18 +11,18 @@ class GameStage(IntEnum):
     GAME_OVER = 3
 
 def swapRole(players):
-    players['active'], players['passive'] = players['passive'], players['active']
+    players['actv'], players['pssv'] = players['pssv'], players['actv']
     
 # now first move is given
 #   to first by order player in first game,
 #   to winner if he is,
 #   to player which throws last card if dead heat
-def setStatusInNewGame(players):
-    players['active'].status  = Status.ATTACKER
-    players['passive'].status = Status.DEFENDING
+def setNewGame(players, trump, table):    
+    players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
+    players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
 
 # PARAM INPUT:
-#   status of active player (which threw card)
+#   status of actv player (which threw card)
 #   table is object with actual state of table
 #   card (thrown)
 #   trump in game
@@ -38,10 +38,11 @@ def isChoiceCorrect(status, table, card, trump):
         return False
     if status == Status.DEFENDING:
         last = table.cards.sprites()[-1]
-        return ((last.suit == card.suit) and (last.rank < card.rank)) or (not (last.suit == card.suit) and (card.suit == trump))
+        return (last.suit == card.suit and last.rank < card.rank or 
+                not (last.suit == card.suit) and (card.suit == trump))
 
 # PARAM IN:
-#   status of active player (which threw card)
+#   status of actv player (which threw card)
 #   table is object with actual state of table
 #   rival_vol is number of cards in rival's hand
 # PARAM OUT:
@@ -53,23 +54,23 @@ def canCardBeThrown(status, table, rival_vol):
         return False
     # number of cards added by ADDING player on table equals 
     # number of taking player's cards => ADDING should say TAKE_AWAY
-    if status == Status.ATTACKER or status == Status.ADDING:
-        if (table.last_down - table.last_up) == rival_vol:
+    if (status == Status.ATTACKER and rival_vol == 0 or
+        status == Status.ADDING   and (table.last_down - table.last_up) == rival_vol):
             return False
     return True
 
 
 def addFromStock(players, stock):
-    pv = {'active': players['active'].vol(), 'passive': players['passive'].vol()}
-    dv = {'active': 0, 'passive': 0}
+    pv = {'actv': players['actv'].vol(), 'pssv': players['pssv'].vol()}
+    dv = {'actv': 0, 'pssv': 0}
     s  = stock.vol()
-    while s > 0 and (pv['active'] < MAGIC_CONST or pv['passive'] < MAGIC_CONST):
-        if pv['active'] < pv['passive']:
-            dv['active'] += 1
-            pv['active'] += 1
+    while s > 0 and (pv['actv'] < MAGIC_CONST or pv['pssv'] < MAGIC_CONST):
+        if pv['actv'] < pv['pssv']:
+            dv['actv'] += 1
+            pv['actv'] += 1
         else:
-            dv['passive'] += 1
-            pv['passive'] += 1
+            dv['pssv'] += 1
+            pv['pssv'] += 1
         s -= 1    
     for role in players:       
         for i in range(dv[role]):
@@ -80,36 +81,29 @@ def addFromStock(players, stock):
 
 def isGameOver(stock, players):
     stock_vol = stock.vol()
-    p1_vol    = players['active'].vol()
-    p2_vol    = players['passive'].vol()
-    return stock_vol == 0 and (p1_vol == 0 or p2_vol == 0)
+    p1_vol    = players['actv'].vol()
+    p2_vol    = players['pssv'].vol()
+    if stock_vol == 0 and (p1_vol == 0 or p2_vol == 0):        
+        return GameStage.GAME_OVER
+    else:
+        return GameStage.PLAYING
 
 def whoIsFool(players):
-    p1_vol    = players['active'].vol()
-    p2_vol    = players['passive'].vol()
+    p1_vol    = players['actv'].vol()
+    p2_vol    = players['pssv'].vol()
     if p1_vol == 0 and p2_vol == 0:
-        players['active'].mess_box.setText('Ничья!')
-        players['passive'].mess_box.setText('Ничья!')
-        return 'nobody'
+        players['actv'].mess_box.setText('Ничья!')
+        players['pssv'].mess_box.setText('Ничья!')
+        return 'no one'
     elif p2_vol == 0:
-        # call yourself Fool
-        players['active'].status = Status.FOOL
-        players['active'].mess_box.setText('Я Дурак!') 
-        players['active'].losing_counter += 1
-        players['active'].setScore()
-        # call him Fool
-        players['passive'].mess_box.setText('Ты Дурак!')
+        players['actv'].iAmFool()
+        players['pssv'].mess_box.setText('Ты Дурак!')
         swapRole(players)
-        return players['passive'].name
+        return players['pssv'].name
     elif p1_vol == 0:
-        # call yourself Fool
-        players['passive'].status = Status.FOOL
-        players['passive'].mess_box.setText('Я Дурак!')
-        players['passive'].losing_counter += 1
-        players['passive'].setScore()
-        # call him Fool
-        players['active'].mess_box.setText('Ты Дурак!')
-        return players['passive'].name
+        players['pssv'].iAmFool()
+        players['actv'].mess_box.setText('Ты Дурак!')
+        return players['pssv'].name
     else: # wrong call
         return 'neither yet'
 
@@ -117,33 +111,29 @@ def whoIsFool(players):
 def reactToWord(word, players, table, pile, stock):
     if word == Word.BEATEN:
         table.getAllCards(pile)
-        players['active'].status  = Status.DEFENDING
-        players['passive'].status = Status.ATTACKER
+        players['actv'].status  = Status.DEFENDING
+        players['pssv'].status = Status.ATTACKER
         addFromStock(players, stock)
         swapRole(players)
     if word == Word.TAKE:
-        players['passive'].status = Status.ADDING
+        players['pssv'].status = Status.ADDING
         swapRole(players)
     if word == Word.TAKE_AWAY:
         if FLAG_DEBUG:
-            table.getAllCards(players['passive'], True)
+            table.getAllCards(players['pssv'], True)
         else:
-            table.getAllCards(players['passive'], players['passive'].is_user)
-        players['active'].status  = Status.ATTACKER
-        players['passive'].status = Status.DEFENDING
-        addFromStock(players, stock)
-    if isGameOver(stock, players):
-        print(whoIsFool(players) + ' is the Fool!')
-        return GameStage.GAME_OVER
-    else:
-        return GameStage.PLAYING
+            table.getAllCards(players['pssv'], players['pssv'].is_user)
+        players['actv'].status  = Status.ATTACKER
+        players['pssv'].status = Status.DEFENDING
+        addFromStock(players, stock)   
+    return isGameOver(stock, players)
 
 def reactToMove(players, table, pile, stock, mv):
     game_stage = GameStage.PLAYING
     if 'card' in mv:
         card = mv.get('card')
-        table.addCard(card, players['active'].status == Status.DEFENDING)
-        if not players['active'].status == Status.ADDING:
+        table.addCard(card, players['actv'].status == Status.DEFENDING)
+        if not players['actv'].status == Status.ADDING:
             swapRole(players)
     if 'word' in mv:
         word = mv.get('word')

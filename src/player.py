@@ -18,6 +18,13 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
+class PlayerAsRival:
+    def __init__(self, name, vol, status, last_move):
+        self.name      = name
+        self.vol       = vol
+        self.status    = status
+        self.last_move = last_move
+
 class Player(Element):
     # counter of players
     counter = 0
@@ -43,8 +50,10 @@ class Player(Element):
         
         # game params
         self.trump = []
+        self.table = []
         self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
         self.losing_counter = 0
+        self.last_move = {}
         
         # info boxes params
         box_size = [2*CARD_W, CARD_H/3]
@@ -58,7 +67,6 @@ class Player(Element):
         
         box_pos  = self.loc2glob([self.w + self.t, 2*box_size[1] + self.t])        
         self.score_box = TextBox(box_pos, box_size)
-        self.setScore()
         
     def addCard(self, card):
         Element.addCard(self, card)
@@ -85,8 +93,10 @@ class Player(Element):
             self.mess_box.setText('Бери!')
             return Word.TAKE_AWAY
         
-    def setTrump(self, suit):
-        self.trump = suit
+    def setNewGameParams(self, trump, table, status):
+        self.trump  = trump        
+        self.table  = table
+        self.status = status
         self.updateCards()
                 
     def getCardPos(self, layer):
@@ -116,9 +126,18 @@ class Player(Element):
         pos = [x, y]
         return pos
     
-    def setScore(self):
+    def iAmFool(self):
+        self.status = Status.FOOL
+        self.losing_counter += 1
+        self.mess_box.setText('Я Дурак!')
         self.score_box.setText('Дурак ' + str(self.losing_counter) + ' раз(а)')
-
+    
+    def getMeAsRival(self):
+        return PlayerAsRival(self.name, 
+                             self.vol(), 
+                             self.status, 
+                             self.last_move)
+    
     def updateCards(self):        
         cards = sorted(self.cards, key = self.get_weight)
         v = self.vol()
