@@ -100,38 +100,63 @@ class Stock(Element):
 class Table(Element):
     def __init__(self):
         Element.__init__(self, POS_TABLE)
-        self.last_down = 0
-        self.last_up   = 0
+        self.cards = {'up':   pygame.sprite.LayeredUpdates(),
+                      'down': pygame.sprite.LayeredUpdates()}
         
     def addCard(self, card, atop):
         if atop:
-            l = 2*(self.last_up + 1)
-            self.last_up += 1
+            self.cards['up'].add(card)
+            self.cards['up'].change_layer(card, 1)
+            pos_loc = self.getCardPos('up')
         else:
-            l = 2*self.last_down + 1
-            self.last_down += 1
-        
-        pos = self.getCardPos(l)        
-        Element.addCard(self, card, l, pos)
+            self.cards['down'].add(card)
+            self.cards['down'].change_layer(card, 0)
+            pos_loc = self.getCardPos('down')
+            
+        pos = self.loc2glob(pos_loc)
+        card.setTargetPos(pos)        
         
     def getCardPos(self, layer):
-        i    = layer - 1
-        atop = layer % 2
-        x = (i %  MAGIC_CONST) * CARD_W        
-        y = (i // MAGIC_CONST) * CARD_H
-        if atop:
+        i = len(self.cards[layer]) - 1
+        # 6 / 2 = 3 in row for each layer
+        if layer == 'down':
+            n = 2 * (i % (MAGIC_CONST // 2))
+        else: #if layer == 'up':
+            n = 2 * (i % (MAGIC_CONST // 2)) + 1
+        x = n * CARD_W   
+        # 6 / 3 = 2 in col for each layer
+        y = (i // (MAGIC_CONST // 2)) * CARD_H
+        if layer == 'down':
             x += CARD_W / 4
             y += CARD_H / 4
         pos = [x, y]
         return pos
         
     def getAllCards(self, cards_set, by_open = False):
-        while self.vol() > 0:
-            card = Element.getCard(self, not by_open)
-            cards_set.addCard(card)
-        self.last_down = 0
-        self.last_up   = 0
+        for layer in self.cards:
+            while self.vol(layer) > 0:
+                card = self.cards[layer].sprites()[0]
+                if not by_open:
+                    card.flip()
+                self.cards[layer].remove(card)
+                cards_set.addCard(card)
+        
+    def vol(self, layer = 'both'):
+        if layer == 'both':
+            if 'up' in self.cards and 'down' in self.cards:
+                return len(self.cards['up']) + len(self.cards['down'])
+            else:
+                return len(self.cards)
+        else:
+            return len(self.cards[layer])
 
+    def draw(self, screen):
+        self.cards['down'].draw(screen)
+        self.cards['up'].draw(screen)
+        
+    def update(self):
+        self.cards['down'].update()
+        self.cards['up'].update()
 
 class Dealer: 
     def deck2player(deck, player, by_open = False):

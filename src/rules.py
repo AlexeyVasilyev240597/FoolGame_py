@@ -32,12 +32,13 @@ def isChoiceCorrect(status, table, card, trump):
     if status == Status.ATTACKER and table.vol() == 0:
         return True
     if status == Status.ATTACKER or status == Status.ADDING:
-        for c in table.cards.sprites():
-            if card.rank == c.rank:
-                return True
+        for l in table.cards:
+            for c in table.cards[l].sprites():
+                if card.rank == c.rank:
+                    return True
         return False
     if status == Status.DEFENDING:
-        last = table.cards.sprites()[-1]
+        last = table.cards['down'].sprites()[-1]
         return (last.suit == card.suit and last.rank < card.rank or 
                 not (last.suit == card.suit) and (card.suit == trump))
 
@@ -50,12 +51,11 @@ def isChoiceCorrect(status, table, card, trump):
 def canCardBeThrown(status, table, rival_vol):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
-    if table.last_down == MAGIC_CONST:
-        return False
     # number of cards added by ADDING player on table equals 
     # number of taking player's cards => ADDING should say TAKE_AWAY
-    if (status == Status.ATTACKER and rival_vol == 0 or
-        status == Status.ADDING   and (table.last_down - table.last_up) == rival_vol):
+    if ((status == Status.ATTACKER or status == Status.ADDING) and 
+        ((table.vol('down') - table.vol('up')) == rival_vol or 
+          table.vol('down') == MAGIC_CONST)):
             return False
     return True
 
