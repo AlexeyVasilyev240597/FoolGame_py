@@ -57,6 +57,9 @@ class Player(Pile):
         return card
         
     def showCard(self, indx):
+        pass
+    
+    def _showCard(self, indx):
         return self.cards[indx]
         
     def sayWord(self):

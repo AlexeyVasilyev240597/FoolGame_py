@@ -3,6 +3,8 @@ from enum import IntEnum
 from params import MAGIC_CONST, FLAG_DEBUG
 from player import Status, Word
 
+# TODO: create structure for working with players
+
 class GameStage(IntEnum):
     START     = 1
     PLAYING   = 2
@@ -15,48 +17,49 @@ def swapRole(players):
 #   to first by order player in first game,
 #   to winner if he is,
 #   to player which throws last card if dead heat
-# TODO: create func what checking least trump card of players and 
-#       make decision after dead heat and in 1st game
 def setNewGame(players, trump, table):    
     players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
     players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
 
 # PARAM INPUT:
-#   @status of actv player (which threw card)
-#   @table  is object with actual state of table
-#   @card   (thrown)
-#   @trump  in game
+#   status of actv player (which threw card)
+#   table is object with actual state of table
+#   card (thrown)
+#   trump in game
 # PARAM OUT:
 #   answer: is chosen card correct
 def isChoiceCorrect(status, table, card, trump):
     if status == Status.ATTACKER and table.vol() == 0:
         return True
     if status == Status.ATTACKER or status == Status.ADDING:
-        for l in table.cards:
-            for c in table.cards[l]:
-                if card.rank == c.rank:
-                    return True
+        for n in range(table.vol('up')):
+            c = table.showCard('up', n)
+            if card.rank == c.rank:
+                return True    
+        for n in range(table.vol('down')):
+            c = table.showCard('down', n)
+            if card.rank == c.rank:
+                return True   
         return False
     if status == Status.DEFENDING:
-        last = table.cards['down'][-1]
-        return (((last.suit == card.suit) and (last.rank < card.rank)) or 
-                ((last.suit != card.suit) and (card.suit == trump)))
+        last = table.showCard('down', table.vol('down')-1)
+        return (last.suit == card.suit and last.rank < card.rank or 
+                not (last.suit == card.suit) and (card.suit == trump))
 
 # PARAM IN:
-#   @status    of actv player (which threw card)
-#   @table     is object with actual state of table
-#   @rival_vol is number of cards in rival's hand
+#   status of actv player (which threw card)
+#   table is object with actual state of table
+#   rival_vol is number of cards in rival's hand
 # PARAM OUT:
 #   answer: can card be thrown to table
 def canCardBeThrown(status, table, rival_vol):
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
-    if table.vol('up') == MAGIC_CONST:
-        return False
     # number of cards added by ADDING player on table equals 
     # number of taking player's cards => ADDING should say TAKE_AWAY
-    if status == Status.ATTACKER or status == Status.ADDING:
-        if (table.vol('down') - table.vol('up')) == rival_vol:
+    if ((status == Status.ATTACKER or status == Status.ADDING) and 
+        ((table.vol('down') - table.vol('up')) == rival_vol or 
+          table.vol('down') == MAGIC_CONST)):
             return False
     return True
 
@@ -72,7 +75,7 @@ def addFromStock(players, stock):
         else:
             dv['pssv'] += 1
             pv['pssv'] += 1
-        s -= 1
+        s -= 1    
     for role in players:       
         for i in range(dv[role]):
             if FLAG_DEBUG:
@@ -108,7 +111,7 @@ def whoIsFool(players):
 def reactToWord(word, players, table, pile, stock):
     if word == Word.BEATEN:
         table.shift(pile, True)
-        players['actv'].status = Status.DEFENDING
+        players['actv'].status  = Status.DEFENDING
         players['pssv'].status = Status.ATTACKER
         addFromStock(players, stock)
         swapRole(players)
@@ -120,9 +123,9 @@ def reactToWord(word, players, table, pile, stock):
             table.shift(players['pssv'], False)
         else:
             table.shift(players['pssv'], not players['pssv'].is_user)
-        players['actv'].status = Status.ATTACKER
+        players['actv'].status  = Status.ATTACKER
         players['pssv'].status = Status.DEFENDING
-        addFromStock(players, stock)
+        addFromStock(players, stock)   
     return isGameOver(stock, players)
 
 def reactToMove(players, table, pile, stock, mv):

@@ -16,9 +16,14 @@ class Pile:
             c.flip()
         return c
 
+    def showCard(self, indx):
+        if indx < self.vol():
+            return self.cards[indx]
+    
     def shift(self, pile, to_flip = False):
         while self.vol() > 0:
             pile.addCard(self.getCard(to_flip))
+            
 
     def vol(self):
         return len(self.cards)
@@ -50,6 +55,10 @@ class Stock(Pile):
         if n == 1:
             card.flip()
         return card
+    
+    def showCard(self, indx):
+        if self.vol() > 0 and indx == self.vol():
+            return self.cards[indx]
 
 class Table(Pile):
     def __init__(self):
@@ -61,6 +70,10 @@ class Table(Pile):
             self.cards['up'].append(card)
         else:
             self.cards['down'].append(card)
+     
+    def showCard(self, layer, indx):
+        if indx < self.vol(layer):
+            return self.cards[layer][indx]
      
     def shift(self, pile, to_flip = False):
         self.cards = self.cards['up'] + self.cards['down']
