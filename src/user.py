@@ -54,7 +54,7 @@ class User(Player):
             
         if event.key == pygame.K_s:
             if self.joystick.chooseCard():
-                card = self.showCard(self.joystick.chosen_card)
+                card = self._showCard(self.joystick.chosen_card)
                 move_correct = (isChoiceCorrect(self.status, 
                                                 self.table, 
                                                 card, 
@@ -94,11 +94,11 @@ class User(Player):
     def draw(self, screen):
         Player.draw(self, screen)
         if self.vol() > 0:
-            if self.joystick.active_card >= 0:
-                rect = self.showCard(self.joystick.active_card).rect
+            if self.joystick.active_card >= 0 and self.vol() > 0:
+                rect = self._showCard(self.joystick.active_card).rect
                 pygame.draw.rect(screen, COLOR_CARD_ACTIVE, rect, self.t)
-            if self.joystick.chosen_card >= 0 and self.joystick.wrong_choice:
-                rect = self.showCard(self.joystick.chosen_card).rect                
+            if self.joystick.chosen_card >= 0 and self.joystick.wrong_choice and self.vol() > 0:
+                rect = self._showCard(self.joystick.chosen_card).rect                
                 pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)
 
     def updateCards(self):

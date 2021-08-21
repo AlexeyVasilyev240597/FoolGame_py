@@ -51,7 +51,8 @@ class Player(Element):
         # game params
         self.trump = []
         self.table = []
-        self.get_weight = lambda card : ((card.suit == self.trump)*Rank.ACE.value + card.rank.value)
+        self.get_weight = lambda card : ((card.suit == self.trump)*
+                                         Rank.ACE.value + card.rank.value)
         self.losing_counter = 0
         self.last_move = {}
         
@@ -79,7 +80,11 @@ class Player(Element):
         return card
         
     def showCard(self, indx):
-        return self.cards.sprites()[indx]
+        pass
+    
+    def _showCard(self, indx):
+        if indx < self.vol():
+            return self._cards.sprites()[indx]
         
     def sayWord(self):
         if self.status == Status.ATTACKER:
@@ -139,11 +144,11 @@ class Player(Element):
                              self.last_move)
     
     def updateCards(self):        
-        cards = sorted(self.cards, key = self.get_weight)
+        cards = sorted(self._cards, key = self.get_weight)
         v = self.vol()
         for l, c in zip(range(v), cards):
-            self.cards.change_layer(c, l)
-            pos_loc = self.getCardPos(self.cards.get_layer_of_sprite(c))
+            self._cards.change_layer(c, l)
+            pos_loc = self.getCardPos(self._cards.get_layer_of_sprite(c))
             pos = self.loc2glob(pos_loc)
             c.setTargetPos(pos)
             

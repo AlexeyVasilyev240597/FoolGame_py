@@ -4,12 +4,11 @@ from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
 from elems  import Deck, Pile, Stock, Table, Dealer
 from user   import User
 from ai     import AIGenerator
-from rules  import GameStage, reactToMove, setNewGame, isGameOver, whoIsFool
+from rules  import GameStage, reactToMove, setNewGame, whoIsFool
 
 # in seconds
 TIME_DELAY = 1
 
-# TODO: write log file (json) contained all moves of players and their cards on hands
 # TODO: create a text file with a win score between each AI and user
 # TODO: create a ring for AIs fighting 
 #       (for minimization allocated resouces maybe it needs splitting 

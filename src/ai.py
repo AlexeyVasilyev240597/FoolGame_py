@@ -34,7 +34,7 @@ class ArtInt(Player):
         indxs = []
         if canCardBeThrown(self.status, self.table, rival_vol):
             for i in range(self.vol()):
-                card = self.showCard(i)
+                card = self._showCard(i)
                 move_correct = (isChoiceCorrect(self.status, 
                                                 self.table, 
                                                 card, 
@@ -42,16 +42,21 @@ class ArtInt(Player):
                 if move_correct:
                     indxs.append(i)
         return indxs
-        
-    def getMeanWeight(self, cards = []):        
-        if cards == []:
-            cards = self.cards
-        vol = len(cards)
-        mw = 0
+    
+    def getWeightOfSet(self, cards):        
+        sw = 0
         for c in cards:
-            mw += self.get_weight(c)
+            sw += self.get_weight(c)
+        return sw
+    
+    def getMeanWeight(self, cards = []):  
+        mw = 0
+        if cards == []:
+            cards = self._cards
+        sw = self.getWeightOfSet(self, cards)
+        vol = len(cards)
         if vol > 0:
-            mw /= vol
+            mw = sw/vol
         return mw
 
 
@@ -70,7 +75,7 @@ class Alexander_P(ArtInt):
     def makeDecision(self, indxs, stock_vol, rival):
         if len(indxs) > 0:
             if self.status == Status.DEFENDING:
-                w = self.get_weight(self.showCard(indxs[0]))
+                w = self.get_weight(self._showCard(indxs[0]))
                 if w <= Rank.TEN.value:
                     return True
             else:
@@ -86,7 +91,7 @@ class George_P(ArtInt):
         if len(indxs) > 0:
             if (self.status == Status.ATTACKER and self.table.vol() > 0 or
                 self.status == Status.ADDING):
-                w = self.get_weight(self.showCard(indxs[0]))
+                w = self.get_weight(self._showCard(indxs[0]))
                 if w <= Rank.TEN.value:
                     return True
             else:
@@ -104,7 +109,7 @@ class Gregory_P(ArtInt):
             # it is not endspiel yet then 
             # I am weighting card
             if self.table.vol() > 0 and stock_vol > 0:
-                w = self.get_weight(self.showCard(indxs[0]))
+                w = self.get_weight(self._showCard(indxs[0]))
                 if w <= Rank.ACE.value:#Rank.TEN.value:
                     return True
             else:

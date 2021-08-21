@@ -8,32 +8,36 @@ from items import Rank, Suit, CardS, TextBox, Badge, DECK_VOLUME
 class Element:
     def __init__(self, pos):
         self.pos = pos
-        self.cards = pygame.sprite.LayeredUpdates()
+        self._cards = pygame.sprite.LayeredUpdates()
     
     def addCard(self, card, layer = 0, pos_loc = [0, 0]):
         pos = self.loc2glob(pos_loc)
         card.setTargetPos(pos)
-        self.cards.add(card)
-        self.cards.change_layer(card, layer)
+        self._cards.add(card)
+        self._cards.change_layer(card, layer)
         
     def getCard(self, to_flip = False, index = -1):        
-        c = self.cards.sprites()[index]
+        c = self._cards.sprites()[index]
         if to_flip:
             c.flip()
-        self.cards.remove(c)
+        self._cards.remove(c)
         return c
+    
+    def showCard(self, indx):
+        if indx < self.vol():
+            return self._cards.sprites()[indx]
 
     def loc2glob(self, pos_loc):
         return [self.pos[0] + pos_loc[0], self.pos[1] + pos_loc[1]]
 
     def vol(self):
-        return len(self.cards.sprites())
+        return len(self._cards.sprites())
 
     def draw(self, screen):
-        self.cards.draw(screen)
+        self._cards.draw(screen)
         
     def update(self):
-        self.cards.update()
+        self._cards.update()
 
 class Deck(Element):
     def __init__(self):
@@ -47,14 +51,17 @@ class Deck(Element):
         Element.addCard(self, card, DECK_VOLUME-self.vol()-1)
 
     def shuffle(self):
-        lrs = self.cards.layers()
+        lrs = self._cards.layers()
         random.shuffle(lrs)
         for n in range(len(lrs)):
-            self.cards.switch_layer(n, lrs[n])
+            self._cards.switch_layer(n, lrs[n])
 
 class Pile(Element):
     def __init__(self):
         Element.__init__(self, POS_PILE)
+        
+    def showCard(self, indx):
+        pass
     
 
 class Stock(Element):
@@ -64,11 +71,11 @@ class Stock(Element):
         self.counter = []
     
     def showTrump(self):
-        last_card = self.cards.get_top_sprite()
+        last_card = self._cards.get_top_sprite()
         last_card.flip()
         last_card.setTargetPos([self.pos[0], self.pos[1] + CARD_W/4])
         last_card.image = pygame.transform.rotate(last_card.image, -90)
-        self.cards.move_to_back(last_card)
+        self._cards.move_to_back(last_card)
         # set info box params
         box_pos = self.loc2glob([CARD_W/2-BADGE_S/2, CARD_H/2-BADGE_S/2])
         box_size = [BADGE_S, BADGE_S]
@@ -88,9 +95,13 @@ class Stock(Element):
             card.flip()
         self.counter.setText(str(self.vol()))
         return card
+    
+    def showCard(self, indx):
+        if self.vol() > 0 and indx == self.vol() - 1:
+            return self._cards.sprites()[indx]        
 
     def draw(self, screen):
-        self.cards.draw(screen)        
+        self._cards.draw(screen)        
         if self.vol() > 1 and not self.counter == []:
             self.counter.draw(screen)
         if self.vol() == 0 and not self.counter == []:
@@ -100,24 +111,24 @@ class Stock(Element):
 class Table(Element):
     def __init__(self):
         Element.__init__(self, POS_TABLE)
-        self.cards = {'up':   pygame.sprite.LayeredUpdates(),
+        self._cards = {'up':   pygame.sprite.LayeredUpdates(),
                       'down': pygame.sprite.LayeredUpdates()}
         
     def addCard(self, card, atop):
         if atop:
-            self.cards['up'].add(card)
-            self.cards['up'].change_layer(card, 1)
+            self._cards['up'].add(card)
+            self._cards['up'].change_layer(card, 1)
             pos_loc = self.getCardPos('up')
         else:
-            self.cards['down'].add(card)
-            self.cards['down'].change_layer(card, 0)
+            self._cards['down'].add(card)
+            self._cards['down'].change_layer(card, 0)
             pos_loc = self.getCardPos('down')
             
         pos = self.loc2glob(pos_loc)
         card.setTargetPos(pos)        
         
     def getCardPos(self, layer):
-        i = len(self.cards[layer]) - 1
+        i = self.vol(layer) - 1
         # 6 / 2 = 3 in row for each layer
         if layer == 'down':
             n = 2 * (i % (MAGIC_CONST // 2))
@@ -133,30 +144,34 @@ class Table(Element):
         return pos
         
     def getAllCards(self, cards_set, by_open = False):
-        for layer in self.cards:
+        for layer in self._cards:
             while self.vol(layer) > 0:
-                card = self.cards[layer].sprites()[0]
+                card = self._cards[layer].sprites()[0]
                 if not by_open:
                     card.flip()
-                self.cards[layer].remove(card)
+                self._cards[layer].remove(card)
                 cards_set.addCard(card)
+        
+    def showCard(self, layer, indx):
+        if indx < self.vol(layer):
+            return self._cards[layer].sprites()[indx]
         
     def vol(self, layer = 'both'):
         if layer == 'both':
-            if 'up' in self.cards and 'down' in self.cards:
-                return len(self.cards['up']) + len(self.cards['down'])
+            if 'up' in self._cards and 'down' in self._cards:
+                return len(self._cards['up']) + len(self._cards['down'])
             else:
-                return len(self.cards)
+                return len(self._cards)
         else:
-            return len(self.cards[layer])
+            return len(self._cards[layer])
 
     def draw(self, screen):
-        self.cards['down'].draw(screen)
-        self.cards['up'].draw(screen)
+        self._cards['down'].draw(screen)
+        self._cards['up'].draw(screen)
         
     def update(self):
-        self.cards['down'].update()
-        self.cards['up'].update()
+        self._cards['down'].update()
+        self._cards['up'].update()
 
 class Dealer: 
     def deck2player(deck, player, by_open = False):
@@ -165,7 +180,7 @@ class Dealer:
             player.addCard(card)
     
     def deck2stock(deck, stock):
-        while len(deck.cards) > 0:
+        while deck.vol() > 0:
             card = deck.getCard(False, 0)
             stock.addCard(card)
 

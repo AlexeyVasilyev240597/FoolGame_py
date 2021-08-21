@@ -32,13 +32,17 @@ def isChoiceCorrect(status, table, card, trump):
     if status == Status.ATTACKER and table.vol() == 0:
         return True
     if status == Status.ATTACKER or status == Status.ADDING:
-        for l in table.cards:
-            for c in table.cards[l].sprites():
-                if card.rank == c.rank:
-                    return True
+        for n in range(table.vol('up')):
+            c = table.showCard('up', n)
+            if card.rank == c.rank:
+                return True    
+        for n in range(table.vol('down')):
+            c = table.showCard('down', n)
+            if card.rank == c.rank:
+                return True   
         return False
     if status == Status.DEFENDING:
-        last = table.cards['down'].sprites()[-1]
+        last = table.showCard('down', table.vol('down')-1)
         return (last.suit == card.suit and last.rank < card.rank or 
                 not (last.suit == card.suit) and (card.suit == trump))
 
