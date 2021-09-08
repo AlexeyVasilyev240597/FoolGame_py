@@ -101,12 +101,10 @@ def whoIsFool(players):
         return 'no one'
     elif p2_vol == 0:
         players['actv'].iAmFool()
-        players['pssv'].mess_box.setText('Ты Дурак!')
         swapRole(players)
         return players['pssv'].name
     elif p1_vol == 0:
         players['pssv'].iAmFool()
-        players['actv'].mess_box.setText('Ты Дурак!')
         return players['pssv'].name
     else: # wrong call
         return 'neither yet'

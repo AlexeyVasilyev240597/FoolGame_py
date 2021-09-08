@@ -25,12 +25,9 @@ class PlayerAsRival:
         self.status    = status
         self.last_move = last_move
 
+#  TODO: fix indixation for game with new player
 class Player(Element):
-    # counter of players
-    counter = 0
     def __init__(self, name, is_user = True):
-        Player.counter += 1
-        
         # main params        
         self.name = name
         self.status = []
@@ -38,7 +35,7 @@ class Player(Element):
         
         # geometric params
         self.MAX_IN_ROW = 2*MAGIC_CONST
-        if Player.counter == 1:
+        if is_user:
             pos = POS_PLAYERS['down']
         else: # Player.counter == 2
             pos = POS_PLAYERS['up']
@@ -68,7 +65,7 @@ class Player(Element):
         
         box_pos  = self.loc2glob([self.w + self.t, 2*box_size[1] + self.t])        
         self.score_box = TextBox(box_pos, box_size)
-        
+                
     def addCard(self, card):
         Element.addCard(self, card)
         self.updateCards() 

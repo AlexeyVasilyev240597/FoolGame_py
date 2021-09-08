@@ -134,9 +134,16 @@ class Sergey_C(ArtInt):
         return indxs[0]
 
 
-AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]
-def AIGenerator(ai_name):
-    for ai_c in AI_list:
-        ai_o = ai_c()
-        if ai_name == ai_o.name:
-            return ai_o
+class AIGenerator:
+    AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]
+    
+    def getNames():
+        names_list = []
+        for ai_c in  AIGenerator.AI_list:
+            names_list.append(ai_c.__name__)
+        return names_list
+    
+    def getInstance(ai_name):
+        for ai_c in AIGenerator.AI_list:
+            if ai_name == ai_c.__name__:
+                return ai_c()
