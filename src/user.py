@@ -1,75 +1,45 @@
 import pygame
 from elems  import Element
 from player import Player, Status
-from params import COLOR_CARD_ACTIVE, COLOR_CARD_WRONG
+from params import COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
-
-# BUG: во время попытки выбрать последнюю карту в наборе
-#   line 94, in draw: rect = self.cards.sprites()[self.joystick.active_card].rect
-
-class Joystick:
-    def __init__(self):
-        self.active_card = -1
-        self.chosen_card = -1
-        self.num = 0
-        self.wrong_choice = False
-
-    def shiftRight(self):
-        if not self.chosen_card == -1:
-            self.chosen_card = -1
-        self.active_card += 1            
-        if self.active_card >= self.num:
-            self.active_card = self.num-1
-
-    def shiftLeft(self):
-        if not self.chosen_card == -1:
-            self.chosen_card = -1
-        self.active_card -= 1
-        if self.active_card < 0:
-            self.active_card = 0
-            
-    def chooseCard(self):
-        if self.active_card >= 0:
-            self.chosen_card = self.active_card
-            return True
-        return False
-
 
 class User(Player):
     def __init__(self, name):
         Player.__init__(self, name)
-        self.joystick = Joystick()        
+        self.clicked_card_indx = -1  
+        self.wrong_choice = False
 
     def addCard(self, card):        
-        Player.addCard(self, card)
-        self.joystick.num += 1
+        Player.addCard(self, card)        
 
-    def move(self, event, stock_vol, rival):
+    def isCardChoosen(self, pos):
+        clicked_cards = [c for c in self._cards if c.rect.collidepoint(pos)]
+        if clicked_cards:
+            self.clicked_card_indx = clicked_cards[-1].layer
+            return True
+        else:
+            return False
+    
+    def move(self, stock_vol, rival):
         ans = []
-        if event.key == pygame.K_a:
-            self.joystick.shiftLeft()
-            
-        if event.key == pygame.K_d:
-            self.joystick.shiftRight()
-            
-        if event.key == pygame.K_s:
-            if self.joystick.chooseCard():
-                card = self._showCard(self.joystick.chosen_card)
-                move_correct = (isChoiceCorrect(self.status, 
-                                                self.table, 
-                                                card, 
-                                                self.trump) and
-                                canCardBeThrown(self.status, 
-                                                self.table, 
-                                                rival.vol))
-                if move_correct:
-                    card = self.getCard()
-                    self.updateCards()
-                    ans = {'card': card}
-                else:
-                    self.joystick.wrong_choice = True
+        
+        if self.clicked_card_indx >= 0:            
+            card = self._showCard(self.clicked_card_indx)
+            move_correct = (isChoiceCorrect(self.status, 
+                                            self.table, 
+                                            card, 
+                                            self.trump) and
+                            canCardBeThrown(self.status, 
+                                            self.table, 
+                                            rival.vol))
+            if move_correct:
+                card = self.getCard()
+                ans = {'card': card}
+            else:
+                self.wrong_choice = True
  
-        if event.key == pygame.K_w:
+        else:
             if self.table.vol() > 0:
                 word = self.sayWord()                
                 ans = {'word': word}
@@ -80,9 +50,7 @@ class User(Player):
         if self.status == Status.FOOL:
             card = Element.getCard(self, True, 0)
         else:
-            cci = self.joystick.chosen_card
-            card = Element.getCard(self, False, cci)        
-            self.joystick.num -= 1
+            card = Element.getCard(self, False, self.clicked_card_indx)        
         self.updateCards()
         return card
     
@@ -94,15 +62,11 @@ class User(Player):
     def draw(self, screen):
         Player.draw(self, screen)
         if self.vol() > 0:
-            if self.joystick.active_card >= 0 and self.vol() > 0:
-                rect = self._showCard(self.joystick.active_card).rect
-                pygame.draw.rect(screen, COLOR_CARD_ACTIVE, rect, self.t)
-            if self.joystick.chosen_card >= 0 and self.joystick.wrong_choice and self.vol() > 0:
-                rect = self._showCard(self.joystick.chosen_card).rect                
+            if self.clicked_card_indx >= 0 and self.wrong_choice:
+                rect = self._showCard(self.clicked_card_indx).rect                
                 pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)
 
     def updateCards(self):
         Player.updateCards(self)
-        self.joystick.active_card = -1
-        self.joystick.chosen_card = -1
+        self.clicked_card_indx = -1
         

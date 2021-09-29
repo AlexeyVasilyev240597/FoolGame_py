@@ -14,7 +14,6 @@ from rules  import GameStage, reactToMove, setNewGame, whoIsFool
 #       its params will be names of players
 #       it will run in __main__ like here https://habr.com/ru/post/456214/
 # TODO: put .py files to folders and write __init__ and __main__ funcs
-# TODO: add menu like this https://pygame-menu.readthedocs.io/en/4.1.3/
 
 def play_fool_game(user_name, ai_name):
     # in seconds
@@ -28,8 +27,7 @@ def play_fool_game(user_name, ai_name):
     clock = pygame.time.Clock()
     
     deck = Deck()
-    
-    # AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]    
+      
     pl1       = User(user_name)
     pl2       = AIGenerator.getInstance(ai_name)
     players   = {'actv': pl1, 'pssv': pl2}
@@ -50,7 +48,24 @@ def play_fool_game(user_name, ai_name):
                 del players['actv']
                 del players['pssv']
                 return
-            
+
+            if (event.type == pygame.MOUSEBUTTONUP and
+                game_stage == GameStage.PLAYING and
+                players['actv'].is_user):
+                pos = pygame.mouse.get_pos()
+                if players['actv'].isCardChoosen(pos):
+                    # user's move
+                    pl_cur = players['actv']
+                    pl_riv = players['pssv']
+                    mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
+                    if not mv == []:
+                        game_stage = reactToMove(players, table, pile, stock, mv)
+                        if game_stage == GameStage.PLAYING:
+                            start_ticks = pygame.time.get_ticks()
+                            pl_riv.mess_box.setText('')
+                        elif game_stage == GameStage.GAME_OVER:
+                            whoIsFool(players)
+                                
             elif event.type == pygame.KEYDOWN:
                 if game_stage == GameStage.START and event.key == pygame.K_n:
                     deck.shuffle()
@@ -59,10 +74,13 @@ def play_fool_game(user_name, ai_name):
                     game_stage = GameStage.PLAYING  
                     start_ticks = pygame.time.get_ticks()
                     
-                if game_stage == GameStage.PLAYING and players['actv'].is_user:
+                if (game_stage == GameStage.PLAYING and
+                    players['actv'].is_user and
+                    event.key == pygame.K_w):
+                    # user's move
                     pl_cur = players['actv']
                     pl_riv = players['pssv']
-                    mv = pl_cur.move(event, stock.vol(), pl_riv.getMeAsRival())
+                    mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
                     if not mv == []:
                         game_stage = reactToMove(players, table, pile, stock, mv)
                         if game_stage == GameStage.PLAYING:
