@@ -13,10 +13,14 @@ class User(Player):
     def addCard(self, card):        
         Player.addCard(self, card)        
 
-    def isCardChoosen(self, pos):
+    def isClicked(self, pos):
         clicked_cards = [c for c in self._cards if c.rect.collidepoint(pos)]
+        does_word_been_said = self.mess_box.rect.collidepoint(pos)
         if clicked_cards:
-            self.clicked_card_indx = clicked_cards[-1].layer
+            self.cur_move = {'card' : clicked_cards[-1].layer}
+            return True
+        elif does_word_been_said:
+            self.cur_move = {'word': 'word'}
             return True
         else:
             return False
@@ -24,8 +28,8 @@ class User(Player):
     def move(self, stock_vol, rival):
         ans = []
         
-        if self.clicked_card_indx >= 0:            
-            card = self._showCard(self.clicked_card_indx)
+        if 'card' in self.cur_move:            
+            card = self._showCard(self.cur_move['card'])
             move_correct = (isChoiceCorrect(self.status, 
                                             self.table, 
                                             card, 
@@ -39,10 +43,12 @@ class User(Player):
             else:
                 self.wrong_choice = True
  
-        else:
+        elif 'word' in self.cur_move:
             if self.table.vol() > 0:
                 word = self.sayWord()                
                 ans = {'word': word}
+            else:
+                self.wrong_choice = True
         
         return ans
 
@@ -50,7 +56,7 @@ class User(Player):
         if self.status == Status.FOOL:
             card = Element.getCard(self, True, 0)
         else:
-            card = Element.getCard(self, False, self.clicked_card_indx)        
+            card = Element.getCard(self, False, self.cur_move['card'])        
         self.updateCards()
         return card
     
@@ -62,11 +68,24 @@ class User(Player):
     def draw(self, screen):
         Player.draw(self, screen)
         if self.vol() > 0:
-            if self.clicked_card_indx >= 0 and self.wrong_choice:
-                rect = self._showCard(self.clicked_card_indx).rect                
+            if self.wrong_choice:
+                if 'card' in self.cur_move:
+                    rect = self._showCard(self.cur_move['card']).rect
+                elif 'word' in self.cur_move:
+                    rect = self.mess_box.rect
                 pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)
+        if self.status == Status.ATTACKER:
+            self.mess_box.setText('Бито!')
+        elif self.status == Status.DEFENDING:
+            self.mess_box.setText('Беру!')
+        elif self.status == Status.ADDING:
+            self.mess_box.setText('Бери!')
+        elif self.status == Status.FOOL:
+            self.mess_box.setText('')
+        
 
     def updateCards(self):
         Player.updateCards(self)
-        self.clicked_card_indx = -1
+        self.cur_move = []
+        self.wrong_choice = False
         

@@ -31,6 +31,7 @@ class Player(Element):
         # main params        
         self.name = name
         self.status = []
+        self.cur_move  = []
         self.is_user = is_user
         
         # geometric params
@@ -91,7 +92,6 @@ class Player(Element):
             self.mess_box.setText('Беру!')
             return Word.TAKE
         if self.status == Status.ADDING:
-            # self.mess_box.setText('Забирай!')
             self.mess_box.setText('Бери!')
             return Word.TAKE_AWAY
         

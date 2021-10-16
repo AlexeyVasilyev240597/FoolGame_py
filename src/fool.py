@@ -53,7 +53,7 @@ def play_fool_game(user_name, ai_name):
                 game_stage == GameStage.PLAYING and
                 players['actv'].is_user):
                 pos = pygame.mouse.get_pos()
-                if players['actv'].isCardChoosen(pos):
+                if players['actv'].isClicked(pos):
                     # user's move
                     pl_cur = players['actv']
                     pl_riv = players['pssv']
@@ -73,21 +73,6 @@ def play_fool_game(user_name, ai_name):
                     setNewGame(players, trump, table)
                     game_stage = GameStage.PLAYING  
                     start_ticks = pygame.time.get_ticks()
-                    
-                if (game_stage == GameStage.PLAYING and
-                    players['actv'].is_user and
-                    event.key == pygame.K_w):
-                    # user's move
-                    pl_cur = players['actv']
-                    pl_riv = players['pssv']
-                    mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
-                    if not mv == []:
-                        game_stage = reactToMove(players, table, pile, stock, mv)
-                        if game_stage == GameStage.PLAYING:
-                            start_ticks = pygame.time.get_ticks()
-                            pl_riv.mess_box.setText('')
-                        elif game_stage == GameStage.GAME_OVER:
-                            whoIsFool(players)
                 
                 if game_stage == GameStage.GAME_OVER and event.key == pygame.K_SPACE:
                     Dealer.all2deck(players, table, pile, deck)
@@ -106,7 +91,7 @@ def play_fool_game(user_name, ai_name):
                 game_stage = reactToMove(players, table, pile, stock, mv)
                 if game_stage == GameStage.PLAYING:
                     start_ticks = pygame.time.get_ticks()
-                    pl_riv.mess_box.setText('')
+                    # pl_riv.mess_box.setText('')
                 elif game_stage == GameStage.GAME_OVER:
                     whoIsFool(players)
         
