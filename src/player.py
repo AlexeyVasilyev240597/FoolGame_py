@@ -72,7 +72,10 @@ class Player(Element):
         self.updateCards() 
         
     def getCard(self, indx = 0):
-        flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
+        # flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
+        flip_flag = (not self.is_user and not self.status == Status.FOOL or
+                     self.is_user and self.status == Status.FOOL)
+        flip_flag = not (self.is_user ^ (self.status == Status.FOOL))
         card = Element.getCard(self, flip_flag, indx)
         self.updateCards()
         return card

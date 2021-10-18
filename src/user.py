@@ -1,5 +1,4 @@
 import pygame
-from elems  import Element
 from player import Player, Status
 from params import COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
@@ -15,11 +14,11 @@ class User(Player):
 
     def isClicked(self, pos):
         clicked_cards = [c for c in self._cards if c.rect.collidepoint(pos)]
-        does_word_been_said = self.mess_box.rect.collidepoint(pos)
+        is_word_said = self.mess_box.rect.collidepoint(pos)
         if clicked_cards:
             self.cur_move = {'card' : clicked_cards[-1].layer}
             return True
-        elif does_word_been_said:
+        elif is_word_said:
             self.cur_move = {'word': 'word'}
             return True
         else:
@@ -38,7 +37,7 @@ class User(Player):
                                             self.table, 
                                             rival.vol))
             if move_correct:
-                card = self.getCard()
+                card = self.getCard(self.cur_move['card'])
                 ans = {'card': card}
             else:
                 self.wrong_choice = True
@@ -52,14 +51,6 @@ class User(Player):
         
         return ans
 
-    def getCard(self):
-        if self.status == Status.FOOL:
-            card = Element.getCard(self, True, 0)
-        else:
-            card = Element.getCard(self, False, self.cur_move['card'])        
-        self.updateCards()
-        return card
-    
     def sayWord(self):
         word = Player.sayWord(self)
         self.updateCards()
