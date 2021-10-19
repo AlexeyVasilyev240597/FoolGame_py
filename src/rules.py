@@ -115,20 +115,20 @@ def whoIsFool(players):
 def reactToWord(word, players, table, pile, stock):
     if word == Word.BEATEN:
         table.getAllCards(pile)
-        players['actv'].status  = Status.DEFENDING
-        players['pssv'].status = Status.ATTACKER
+        players['actv'].setStatus(Status.DEFENDING)
+        players['pssv'].setStatus(Status.ATTACKER)
         addFromStock(players, stock)
         swapRole(players)
     if word == Word.TAKE:
-        players['pssv'].status = Status.ADDING
+        players['pssv'].setStatus(Status.ADDING)
         swapRole(players)
     if word == Word.TAKE_AWAY:
         if FLAG_DEBUG:
             table.getAllCards(players['pssv'], True)
         else:
             table.getAllCards(players['pssv'], players['pssv'].is_user)
-        players['actv'].status  = Status.ATTACKER
-        players['pssv'].status = Status.DEFENDING
+        players['actv'].setStatus(Status.ATTACKER)
+        players['pssv'].setStatus(Status.DEFENDING)
         addFromStock(players, stock)   
     return isGameOver(stock, players)
 

@@ -56,15 +56,8 @@ class User(Player):
         self.updateCards()
         return word
     
-    def draw(self, screen):
-        Player.draw(self, screen)
-        if self.vol() > 0:
-            if self.wrong_choice:
-                if 'card' in self.cur_move:
-                    rect = self._showCard(self.cur_move['card']).rect
-                elif 'word' in self.cur_move:
-                    rect = self.mess_box.rect
-                pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)
+    def setStatus(self, status):
+        Player.setStatus(self, status)
         if self.status == Status.ATTACKER:
             self.mess_box.setText('Бито!')
         elif self.status == Status.DEFENDING:
@@ -73,7 +66,16 @@ class User(Player):
             self.mess_box.setText('Бери!')
         elif self.status == Status.FOOL:
             self.mess_box.setText('')
-        
+    
+    def draw(self, screen):
+        Player.draw(self, screen)
+        if self.vol() > 0:
+            if self.wrong_choice:
+                if 'card' in self.cur_move:
+                    rect = self._showCard(self.cur_move['card']).rect
+                elif 'word' in self.cur_move:
+                    rect = self.mess_box.rect
+                pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)        
 
     def updateCards(self):
         Player.updateCards(self)

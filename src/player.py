@@ -101,8 +101,11 @@ class Player(Element):
     def setNewGameParams(self, trump, table, status):
         self.trump  = trump        
         self.table  = table
-        self.status = status
+        self.setStatus(status)
         self.updateCards()
+        
+    def setStatus(self, status):
+        self.status = status
                 
     def getCardPos(self, layer):
         n = self.vol()
