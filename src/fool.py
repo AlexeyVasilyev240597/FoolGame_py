@@ -10,9 +10,8 @@ from rules  import GameStage, reactToMove, setNewGame, whoIsFool
 # TODO: create a ring for AIs fighting 
 #       (for minimization allocated resouces maybe it needs splitting 
 #        kernel and graphic parts of Element class and its childern)
-# TODO: write class Fool() or function fool() with all this code;
-#       its params will be names of players
-#       it will run in __main__ like here https://habr.com/ru/post/456214/
+# TODO: function play_fool_game() will run in __main__ 
+#       like here https://habr.com/ru/post/456214/
 # TODO: put .py files to folders and write __init__ and __main__ funcs
 
 def play_fool_game(user_name, ai_name):
@@ -36,6 +35,7 @@ def play_fool_game(user_name, ai_name):
     table     = Table()
     
     game_stage = GameStage.START
+    pl1.mess_box.setText('Начнём')
     running = True
     while running:
         clock.tick(FPS)
@@ -45,42 +45,39 @@ def play_fool_game(user_name, ai_name):
             if event.type == pygame.QUIT:                
                 del pl1
                 del pl2
-                del players['actv']
-                del players['pssv']
                 return
 
-            if (event.type == pygame.MOUSEBUTTONUP and
-                game_stage == GameStage.PLAYING and
-                players['actv'].is_user):
+            if (event.type == pygame.MOUSEBUTTONUP):
                 pos = pygame.mouse.get_pos()
-                if players['actv'].isClicked(pos):
-                    # user's move
-                    pl_cur = players['actv']
-                    pl_riv = players['pssv']
-                    mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
-                    if not mv == []:
-                        game_stage = reactToMove(players, table, pile, stock, mv)
-                        if game_stage == GameStage.PLAYING:
-                            start_ticks = pygame.time.get_ticks()
-                            pl_riv.mess_box.setText('')
-                        elif game_stage == GameStage.GAME_OVER:
-                            whoIsFool(players)
-                                
-            elif event.type == pygame.KEYDOWN:
-                if game_stage == GameStage.START and event.key == pygame.K_n:
-                    deck.shuffle()
-                    trump = Dealer.deal(deck, players, stock)
-                    setNewGame(players, trump, table)
-                    game_stage = GameStage.PLAYING  
-                    start_ticks = pygame.time.get_ticks()
+                if (game_stage == GameStage.PLAYING and
+                    players['actv'].is_user):
+                    if players['actv'].isClicked(pos):
+                        # user's move
+                        pl_cur = players['actv']
+                        pl_riv = players['pssv']
+                        mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
+                        if not mv == []:
+                            game_stage = reactToMove(players, table, pile, stock, mv)
+                            if game_stage == GameStage.PLAYING:
+                                start_ticks = pygame.time.get_ticks()
+                                pl_riv.mess_box.setText('')
+                            elif game_stage == GameStage.GAME_OVER:
+                                whoIsFool(players)
                 
-                if game_stage == GameStage.GAME_OVER and event.key == pygame.K_SPACE:
-                    Dealer.all2deck(players, table, pile, deck)
-                    game_stage = GameStage.START
-                    pl1.mess_box.setText('')
-                    pl2.mess_box.setText('')
-                    stock.trump_badge.empty()
-                    
+                elif (game_stage == GameStage.GAME_OVER):
+                    user_clicked = pl1.mess_box.rect.collidepoint(pos) 
+                    if user_clicked:
+                        Dealer.all2deck(players, table, pile, deck)
+                        game_stage = GameStage.START
+                        stock.trump_badge.empty()
+                        pl1.mess_box.setText('Ещё раз')
+                        pl2.mess_box.setText('')
+                        
+                elif (game_stage == GameStage.START):
+                      user_clicked = pl1.mess_box.rect.collidepoint(pos) 
+                      if user_clicked:
+                        game_stage = setNewGame(deck, stock, table, players)
+                        start_ticks = pygame.time.get_ticks()
         
         if not players['actv'].is_user and game_stage == GameStage.PLAYING:
             pl_cur = players['actv']
@@ -91,7 +88,6 @@ def play_fool_game(user_name, ai_name):
                 game_stage = reactToMove(players, table, pile, stock, mv)
                 if game_stage == GameStage.PLAYING:
                     start_ticks = pygame.time.get_ticks()
-                    # pl_riv.mess_box.setText('')
                 elif game_stage == GameStage.GAME_OVER:
                     whoIsFool(players)
         

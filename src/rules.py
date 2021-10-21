@@ -1,6 +1,7 @@
 from enum import IntEnum
 
 from params import MAGIC_CONST, FLAG_DEBUG
+from elems  import Dealer
 from player import Status, Word
 
 # TODO: create structure for working with players
@@ -17,9 +18,12 @@ def swapRole(players):
 #   to first by order player in first game,
 #   to winner if he is,
 #   to player which throws last card if dead heat
-def setNewGame(players, trump, table):    
+def setNewGame(deck, stock, table, players):
+    deck.shuffle()
+    trump = Dealer.deal(deck, players, stock)
     players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
     players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
+    return GameStage.PLAYING
 
 # PARAM INPUT:
 #   status of actv player (which threw card)
@@ -101,11 +105,11 @@ def whoIsFool(players):
         return 'no one'
     elif p2_vol == 0:
         players['actv'].iAmFool()
-        players['pssv'].mess_box.setText('')
+        players['pssv'].mess_box.setText('Лады')
         swapRole(players)
         return players['pssv'].name
     elif p1_vol == 0:
-        players['actv'].mess_box.setText('')
+        players['actv'].mess_box.setText('Лады')
         players['pssv'].iAmFool()
         return players['pssv'].name
     else: # wrong call
