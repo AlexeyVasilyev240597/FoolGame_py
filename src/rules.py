@@ -2,7 +2,7 @@ from enum import IntEnum
 
 from params import MAGIC_CONST, FLAG_DEBUG
 from elems  import Dealer
-from player import Status, Word
+from player import Role, Status, Word
 
 # TODO: create structure for working with players
 
@@ -12,7 +12,7 @@ class GameStage(IntEnum):
     GAME_OVER = 3
 
 def swapRole(players):
-    players['actv'], players['pssv'] = players['pssv'], players['actv']
+    players[Role.ACTV], players[Role.PSSV] = players[Role.PSSV], players[Role.ACTV]
     
 # now first move is given
 #   to first by order player in first game,
@@ -20,9 +20,9 @@ def swapRole(players):
 #   to player which throws last card if dead heat
 def setNewGame(deck, stock, table, players):
     deck.shuffle()
-    trump = Dealer.deal(deck, players, stock)
-    players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
-    players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
+    trump = Dealer.deal(deck, players[Role.ACTV], players[Role.PSSV], stock)
+    players[Role.ACTV].setNewGameParams(trump, table, Status.ATTACKER)
+    players[Role.PSSV].setNewGameParams(trump, table, Status.DEFENDING)
     return GameStage.PLAYING
 
 # PARAM INPUT:
@@ -69,16 +69,16 @@ def canCardBeThrown(status, table, rival_vol):
 
 
 def addFromStock(players, stock):
-    pv = {'actv': players['actv'].vol(), 'pssv': players['pssv'].vol()}
-    dv = {'actv': 0, 'pssv': 0}
+    pv = {Role.ACTV: players[Role.ACTV].vol(), Role.PSSV: players[Role.PSSV].vol()}
+    dv = {Role.ACTV: 0, Role.PSSV: 0}
     s  = stock.vol()
-    while s > 0 and (pv['actv'] < MAGIC_CONST or pv['pssv'] < MAGIC_CONST):
-        if pv['actv'] < pv['pssv']:
-            dv['actv'] += 1
-            pv['actv'] += 1
+    while s > 0 and (pv[Role.ACTV] < MAGIC_CONST or pv[Role.PSSV] < MAGIC_CONST):
+        if pv[Role.ACTV] < pv[Role.PSSV]:
+            dv[Role.ACTV] += 1
+            pv[Role.ACTV] += 1
         else:
-            dv['pssv'] += 1
-            pv['pssv'] += 1
+            dv[Role.PSSV] += 1
+            pv[Role.PSSV] += 1
         s -= 1    
     for role in players:       
         for i in range(dv[role]):
@@ -89,29 +89,29 @@ def addFromStock(players, stock):
 
 def isGameOver(stock, players):
     stock_vol = stock.vol()
-    p1_vol    = players['actv'].vol()
-    p2_vol    = players['pssv'].vol()
+    p1_vol    = players[Role.ACTV].vol()
+    p2_vol    = players[Role.PSSV].vol()
     if stock_vol == 0 and (p1_vol == 0 or p2_vol == 0):        
         return GameStage.GAME_OVER
     else:
         return GameStage.PLAYING
 
 def whoIsFool(players):
-    p1_vol    = players['actv'].vol()
-    p2_vol    = players['pssv'].vol()
+    p1_vol    = players[Role.ACTV].vol()
+    p2_vol    = players[Role.PSSV].vol()
     if p1_vol == 0 and p2_vol == 0:
-        players['actv'].mess_box.setText('Ничья!')
-        players['pssv'].mess_box.setText('Ничья!')
+        players[Role.ACTV].mess_box.setText('Ничья!')
+        players[Role.PSSV].mess_box.setText('Ничья!')
         return 'no one'
     elif p2_vol == 0:
-        players['actv'].iAmFool()
-        players['pssv'].mess_box.setText('Лады')
+        players[Role.ACTV].iAmFool()
+        players[Role.PSSV].mess_box.setText('Лады')
         swapRole(players)
-        return players['pssv'].name
+        return players[Role.PSSV].name
     elif p1_vol == 0:
-        players['actv'].mess_box.setText('Лады')
-        players['pssv'].iAmFool()
-        return players['pssv'].name
+        players[Role.ACTV].mess_box.setText('Лады')
+        players[Role.PSSV].iAmFool()
+        return players[Role.PSSV].name
     else: # wrong call
         return 'neither yet'
 
@@ -119,20 +119,20 @@ def whoIsFool(players):
 def reactToWord(word, players, table, pile, stock):
     if word == Word.BEATEN:
         table.getAllCards(pile)
-        players['actv'].setStatus(Status.DEFENDING)
-        players['pssv'].setStatus(Status.ATTACKER)
+        players[Role.ACTV].setStatus(Status.DEFENDING)
+        players[Role.PSSV].setStatus(Status.ATTACKER)
         addFromStock(players, stock)
         swapRole(players)
     if word == Word.TAKE:
-        players['pssv'].setStatus(Status.ADDING)
+        players[Role.PSSV].setStatus(Status.ADDING)
         swapRole(players)
     if word == Word.TAKE_AWAY:
-        if FLAG_DEBUG:
-            table.getAllCards(players['pssv'], True)
-        else:
-            table.getAllCards(players['pssv'], players['pssv'].is_user)
-        players['actv'].setStatus(Status.ATTACKER)
-        players['pssv'].setStatus(Status.DEFENDING)
+        # if FLAG_DEBUG:
+        #     table.getAllCards(players[Role.PSSV], True)
+        # else:
+        table.getAllCards(players[Role.PSSV], players[Role.PSSV].is_user)
+        players[Role.ACTV].setStatus(Status.ATTACKER)
+        players[Role.PSSV].setStatus(Status.DEFENDING)
         addFromStock(players, stock)   
     return isGameOver(stock, players)
 
@@ -140,8 +140,8 @@ def reactToMove(players, table, pile, stock, mv):
     game_stage = GameStage.PLAYING
     if 'card' in mv:
         card = mv.get('card')
-        table.addCard(card, players['actv'].status == Status.DEFENDING)
-        if not players['actv'].status == Status.ADDING:
+        table.addCard(card, players[Role.ACTV].status == Status.DEFENDING)
+        if not players[Role.ACTV].status == Status.ADDING:
             swapRole(players)
     if 'word' in mv:
         word = mv.get('word')

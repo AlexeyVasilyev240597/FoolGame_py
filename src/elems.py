@@ -185,22 +185,22 @@ class Dealer:
             stock.addCard(card)
 
     # call in start of Fool Game
-    def deal(deck, players, stock):
+    def deal(deck, pl1, pl2, stock):
         if FLAG_DEBUG:
-            Dealer.deck2player(deck, players['pssv'], True)
-            Dealer.deck2player(deck, players['actv'],  True)
+            Dealer.deck2player(deck, pl1, True)
+            Dealer.deck2player(deck, pl2,  True)
         else:
-            Dealer.deck2player(deck, players['pssv'], players['pssv'].is_user)
-            Dealer.deck2player(deck, players['actv'],  players['actv'].is_user)
+            Dealer.deck2player(deck, pl2, pl2.is_user)
+            Dealer.deck2player(deck, pl1,  pl1.is_user)
         Dealer.deck2stock(deck, stock)
         trump = stock.showTrump()
         return trump
     
     # call in finish of Fool Game
     def all2deck(players, table, pile, deck):
-        for role in players:
-            while players[role].vol() > 0:
-                card = players[role].getCard()
+        for pl in players:
+            while pl.vol() > 0:
+                card = pl.getCard()
                 deck.addCard(card)
         table.getAllCards(deck)
         while pile.vol() > 0:

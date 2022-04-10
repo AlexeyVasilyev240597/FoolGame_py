@@ -2,6 +2,7 @@ import pygame
 
 from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
 from elems  import Deck, Pile, Stock, Table, Dealer
+from player import Role
 from user   import User
 from ai     import AIGenerator
 from rules  import GameStage, reactToMove, setNewGame, whoIsFool
@@ -13,6 +14,7 @@ from rules  import GameStage, reactToMove, setNewGame, whoIsFool
 # TODO: function play_fool_game() will run in __main__ 
 #       like here https://habr.com/ru/post/456214/
 # TODO: put .py files to folders and write __init__ and __main__ funcs
+# TODO: create a flashing in TIME_DELAY of green frame of players button after its pressing
 
 def play_fool_game(user_name, ai_name):
     # in seconds
@@ -29,7 +31,7 @@ def play_fool_game(user_name, ai_name):
       
     pl1       = User(user_name)
     pl2       = AIGenerator.getInstance(ai_name)
-    players   = {'actv': pl1, 'pssv': pl2}
+    players   = {Role.ACTV: pl1, Role.PSSV: pl2}
     stock     = Stock()
     pile      = Pile()
     table     = Table()
@@ -49,14 +51,21 @@ def play_fool_game(user_name, ai_name):
 
             if (event.type == pygame.MOUSEBUTTONUP):
                 pos = pygame.mouse.get_pos()
-                if (game_stage == GameStage.PLAYING and
-                    players['actv'].is_user):
-                    if players['actv'].isClicked(pos):
+                
+                if (game_stage == GameStage.START):
+                      user_clicked = pl1.mess_box.rect.collidepoint(pos) 
+                      if user_clicked:
+                        game_stage = setNewGame(deck, stock, table, players)
+                        start_ticks = pygame.time.get_ticks()
+                
+                elif (game_stage == GameStage.PLAYING and
+                    players[Role.ACTV].is_user):
+                    if players[Role.ACTV].isClicked(pos):
                         # user's move
-                        pl_cur = players['actv']
-                        pl_riv = players['pssv']
-                        mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
-                        if not mv == []:
+                        # pl_cur = players[Role.ACTV]
+                        pl_riv = players[Role.PSSV]
+                        mv = players[Role.ACTV].move(stock.vol(), players[Role.PSSV].getMeAsRival())
+                        if mv:
                             game_stage = reactToMove(players, table, pile, stock, mv)
                             if game_stage == GameStage.PLAYING:
                                 start_ticks = pygame.time.get_ticks()
@@ -67,24 +76,16 @@ def play_fool_game(user_name, ai_name):
                 elif (game_stage == GameStage.GAME_OVER):
                     user_clicked = pl1.mess_box.rect.collidepoint(pos) 
                     if user_clicked:
-                        Dealer.all2deck(players, table, pile, deck)
+                        Dealer.all2deck([players[Role.ACTV], players[Role.PSSV]], table, pile, deck)
                         game_stage = GameStage.START
                         stock.trump_badge.empty()
                         pl1.mess_box.setText('Ещё раз')
                         pl2.mess_box.setText('')
-                        
-                elif (game_stage == GameStage.START):
-                      user_clicked = pl1.mess_box.rect.collidepoint(pos) 
-                      if user_clicked:
-                        game_stage = setNewGame(deck, stock, table, players)
-                        start_ticks = pygame.time.get_ticks()
         
-        if not players['actv'].is_user and game_stage == GameStage.PLAYING:
-            pl_cur = players['actv']
-            pl_riv = players['pssv']
+        if not players[Role.ACTV].is_user and game_stage == GameStage.PLAYING:
             sec = (pygame.time.get_ticks()-start_ticks)/1000
             if sec > TIME_DELAY:
-                mv = pl_cur.move(stock.vol(), pl_riv.getMeAsRival())
+                mv = players[Role.ACTV].move(stock.vol(), players[Role.PSSV].getMeAsRival())
                 game_stage = reactToMove(players, table, pile, stock, mv)
                 if game_stage == GameStage.PLAYING:
                     start_ticks = pygame.time.get_ticks()

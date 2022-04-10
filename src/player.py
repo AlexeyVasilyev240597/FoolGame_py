@@ -1,11 +1,20 @@
 import pygame
 from enum import IntEnum
 
-from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS, FLAG_DEBUG
+from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS#, FLAG_DEBUG
 from params import COLOR_FRAME
 from params import MAGIC_CONST
 from items import Rank, TextBox
 from elems import Element
+
+class Role(IntEnum):
+    # active
+    ACTV = 1
+    # passive
+    PSSV = 2
+    # in a three hands game
+    # cuckold
+    #CKLD = 3
 
 class Status(IntEnum):
     ATTACKER  = 1
@@ -16,7 +25,18 @@ class Status(IntEnum):
 class Word(IntEnum):
     BEATEN    = 1
     TAKE      = 2
-    TAKE_AWAY = 3       
+    TAKE_AWAY = 3
+    I_AM_FOOL = 4
+
+words_rus = {Word.BEATEN:    'Бито!',
+            Word.TAKE:      'Беру!',
+            Word.TAKE_AWAY: 'Бери!',
+            Word.I_AM_FOOL: 'Я Дурак!'}
+
+word_by_status = {Status.ATTACKER:  Word.BEATEN,
+                  Status.DEFENDING: Word.TAKE,
+                  Status.ADDING:    Word.TAKE_AWAY,
+                  Status.FOOL:      Word.I_AM_FOOL}
 
 class PlayerAsRival:
     def __init__(self, name, vol, status, last_move):
@@ -73,8 +93,6 @@ class Player(Element):
         
     def getCard(self, indx = 0):
         # flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
-        flip_flag = (not self.is_user and not self.status == Status.FOOL or
-                     self.is_user and self.status == Status.FOOL)
         flip_flag = not (self.is_user ^ (self.status == Status.FOOL))
         card = Element.getCard(self, flip_flag, indx)
         self.updateCards()
@@ -88,15 +106,11 @@ class Player(Element):
             return self._cards.sprites()[indx]
         
     def sayWord(self):
-        if self.status == Status.ATTACKER:
-            self.mess_box.setText('Бито!')
-            return Word.BEATEN
-        if self.status == Status.DEFENDING:
-            self.mess_box.setText('Беру!')
-            return Word.TAKE
-        if self.status == Status.ADDING:
-            self.mess_box.setText('Бери!')
-            return Word.TAKE_AWAY
+        word = word_by_status[self.status]
+        # if not self.is_use1r:
+        self.mess_box.setText(words_rus[word])
+        self.updateCards()
+        return word
         
     def setNewGameParams(self, trump, table, status):
         self.trump  = trump        
@@ -106,7 +120,11 @@ class Player(Element):
         
     def setStatus(self, status):
         self.status = status
-                
+        if self.is_user:
+            self.mess_box.setText(words_rus[word_by_status[status]])
+        # else:
+        #     self.mess_box.setText('')
+    
     def getCardPos(self, layer):
         n = self.vol()
         if n == 1:

@@ -19,17 +19,6 @@ class Rank(IntEnum):
     KING  = 13
     ACE   = 14
 
-#class Rank(Enum):
-#    SIX   = '6'
-#    SEVEN = '7'
-#    EIGHT = '8'
-#    NINE  = '9'
-#    TEN   = '10'
-#    JACK  = 'J'
-#    QUEEN = 'Q'
-#    KING  = 'K'
-#    ACE   = 'A'
-
 class Suit(Enum):
     DIAMONDS = 'D'
     HEARTS   = 'H'
@@ -43,17 +32,27 @@ class Side(Flag):
     FACE = 1
 
 class Card:        
-    def __init__(self, suit, rank):        
+    def __init__(self, suit, rank, side = Side.BACK):
         self.suit = suit
-        self.rank = rank         
-        self.side = Side.BACK
+        self.rank = rank
+        self.side = side
 
     def __repr__(self):
         if self.side == Side.FACE:
-            return repr(self.rank.name + ' of ' + self.suit.name)
-            #return repr(self.suit.value + self.rank.value)
+            if self.rank.value == Rank.JACK:
+                rank = 'J'
+            elif self.rank.value == Rank.QUEEN:
+                rank = 'Q'
+            elif self.rank.value == Rank.KING:
+                rank = 'K'
+            elif self.rank.value == Rank.ACE:
+                rank = 'A'
+            else:
+                rank = str(self.rank.value)
+            return repr(rank + '-' + self.suit.value)
         else:
-            return repr('unknown')
+            # unknown
+            return repr('UNK')
 
     def flip(self):
         self.side = Side(not self.side)

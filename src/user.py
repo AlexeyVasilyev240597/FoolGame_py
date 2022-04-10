@@ -1,5 +1,5 @@
 import pygame
-from player import Player, Status
+from player import Player
 from params import COLOR_CARD_WRONG
 from rules  import isChoiceCorrect, canCardBeThrown
 
@@ -41,31 +41,13 @@ class User(Player):
                 ans = {'card': card}
             else:
                 self.wrong_choice = True
- 
         elif 'word' in self.cur_move:
             if self.table.vol() > 0:
                 word = self.sayWord()                
                 ans = {'word': word}
             else:
                 self.wrong_choice = True
-        
         return ans
-
-    def sayWord(self):
-        word = Player.sayWord(self)
-        self.updateCards()
-        return word
-    
-    def setStatus(self, status):
-        Player.setStatus(self, status)
-        if self.status == Status.ATTACKER:
-            self.mess_box.setText('Бито!')
-        elif self.status == Status.DEFENDING:
-            self.mess_box.setText('Беру!')
-        elif self.status == Status.ADDING:
-            self.mess_box.setText('Бери!')
-        elif self.status == Status.FOOL:
-            self.mess_box.setText('')
     
     def draw(self, screen):
         Player.draw(self, screen)
