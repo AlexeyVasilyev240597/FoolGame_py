@@ -156,7 +156,9 @@ class Player(Element):
         self.status = Status.FOOL
         self.losing_counter += 1
         self.mess_box.setText('Я Дурак!')
-        self.score_box.setText('Дурак ' + str(self.losing_counter) + ' раз(а)')
+        times = self.losing_counter
+        times_case = ' раза' if (times % 5 > 1 and times % 5 < 5) else ' раз'
+        self.score_box.setText('Дурак ' + str(times) + times_case)
     
     def getMeAsRival(self):
         return PlayerAsRival(self.name, 

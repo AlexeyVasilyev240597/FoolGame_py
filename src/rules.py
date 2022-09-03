@@ -4,7 +4,7 @@ from params import MAGIC_CONST, FLAG_DEBUG
 from elems  import Dealer
 from player import Role, Status, Word
 
-# TODO: create structure for working with players
+# TODO: create structure for working with players, named Context
 
 class GameStage(IntEnum):
     START     = 1
