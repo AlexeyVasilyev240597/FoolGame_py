@@ -86,16 +86,32 @@ class Player(Element):
         
         box_pos  = self.loc2glob([self.w + self.t, 2*box_size[1] + self.t])        
         self.score_box = TextBox(box_pos, box_size)
-                
+    
+    
+    def needUpdate(player_meth):
+        def updateCards(self, *args, **kwargs):
+            val = player_meth(self, *args, **kwargs)
+            # start updating stuff
+            cards = sorted(self._cards, key = self.get_weight)
+            v = self.vol()
+            for l, c in zip(range(v), cards):
+                self._cards.change_layer(c, l)
+                pos_loc = self.getCardPos(self._cards.get_layer_of_sprite(c))
+                pos = self.loc2glob(pos_loc)
+                c.setTargetPos(pos)
+            # end updating stuff
+            return val
+        return updateCards
+    
+    @needUpdate
     def addCard(self, card):
         Element.addCard(self, card)
-        self.updateCards() 
         
+    @needUpdate
     def getCard(self, indx = 0):
         # flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
         flip_flag = not (self.is_user ^ (self.status == Status.FOOL))
         card = Element.getCard(self, flip_flag, indx)
-        self.updateCards()
         return card
         
     def showCard(self, indx):
@@ -104,26 +120,24 @@ class Player(Element):
     def _showCard(self, indx):
         if indx < self.vol():
             return self._cards.sprites()[indx]
-        
+    
+    @needUpdate
     def sayWord(self):
         word = word_by_status[self.status]
         # if not self.is_use1r:
         self.mess_box.setText(words_rus[word])
-        self.updateCards()
         return word
-        
+    
+    @needUpdate
     def setNewGameParams(self, trump, table, status):
         self.trump  = trump        
         self.table  = table
         self.setStatus(status)
-        self.updateCards()
         
     def setStatus(self, status):
         self.status = status
         if self.is_user:
             self.mess_box.setText(words_rus[word_by_status[status]])
-        # else:
-        #     self.mess_box.setText('')
     
     def getCardPos(self, layer):
         n = self.vol()
@@ -165,16 +179,7 @@ class Player(Element):
                              self.vol(), 
                              self.status, 
                              self.last_move)
-    
-    def updateCards(self):        
-        cards = sorted(self._cards, key = self.get_weight)
-        v = self.vol()
-        for l, c in zip(range(v), cards):
-            self._cards.change_layer(c, l)
-            pos_loc = self.getCardPos(self._cards.get_layer_of_sprite(c))
-            pos = self.loc2glob(pos_loc)
-            c.setTargetPos(pos)
-            
+      
     def draw(self, screen):
         pygame.draw.rect(screen, COLOR_FRAME, self.rect, self.t)  
         Element.draw(self, screen)

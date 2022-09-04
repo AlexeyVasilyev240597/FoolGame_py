@@ -6,11 +6,7 @@ from rules  import isChoiceCorrect, canCardBeThrown
 class User(Player):
     def __init__(self, name):
         Player.__init__(self, name)
-        self.clicked_card_indx = -1  
-        self.wrong_choice = False
-
-    def addCard(self, card):        
-        Player.addCard(self, card)        
+        self.wrong_choice = False   
 
     def isClicked(self, pos):
         clicked_cards = [c for c in self._cards if c.rect.collidepoint(pos)]
@@ -58,9 +54,3 @@ class User(Player):
                 elif 'word' in self.cur_move:
                     rect = self.mess_box.rect
                 pygame.draw.rect(screen, COLOR_CARD_WRONG, rect, self.t)        
-
-    def updateCards(self):
-        Player.updateCards(self)
-        self.cur_move = []
-        self.wrong_choice = False
-        
