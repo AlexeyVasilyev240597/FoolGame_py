@@ -1,11 +1,12 @@
 import pygame
 
-from params import WIDTH, HEIGHT, FPS, COLOR_CLOTH
-from elems  import Deck, Pile, Stock, Table, Dealer
-from player import Role
-from user   import User
-from ai     import AIGenerator
-from rules  import GameStage, reactToMove, setNewGame, whoIsFool
+from params  import WIDTH, HEIGHT, FPS, COLOR_CLOTH
+from elems   import Deck, Pile, Stock, Table, Dealer
+from player  import Role
+from user    import User
+from ai      import AIGenerator
+from rules   import GameStage, reactToMove, setNewGame, whoIsFool
+from context import PlayingContext
 
 # TODO: create a text file with a win score between each AI and user
 # TODO: create a ring for AIs fighting 
@@ -56,6 +57,7 @@ def play_fool_game(user_name, ai_name):
                       user_clicked = pl1.mess_box.rect.collidepoint(pos) 
                       if user_clicked:
                         game_stage = setNewGame(deck, stock, table, players)
+                        context = PlayingContext(stock.trump)
                         start_ticks = pygame.time.get_ticks()
                 
                 elif (game_stage == GameStage.PLAYING and
@@ -64,14 +66,16 @@ def play_fool_game(user_name, ai_name):
                         # user's move
                         # pl_cur = players[Role.ACTV]
                         pl_riv = players[Role.PSSV]
-                        mv = players[Role.ACTV].move(stock.vol(), players[Role.PSSV].getMeAsRival())
+                        mv = players[Role.ACTV].move(context)
                         if mv:
+                            context = PlayingContext.netx_context(context, mv)
                             game_stage = reactToMove(players, table, pile, stock, mv)
                             if game_stage == GameStage.PLAYING:
                                 start_ticks = pygame.time.get_ticks()
                                 pl_riv.mess_box.setText('')
                             elif game_stage == GameStage.GAME_OVER:
                                 whoIsFool(players)
+                            print(repr(context))
                 
                 elif (game_stage == GameStage.GAME_OVER):
                     user_clicked = pl1.mess_box.rect.collidepoint(pos) 
@@ -85,12 +89,14 @@ def play_fool_game(user_name, ai_name):
         if not players[Role.ACTV].is_user and game_stage == GameStage.PLAYING:
             sec = (pygame.time.get_ticks()-start_ticks)/1000
             if sec > TIME_DELAY:
-                mv = players[Role.ACTV].move(stock.vol(), players[Role.PSSV].getMeAsRival())
+                mv = players[Role.ACTV].move(context)
+                context = PlayingContext.netx_context(context, mv)
                 game_stage = reactToMove(players, table, pile, stock, mv)
                 if game_stage == GameStage.PLAYING:
                     start_ticks = pygame.time.get_ticks()
                 elif game_stage == GameStage.GAME_OVER:
                     whoIsFool(players)
+                print(repr(context))
         
         pl1.update()
         pl2.update()

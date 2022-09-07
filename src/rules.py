@@ -4,8 +4,6 @@ from params import MAGIC_CONST, FLAG_DEBUG
 from elems  import Dealer
 from player import Role, Status, Word
 
-# TODO: create structure for working with players, named Context
-
 class GameStage(IntEnum):
     START     = 1
     PLAYING   = 2
@@ -20,9 +18,9 @@ def swapRole(players):
 #   to player which throws last card if dead heat
 def setNewGame(deck, stock, table, players):
     deck.shuffle()
-    trump = Dealer.deal(deck, players[Role.ACTV], players[Role.PSSV], stock)
-    players[Role.ACTV].setNewGameParams(trump, table, Status.ATTACKER)
-    players[Role.PSSV].setNewGameParams(trump, table, Status.DEFENDING)
+    Dealer.deal(deck, players[Role.ACTV], players[Role.PSSV], stock)
+    players[Role.ACTV].setNewGameParams(stock.trump, table, Status.ATTACKER)
+    players[Role.PSSV].setNewGameParams(stock.trump, table, Status.DEFENDING)
     return GameStage.PLAYING
 
 # PARAM INPUT:
@@ -67,11 +65,8 @@ def canCardBeThrown(status, table, rival_vol):
             return False
     return True
 
-
-def addFromStock(players, stock):
-    pv = {Role.ACTV: players[Role.ACTV].vol(), Role.PSSV: players[Role.PSSV].vol()}
+def how_many_add_from_stock(pv, s):
     dv = {Role.ACTV: 0, Role.PSSV: 0}
-    s  = stock.vol()
     while s > 0 and (pv[Role.ACTV] < MAGIC_CONST or pv[Role.PSSV] < MAGIC_CONST):
         if pv[Role.ACTV] < pv[Role.PSSV]:
             dv[Role.ACTV] += 1
@@ -79,13 +74,19 @@ def addFromStock(players, stock):
         else:
             dv[Role.PSSV] += 1
             pv[Role.PSSV] += 1
-        s -= 1    
-    for role in players:       
+        s -= 1
+    return dv
+
+def addFromStock(players, stock):
+    pv = {Role.ACTV: players[Role.ACTV].vol(), Role.PSSV: players[Role.PSSV].vol()}
+    s  = stock.vol()
+    dv = how_many_add_from_stock(pv, s)
+    for role in players:
         for i in range(dv[role]):
-            if FLAG_DEBUG:
-                players[role].addCard(stock.getCard(True))
-            else:
-                players[role].addCard(stock.getCard(players[role].is_user))
+            # if FLAG_DEBUG:
+            #     players[role].addCard(stock.getCard(True))
+            # else:
+            players[role].addCard(stock.getCard(players[role].is_user))
 
 def isGameOver(stock, players):
     stock_vol = stock.vol()
@@ -123,10 +124,10 @@ def reactToWord(word, players, table, pile, stock):
         players[Role.PSSV].setStatus(Status.ATTACKER)
         addFromStock(players, stock)
         swapRole(players)
-    if word == Word.TAKE:
+    elif word == Word.TAKE:
         players[Role.PSSV].setStatus(Status.ADDING)
         swapRole(players)
-    if word == Word.TAKE_AWAY:
+    elif word == Word.TAKE_AWAY:
         # if FLAG_DEBUG:
         #     table.getAllCards(players[Role.PSSV], True)
         # else:
@@ -137,12 +138,12 @@ def reactToWord(word, players, table, pile, stock):
     return isGameOver(stock, players)
 
 def reactToMove(players, table, pile, stock, mv):
-    game_stage = GameStage.PLAYING
     if 'card' in mv:
         card = mv.get('card')
         table.addCard(card, players[Role.ACTV].status == Status.DEFENDING)
         if not players[Role.ACTV].status == Status.ADDING:
             swapRole(players)
+        game_stage = GameStage.PLAYING
     if 'word' in mv:
         word = mv.get('word')
         game_stage = reactToWord(word, players, table, pile, stock)

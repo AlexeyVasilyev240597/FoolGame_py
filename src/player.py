@@ -4,8 +4,8 @@ from enum import IntEnum
 from params import CARD_H, CARD_W, PLAYER_H, PLAYER_W, POS_PLAYERS#, FLAG_DEBUG
 from params import COLOR_FRAME
 from params import MAGIC_CONST
-from items import Rank, TextBox
-from elems import Element
+from items  import Rank, TextBox
+from elems  import Element
 
 class Role(IntEnum):
     # active
@@ -38,14 +38,6 @@ word_by_status = {Status.ATTACKER:  Word.BEATEN,
                   Status.ADDING:    Word.TAKE_AWAY,
                   Status.FOOL:      Word.I_AM_FOOL}
 
-class PlayerAsRival:
-    def __init__(self, name, vol, status, last_move):
-        self.name      = name
-        self.vol       = vol
-        self.status    = status
-        self.last_move = last_move
-
-#  TODO: fix indixation for game with new player
 class Player(Element):
     def __init__(self, name, is_user = True):
         # main params        
@@ -67,7 +59,7 @@ class Player(Element):
         Element.__init__(self, pos)
         
         # game params
-        self.trump = []
+        self.trump = None
         self.table = []
         self.get_weight = lambda card : ((card.suit == self.trump)*
                                          Rank.ACE.value + card.rank.value)
@@ -174,12 +166,6 @@ class Player(Element):
         times_case = ' раза' if (times % 5 > 1 and times % 5 < 5) else ' раз'
         self.score_box.setText('Дурак ' + str(times) + times_case)
     
-    def getMeAsRival(self):
-        return PlayerAsRival(self.name, 
-                             self.vol(), 
-                             self.status, 
-                             self.last_move)
-      
     def draw(self, screen):
         pygame.draw.rect(screen, COLOR_FRAME, self.rect, self.t)  
         Element.draw(self, screen)

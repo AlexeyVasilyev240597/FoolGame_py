@@ -69,6 +69,7 @@ class Stock(Element):
         Element.__init__(self, POS_STOCK)
         self.trump_badge = pygame.sprite.Group()
         self.counter = []
+        self.trump = None
     
     def showTrump(self):
         last_card = self._cards.get_top_sprite()
@@ -85,7 +86,7 @@ class Stock(Element):
         # init counter
         self.counter = TextBox(box_pos, box_size)
         self.counter.setText(str(self.vol()))
-        return last_card.suit
+        self.trump = last_card.suit
     
     def getCard(self, by_open = False):
         n = self.vol()
@@ -193,8 +194,7 @@ class Dealer:
             Dealer.deck2player(deck, pl2, pl2.is_user)
             Dealer.deck2player(deck, pl1,  pl1.is_user)
         Dealer.deck2stock(deck, stock)
-        trump = stock.showTrump()
-        return trump
+        stock.showTrump()
     
     # call in finish of Fool Game
     def all2deck(players, table, pile, deck):
