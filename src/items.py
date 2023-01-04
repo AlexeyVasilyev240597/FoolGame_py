@@ -25,10 +25,10 @@ class Side(Flag):
     FACE = 1
 
 class Card:        
-    def __init__(self, suit, rank):        
+    def __init__(self, suit, rank, side = Side.BACK):        
         self.suit = suit
-        self.rank = rank         
-        self.side = Side.BACK
+        self.rank = rank
+        self.side = side
 
     def __repr__(self):
         if self.side == Side.FACE:
