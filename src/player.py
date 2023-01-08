@@ -1,7 +1,7 @@
 from enum import IntEnum
 
 from params import MAGIC_CONST, FLAG_DEBUG
-from items  import Rank
+from card  import Rank
 from elems  import Pile
 
 

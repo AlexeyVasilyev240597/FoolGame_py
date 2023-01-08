@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from items import Suit, Rank, Side, Card
+import random
 
-import copy
+from card import Card, Suit, Rank
 
 class CardSet(ABC):
     def __init__(self, set_type):
         self._cards = set_type()
     
     @abstractmethod
-    def addCard(self, card) -> None:
+    def addCard(self, card: Card) -> None:
         pass
     
     @abstractmethod
@@ -28,6 +28,29 @@ class CardSet(ABC):
     def vol(self) -> int:
         pass
 
+
+# class Deck(CardSet):
+#     def __init__(self, set_type):
+#         super().__init__(set_type)
+#         for s in Suit:
+#             for r in Rank:
+#                 c = Card(s, r)
+#                 self.addCard(c)
+
+#     def shuffle(self):
+#         random.shuffle(self._cards)
+
+
+class Stock(CardSet):
+    def __init__(self, set_type):
+        super().__init__(set_type)
+        self.trump = None
+
+    def setTrump(self):
+        last_card = self.getCard(True)
+        self.addCard(last_card)
+        self.trump = last_card.suit
+        return self.trump
 
 class CardSetNoGraphic(CardSet):
     def __init__(self):
@@ -56,40 +79,4 @@ class CardSetNoGraphic(CardSet):
     
     def __repr__(self):
         return self._cards.__repr__()
-
-
-# testing block
-# TODO: transfer this block to separate file with unit tests
-
-def print_sets(s1: CardSet, s2: CardSet):
-    print(f's1 = {s1}')
-    print(f's2 = {s2}')
-    
-def test_open_sets(s1: CardSet, s2: CardSet):
-    s1.shift(s2, True)
-    print('\n test of shifting s1 -> s2 with opening s1')
-    print_sets(s1, s2)
-
-def test_close_sets(s1: CardSet, s2: CardSet):
-    s2.shift(s1, True)
-    print('\n test of shifting s2 -> s1 with closing s2')
-    print_sets(s1, s2)
-    for c in s1._cards:
-        c.flip()
-    print('and opening s1 for checking')
-    print_sets(s1, s2)
-
-s1 = CardSetNoGraphic()
-s1.addCard(Card(Suit.DIAMONDS, Rank.SIX))
-s1.addCard(Card(Suit.DIAMONDS, Rank.SEVEN))
-
-s2 = CardSetNoGraphic()
-s2.addCard(Card(Suit.HEARTS, Rank.EIGHT, Side.FACE))
-s2.addCard(Card(Suit.HEARTS, Rank.NINE,  Side.FACE))
-
-print_sets(s1, s2)
-
-test_open_sets(copy.deepcopy(s1), copy.deepcopy(s2))
-
-test_close_sets(copy.deepcopy(s1), copy.deepcopy(s2))
 

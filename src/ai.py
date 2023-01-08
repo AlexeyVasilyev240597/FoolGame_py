@@ -1,5 +1,5 @@
 # import pygame
-from items  import Rank
+from card  import Rank
 from player import Player, Status
 from rules  import isChoiceCorrect, canCardBeThrown
 
