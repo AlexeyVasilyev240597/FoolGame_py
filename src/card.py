@@ -11,35 +11,27 @@ class Rank(IntEnum):
     KING  = 13
     ACE   = 14
 
-#['\u2666', '\u2663', '\u2665', '\u2660']
+#[ '\u2660', '\u2665', '\u2666', '\u2663' ]
 class Suit(Enum):
-    DIAMONDS = 'D'
-    HEARTS   = 'H'
-    CLUBS    = 'C'
     SPADES   = 'S'
+    HEARTS   = 'H'
+    DIAMONDS = 'D'
+    CLUBS    = 'C'
 
 DECK_VOLUME = len(Rank)*len(Suit)
-    
-class Side(Flag):
-    BACK = 0
-    FACE = 1
+
 
 class Card:        
-    def __init__(self, suit, rank, side = Side.BACK):        
+    def __init__(self, suit, rank):        
         self.suit = suit
         self.rank = rank
-        self.side = side
+
+    def __eq__(self, __o: object) -> bool:
+        return self.suit == __o.suit and self.rank == __o.rank
 
     def __repr__(self):
-        if self.side == Side.FACE:
-            # return repr(self.rank.name + ' of ' + self.suit.name)
-            if self.rank < Rank.JACK.value:
-                r = str(self.rank.value)
-            else:
-                r = self.rank.name[0]
-            return repr(self.suit.value + '-' + r)
+        if self.rank < Rank.JACK.value:
+            r = str(self.rank.value)
         else:
-            return repr('*-*')
-
-    def flip(self):
-        self.side = Side(not self.side)
+            r = self.rank.name[0]
+        return f'{self.suit.value} - {r:<2}'

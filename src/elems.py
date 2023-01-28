@@ -1,114 +1,124 @@
+from abc import ABC
+from copy import copy
 import random
 
-from params import MAGIC_CONST, FLAG_DEBUG
-from items import Rank, Suit, Card
+from card import Rank, Suit, Card
 
-class Pile:
+class Pile(ABC):
     def __init__(self):
-        self.cards = []
+        self.__cards = []
     
-    def addCard(self, card):
-        self.cards.append(card)
+    def addCard(self, card: Card) -> None:
+        self.__cards.append(card)
         
-    def getCard(self, to_flip = False, index = 0):        
-        c = self.cards.pop(index)
-        if to_flip:
-            c.flip()
-        return c
+    def getCard(self, index:int = 0) -> Card:
+        if self.vol() > 0:
+            return self.__cards.pop(index)
+        else:
+            return None
 
-    def showCard(self, indx):
-        if indx < self.vol():
-            return self.cards[indx]
-    
-    def shift(self, pile, to_flip = False):
-        while self.vol() > 0:
-            pile.addCard(self.getCard(to_flip))
-            
+    # cards is being shifted from current pile into 'dest'
+    # amount of cards to be moved, by default - all
+    def shift(self, dest, amount: int = None):
+        if amount == None:
+            amount = self.vol
+        for _ in range(amount):
+            dest.addCard(self.getCard())
 
+    def hideCards(self) -> None:
+        self.__cards = [None]*self.vol
+
+    @property
     def vol(self):
-        return len(self.cards)
+        return len(self.__cards)
+
 
 class Deck(Pile):
     def __init__(self):
-        Pile.__init__(self)
+        super().__init__()
         for s in Suit:
             for r in Rank:
                 c = Card(s, r)
-                # DEBUG
-                # c.flip()
                 self.addCard(c)
 
     def shuffle(self):
-        random.shuffle(self.cards)
+        random.shuffle(self.__cards)
             
 
 class Stock(Pile):
-    def showTrump(self):
-        last_card = self.getCard(True)
-        self.addCard(last_card)
-        self.trump = last_card.suit
+    def __init__(self):
+        super().__init__()
+        self.__trump = None
+        self.__last = None
+    
+    def setTrump(self) -> Suit:
+        if self.vol() > 0:
+            first_card = self.getCard()
+            self.__trump = first_card.suit
+            # put first_card to the bottom
+            self.addCard(first_card)
+            self.__last = first_card
         return self.trump
     
-    def getCard(self, by_open = False):
-        n = self.vol()
-        card = Pile.getCard(self, by_open)
-        if n == 1:
-            card.flip()
-        return card
+    def hideCards(self) -> None:
+        last = self.last
+        super().hideCards()
+        self.__cards[-1] = last
     
-    def showCard(self, indx):
-        if self.vol() > 0 and indx == self.vol():
-            return self.cards[indx]
+    # non-empty Stock can show only last card
+    @property
+    def last(self) -> Card:
+        if self.vol() > 0:
+            return self.__last
+        else:
+            return None
+    
+    @property
+    def trump(self) -> Suit:
+        return self.__trump
+
 
 class Table(Pile):
     def __init__(self):
-        Pile.__init__(self)
-        self.cards = {'up': [], 'down': []}
+        self.__cards = {'up': [], 'down': []}
 
-    def addCard(self, card, atop):
+    def addCard(self, card: Card, atop: bool):
         if atop:
-            self.cards['up'].append(card)
+            self.__cards['up'].append(card)
         else:
-            self.cards['down'].append(card)
+            self.__cards['down'].append(card)
      
-    def showCard(self, layer, indx):
-        if indx < self.vol(layer):
-            return self.cards[layer][indx]
-     
-    def shift(self, pile, to_flip = False):
-        self.cards = self.cards['up'] + self.cards['down']
-        Pile.shift(self, pile, to_flip)
-        self.cards = {'up': [], 'down': []}
+    def shift(self, pile):
+        self.__cards = self.__cards['up'] + self.__cards['down']
+        super().shift(self, pile)
+        self.__cards = {'up': [], 'down': []}
     
-    def vol(self, key = 'all'):
-        if key == 'all':
-            if 'up' in self.cards and 'down' in self.cards:
-                return len(self.cards['up'] + self.cards['down'])
-            else:
-                return len(self.cards)
+    # by default: sum of volumes of down and up piles
+    def vol(self, key = None):
+        if key == None:
+            return len(self.__cards['up'] + self.__cards['down'])
+        elif key == 'down' or key == 'up':
+            return len(self.__cards[key])
         else:
-            return len(self.cards[key])
+            return None            
+    
+    def hasRank(self, r: Rank):
+        for layer in self.__cards:
+            for card in self.__cards[layer]:
+                if card.rank == r:
+                    return True
+        else:
+            return False
 
-class Dealer: 
-    def deck2player(deck, player, by_open = False):
-        for n in range(MAGIC_CONST):
-            card = deck.getCard(by_open, 0)
-            player.addCard(card)
+    def showLastDown(self) -> Card:
+        if self.vol() > 0:
+            return self.__cards['down'][-1]
+        else:
+            return None
     
-    # call in start of Fool Game
-    def deal(deck, players, stock):
-        Dealer.deck2player(deck, players['pssv'], 
-                           FLAG_DEBUG or players['pssv'].is_user)
-        Dealer.deck2player(deck, players['actv'], 
-                           FLAG_DEBUG or players['actv'].is_user)
-        deck.shift(stock)
-        trump = stock.showTrump()
-        return trump
+    def hideCards(self) -> None:
+        pass
     
-    # call in finish of Fool Game
-    def all2deck(players, table, pile, deck):
-        for role in players:
-            while players[role].vol() > 0:
-                deck.addCard(players[role].getCard())
-        table.shift(deck, True)
-        pile.shift(deck)
+    @property
+    def cards(self):
+        return copy(self.__cards)

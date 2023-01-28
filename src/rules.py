@@ -1,50 +1,76 @@
 from enum import IntEnum
 
-from params import MAGIC_CONST, FLAG_DEBUG
-from player import Status, Word
+from card    import Card
+from context import Context
+# from game_exception import WrongInitException
+from player  import Status, Word, Players
 
-# TODO: create structure for working with players
+
+CARDS_KIT = 6
 
 class GameStage(IntEnum):
     START     = 1
     PLAYING   = 2
     GAME_OVER = 3
-
-def swapRole(players):
-    players['actv'], players['pssv'] = players['pssv'], players['actv']
     
-# now first move is given
-#   to first by order player in first game,
-#   to winner if he is,
-#   to player which throws last card if dead heat
-def setNewGame(players, trump, table):    
-    players['actv'].setNewGameParams(trump, table, Status.ATTACKER)
-    players['pssv'].setNewGameParams(trump, table, Status.DEFENDING)
+# TODO:
+# class WrongMoveTypes(IntEnum):
+
+# TODO:
+# class PlayersEnum(IntEnum):
+#     NOBODY   = -1
+#     PLAYER_1 =  0
+#     PLAYER_2 =  1
+
+
+## CARDS TRANSFERING FUNCTIONS
+
+
+# now in first game first move is given to first player (by order),
+#     if dead heat then to player which throws last card 
+#     and to winner otherwise
+def deal(context: Context, winner_id: int = 0):
+    context.deck.shuffle()
+    trump = context.stock.setTrump()
+    context.players.setNewGameParams(trump, winner_id)
+    context.deck.shift(context.players.actv, CARDS_KIT)
+    context.deck.shift(context.players.pssv, CARDS_KIT)
+
+
+# TODO: describe according to the rules
+def complete(context: Context):
+    actv_add, pssv_add = context.players.howManyToComplete(context.stock.vol)
+    # firstly cards are adding to passive player
+    context.deck.shift(context.players.pssv, pssv_add)
+    # then to active one
+    context.deck.shift(context.players.actv, actv_add)
+
+
+# collecting cards from all elements back to deck,
+# call in finish of Game
+def collect(context: Context):
+    context.players.actv.shift(context.deck)
+    context.players.pssv.shift(context.deck)
+
+
+## CHECKING PLAYER'S MOVE FUNCTIONS
 
 # PARAM INPUT:
-#   status of actv player (which threw card)
-#   table is object with actual state of table
 #   card (thrown)
-#   trump in game
+#   game context
 # PARAM OUT:
 #   answer: is chosen card correct
-def isChoiceCorrect(status, table, card, trump):
-    if status == Status.ATTACKER and table.vol() == 0:
+def doesCardFit(card: Card, context: Context) -> bool:
+    status = context.players.actv.status
+    if (status == Status.ATTACKER and
+        context.table.vol == 0):
         return True
-    if status == Status.ATTACKER or status == Status.ADDING:
-        for n in range(table.vol('up')):
-            c = table.showCard('up', n)
-            if card.rank == c.rank:
-                return True    
-        for n in range(table.vol('down')):
-            c = table.showCard('down', n)
-            if card.rank == c.rank:
-                return True   
-        return False
+    if (status == Status.ATTACKER or status == Status.ADDING):
+        return context.table.hasRank(card.rank)
     if status == Status.DEFENDING:
-        last = table.showCard('down', table.vol('down')-1)
+        last = context.table.showLastDown()
         return (last.suit == card.suit and last.rank < card.rank or 
-                not (last.suit == card.suit) and (card.suit == trump))
+                not last.suit == card.suit and card.suit == context.stock.trump)
 
 # PARAM IN:
 #   status of actv player (which threw card)
@@ -52,90 +78,91 @@ def isChoiceCorrect(status, table, card, trump):
 #   rival_vol is number of cards in rival's hand
 # PARAM OUT:
 #   answer: can card be thrown to table
-def canCardBeThrown(status, table, rival_vol):
+def canCardBeThrown(context: Context) -> bool:
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
     # number of cards added by ADDING player on table equals 
     # number of taking player's cards => ADDING should say TAKE_AWAY
-    if ((status == Status.ATTACKER or status == Status.ADDING) and 
-        ((table.vol('down') - table.vol('up')) == rival_vol or 
-          table.vol('down') == MAGIC_CONST)):
+    if ((context.players.actv.status == Status.ATTACKER or 
+         context.players.actv.status == Status.ADDING) and 
+        ((context.table.vol('down') - context.table.vol('up')) == context.players.pssv.vol or 
+          context.table.vol('down') == CARDS_KIT)):
             return False
     return True
 
 
-def addFromStock(players, stock):
-    pv = {'actv': players['actv'].vol(), 'pssv': players['pssv'].vol()}
-    dv = {'actv': 0, 'pssv': 0}
-    s  = stock.vol()
-    while s > 0 and (pv['actv'] < MAGIC_CONST or pv['pssv'] < MAGIC_CONST):
-        if pv['actv'] < pv['pssv']:
-            dv['actv'] += 1
-            pv['actv'] += 1
-        else:
-            dv['pssv'] += 1
-            pv['pssv'] += 1
-        s -= 1    
-    for role in players:       
-        for i in range(dv[role]):
-            if FLAG_DEBUG:
-                players[role].addCard(stock.getCard(True))
-            else:
-                players[role].addCard(stock.getCard(players[role].is_user))
+def isMoveCorrect(move, context: Context) -> bool:
+    if 'card' in move:
+        card = move.get('card')
+        return (doesCardFit(card, context) and 
+                canCardBeThrown(card, context))
+    if 'word' in move:
+        word = move.get('word')
+        return not (word == Word.BEATEN and
+                    context.table.vol == 0 and 
+                    context.players.actv.status == Status.ATTACKER)
+    return False
 
-def isGameOver(stock, players):
-    stock_vol = stock.vol()
-    p1_vol    = players['actv'].vol()
-    p2_vol    = players['pssv'].vol()
+
+## UPDATING GAME CONTEXT AFTER PLAYER'S MOVE
+
+def reactToWord(word: Word, context: Context) -> None:
+    if word == Word.BEATEN:
+        context.table.shift(context.deck)
+        # context.players.actv.status = Status.DEFENDING
+        context.players.pssv.status = Status.ATTACKER
+        complete(context)
+        context.players.swapRoles()
+    if word == Word.TAKE:
+        context.players.pssv.status = Status.ADDING
+        context.players.swapRoles()
+    if word == Word.TAKE_AWAY:
+        context.table.shift(context.players.pssv)
+        # context.players.actv.status  = Status.ATTACKER
+        context.players.pssv.status = Status.DEFENDING
+        complete(context)
+    return gameIsOver(context)
+
+
+# updating context by reaction to a active player's move
+def reactToMove(move, context: Context) -> None:
+    game_stage = GameStage.PLAYING
+    if 'card' in move:
+        card = move.get('card')
+        atop = context.players.actv.status == Status.DEFENDING
+        context.table.addCard(card, atop)
+        if not context.players.actv.status == Status.ADDING:
+            context.players.swapRoles()
+    if 'word' in move:
+        word = move.get('word')
+        game_stage = reactToWord(word, context)
+    return game_stage
+
+
+## REPRESENTING OF RESULT OF THE GAME
+
+def gameIsOver(context: Context) -> GameStage:
+    stock_vol = context.stock.vol
+    p1_vol    = context.players.actv.vol
+    p2_vol    = context.players.pssv.vol
     if stock_vol == 0 and (p1_vol == 0 or p2_vol == 0):        
         return GameStage.GAME_OVER
     else:
         return GameStage.PLAYING
 
-def whoIsFool(players):
-    p1_vol    = players['actv'].vol()
-    p2_vol    = players['pssv'].vol()
+
+def whoIsFool(players: Players) -> int:
+    p1_vol    = players.actv.vol
+    p2_vol    = players.pssv.vol
     if p1_vol == 0 and p2_vol == 0:
-        return 'no one'
+        # return players.getIdByRole('actv')
+        return -1
     elif p2_vol == 0:
-        players['actv'].iAmFool()
-        swapRole(players)
-        return players['pssv'].name
+        players.actv.iAmFool()
+        return players.pssv.name
     elif p1_vol == 0:
-        players['pssv'].iAmFool()
-        return players['pssv'].name
+        players.pssv.iAmFool()
+        return players.pssv.name
     else: # wrong call
-        return 'neither yet'
+        return None
 
-
-def reactToWord(word, players, table, pile, stock):
-    if word == Word.BEATEN:
-        table.shift(pile, True)
-        players['actv'].status  = Status.DEFENDING
-        players['pssv'].status = Status.ATTACKER
-        addFromStock(players, stock)
-        swapRole(players)
-    if word == Word.TAKE:
-        players['pssv'].status = Status.ADDING
-        swapRole(players)
-    if word == Word.TAKE_AWAY:
-        if FLAG_DEBUG:
-            table.shift(players['pssv'], False)
-        else:
-            table.shift(players['pssv'], not players['pssv'].is_user)
-        players['actv'].status  = Status.ATTACKER
-        players['pssv'].status = Status.DEFENDING
-        addFromStock(players, stock)   
-    return isGameOver(stock, players)
-
-def reactToMove(players, table, pile, stock, mv):
-    game_stage = GameStage.PLAYING
-    if 'card' in mv:
-        card = mv.get('card')
-        table.addCard(card, players['actv'].status == Status.DEFENDING)
-        if not players['actv'].status == Status.ADDING:
-            swapRole(players)
-    if 'word' in mv:
-        word = mv.get('word')
-        game_stage = reactToWord(word, players, table, pile, stock)
-    return game_stage

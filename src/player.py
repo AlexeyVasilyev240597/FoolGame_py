@@ -1,9 +1,10 @@
+from abc  import ABC, abstractmethod
 from enum import IntEnum
 
-from params import MAGIC_CONST, FLAG_DEBUG
-from card  import Rank
+# from params import MAGIC_CONST, FLAG_DEBUG
+from card   import Rank, Suit, Card
 from elems  import Pile
-
+from rules  import CARDS_KIT
 
 class Status(IntEnum):
     ATTACKER  = 1
@@ -16,78 +17,123 @@ class Word(IntEnum):
     TAKE      = 2
     TAKE_AWAY = 3       
 
-class PlayerAsRival:
-    def __init__(self, name, vol, status, last_move):
-        self.name      = name
-        self.vol       = vol
-        self.status    = status
-        self.last_move = last_move
 
 class Player(Pile):
-    # counter of players
-    counter = 0
-    def __init__(self, name, is_user = True):
-        Player.counter += 1
-        
-        Pile.__init__(self)
-        
+    def __init__(self, name = 'John Doe'):
         # main params        
         self.name = name#str(Player.counter) + ': ' + name
-        self.status = []
-        self.is_user = is_user
+        self.status = None
                 
         # game params
-        self.trump = []
-        self.table = []
-        self.get_weight = lambda card : ((card.suit == self.trump)*
+        self.trump = None
+        self.__get_weight = lambda card : ((card.suit == self.trump)*
                                          Rank.ACE.value +
                                          card.rank.value)
         self.losing_counter = 0
-        self.last_move = {}
         
     def addCard(self, card):
         Pile.addCard(self, card)
-        self.cards.sort(key = self.get_weight)
-        
-    def getCard(self, indx = 0):
-        flip_flag = not (FLAG_DEBUG ^ (self.status == Status.FOOL))
-        card = Pile.getCard(self, flip_flag, indx)
-        self.cards.sort(key = self.get_weight)
-        self.last_move = {'card': card}
-        return card
-        
-    def showCard(self, indx):
-        pass
+        self.__cards.sort(key = self.__get_weight)
     
-    def _showCard(self, indx):
-        return self.cards[indx]
+    # TODO: add decorators:
+    #   - sort cards
+    #   - if status is FOOL then get the first card
+    @abstractmethod
+    def getCard(self, context) -> Card:
+        pass
+        # indx = self.getCardIndex(context)
+        # card = Pile.getCard(self, indx)
+        # self.cards.sort(key = self.__get_weight)
+        # return card
         
     def sayWord(self):
         if self.status == Status.ATTACKER:
             word = Word.BEATEN
+            self.status = Status.DEFENDING
         if self.status == Status.DEFENDING:
             word = Word.TAKE
         if self.status == Status.ADDING:
             word = Word.TAKE_AWAY
-        self.last_move = {'word': word}
+            self.status = Status.ATTACKER
         return word
         
-    def setNewGameParams(self, trump, table, status):
+    def setNewGameParams(self, trump, status):
         self.trump  = trump        
-        self.table  = table
         self.status = status
-        self.cards.sort(key = self.get_weight)
+        self.cards.sort(key = self.__get_weight)
     
     def iAmFool(self):
         self.status = Status.FOOL
         self.losing_counter += 1
-        
-    def getMeAsRival(self):
-        return PlayerAsRival(self.name, 
-                             self.vol(), 
-                             self.status, 
-                             self.last_move)
-        
+    
+    def move(self):
+        move = {}
+        card = self.getCard()
+        if card is None:
+            word = self.sayWord()
+            move = {'word': word}
+        else:
+            move = {'card': card}
+        return move
+
+
+# structure for working with two players
+class Players(ABC):
+    def __init__(self, name_actv: str, name_pssv: str) -> None:
+        self._players = [Player(name_actv), Player(name_pssv)]
+        self._refs = {'actv': 0,
+                      'pssv': 1}
+
+    @property
+    def actv(self):
+        return self._players[self._refs['actv']]
+    
+    @property
+    def pssv(self):
+        return self._players[self._refs['pssv']]
+
+    def swapRoles(self):
+        self._refs['actv'], self._refs['pssv'] = self._refs['pssv'], self._refs['actv']
+    
+    def getPlayerById(self, id: int) -> Player:
+        if id == 0 or id == 1:
+            return self._players[id]
+        else:
+            return None
+    
+    def getIdByRole(self, role: str):
+        if role == 'actv' or role == 'pssv':
+            return self._players[self._refs[role]]
+        else:
+            return None
+    
+    def howManyToComplete(self, stock_vol: int):
+        # players volume
+        actv_vol = self.actv.vol
+        pssv_vol = self.pssv.vol
+        # need to add 
+        actv_add = 0
+        pssv_add = 0
+        while stock_vol > 0 and (actv_vol < CARDS_KIT or pssv_vol < CARDS_KIT):
+            if actv_vol < pssv_vol:
+                actv_add += 1
+                actv_vol += 1
+            else:
+                pssv_add += 1
+                pssv_vol += 1
+            stock_vol -= 1
+        return actv_add, pssv_add
+
+    # now in first game first move is given to first player (by order),
+    #     if dead heat then to player which throws last card 
+    #     and to winner otherwise
+    def setNewGameParams(self, trump: Suit, winner_id):
+        if not winner_id == self._refs['actv']:
+            self.swapRoles()
+        self.actv.setNewGameParams(trump, Status.ATTACKER)
+        self.pssv.setNewGameParams(trump, Status.DEFENDING)
+
+
 # class PlayersFaceToFace:
 #     def __init__(self, pl_1, pl_2):
 #         self.plrs = [pl_1, pl_2]
