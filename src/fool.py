@@ -1,48 +1,32 @@
-from elems  import Deck, Pile, Stock, Table, Dealer
-from ai     import AIGenerator
-from rules  import GameStage, setNewGame, reactToMove, whoIsFool
-from logger import Logger, LogMode
+from elems  import Deck, Stock, Table
+from player import Player, Players
+from context import Context
+# from ai     import AIGenerator
+from rules import *
 
-NUM_OF_GAMES = 1000
+class FoolGame:
+    def __init__(self, pl_1_name:str, pl_2_name: str) -> None:
+        players = Players(Player(pl_1_name), Player(pl_2_name))
+        self.context = Context(Stock(), Table(), players, Deck())
 
-deck = Deck()    
-# AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]
-pl1       = AIGenerator('Nikita_A')
-pl2       = AIGenerator('Gregory_P')
-players   = {'actv': pl1, 'pssv': pl2}
-stock     = Stock()
-pile      = Pile()
-table     = Table()
+    def playGameRound(self):
 
-# ALL, ENDSPIEL, SCORE
-log = Logger(LogMode.SCORE)
+        game_stage = GameStage.START
+        deal(self.context)
+        
+        game_stage = GameStage.PLAYING      
+        while game_stage == GameStage.PLAYING:
+            # TODO: 
+            # notify player that his/her move is wrong (instead 'pass');
+            # and break loop after several (3-6) trying
+            while not isMoveCorrect(move := 
+                                    self.context.players.actv.move(self.context)):
+                pass        
+            game_stage = reactToMove(move, self.context)
+        collect(self.context)
+        
+        whoIsFool(self.context)
 
-mw = 0
-game_stage = GameStage.START
-for n in range(NUM_OF_GAMES):
-    deck.shuffle()
-    trump = Dealer.deal(deck, players, stock)
-    setNewGame(players, trump, table)
-    log.newGame(pl1, pl2, stock)
-
-    # it_was_endspiel = True
-    game_stage = GameStage.PLAYING      
-    while game_stage == GameStage.PLAYING:
-        mv = players['actv'].move(stock.vol(), players['pssv'].getMeAsRival())                        
-        game_stage = reactToMove(players, table, pile, stock, mv)        
-        log.setMove(mv, players['actv'], table, stock)        
-        # if stock.vol() == 0 and it_was_endspiel:
-        #     mw += pl2.getMeanWeight()
-        #     it_was_endspiel = False
-    
-    fool_name = whoIsFool(players)
-    
-    log.setFool(fool_name)
-    Dealer.all2deck(players, table, pile, deck)
-    
-# mw /= NUM_OF_GAMES
-# print(pl2.name)
-# print(mw)
-    
-log.setScore()  
-log.saveToJson()
+    def playGameSeries(self, num_of_wins: int):
+        while max(self.context.players.score) < num_of_wins:
+            self.playGameRound()

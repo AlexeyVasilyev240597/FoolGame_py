@@ -2,9 +2,10 @@ from abc  import ABC, abstractmethod
 from enum import IntEnum
 
 # from params import MAGIC_CONST, FLAG_DEBUG
-from card   import Rank, Suit, Card
-from elems  import Pile
-from rules  import CARDS_KIT
+from card    import Rank, Suit, Card
+from elems   import Pile
+from context import Context
+from rules   import CARDS_KIT
 
 class Status(IntEnum):
     ATTACKER  = 1
@@ -60,15 +61,11 @@ class Player(Pile):
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status
-        self.cards.sort(key = self.__get_weight)
+        self.__cards.sort(key = self.__get_weight)
     
-    def iAmFool(self):
-        self.status = Status.FOOL
-        self.losing_counter += 1
-    
-    def move(self):
+    def move(self, context: Context):
         move = {}
-        card = self.getCard()
+        card = self.getCard(context)
         if card is None:
             word = self.sayWord()
             move = {'word': word}
@@ -79,10 +76,12 @@ class Player(Pile):
 
 # structure for working with two players
 class Players(ABC):
-    def __init__(self, name_actv: str, name_pssv: str) -> None:
-        self._players = [Player(name_actv), Player(name_pssv)]
+    def __init__(self, pl_1: Player, pl_2: Player) -> None:
+        self._players = [pl_1, pl_2]
         self._refs = {'actv': 0,
                       'pssv': 1}
+        self.score = [0, 0]
+        self.fool_id = -1
 
     @property
     def actv(self):
@@ -107,11 +106,12 @@ class Players(ABC):
         else:
             return None
     
+    # if stock doesn't have enough cards then everyone will get equal amount
     def howManyToComplete(self, stock_vol: int):
         # players volume
         actv_vol = self.actv.vol
         pssv_vol = self.pssv.vol
-        # need to add 
+        # need to add
         actv_add = 0
         pssv_add = 0
         while stock_vol > 0 and (actv_vol < CARDS_KIT or pssv_vol < CARDS_KIT):
@@ -127,11 +127,17 @@ class Players(ABC):
     # now in first game first move is given to first player (by order),
     #     if dead heat then to player which throws last card 
     #     and to winner otherwise
-    def setNewGameParams(self, trump: Suit, winner_id):
-        if not winner_id == self._refs['actv']:
+    def setNewGameParams(self, trump: Suit, fool_id):
+        if self._refs['actv'] == fool_id or fool_id == -1:
             self.swapRoles()
         self.actv.setNewGameParams(trump, Status.ATTACKER)
         self.pssv.setNewGameParams(trump, Status.DEFENDING)
+    
+    def setFoolStatus(self, fool_id:int):
+        self.fool_id = fool_id
+        if fool_id == 0 or fool_id == 1:
+            self.getPlayerById(fool_id).status = Status.FOOL
+            self.score[fool_id] += 1
 
 
 # class PlayersFaceToFace:

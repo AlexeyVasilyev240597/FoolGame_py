@@ -29,10 +29,10 @@ class GameStage(IntEnum):
 # now in first game first move is given to first player (by order),
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
-def deal(context: Context, winner_id: int = 0):
+def deal(context: Context):
     context.deck.shuffle()
     trump = context.stock.setTrump()
-    context.players.setNewGameParams(trump, winner_id)
+    context.players.setNewGameParams(trump, context.players.fool_id)
     context.deck.shift(context.players.actv, CARDS_KIT)
     context.deck.shift(context.players.pssv, CARDS_KIT)
 
@@ -51,6 +51,8 @@ def complete(context: Context):
 def collect(context: Context):
     context.players.actv.shift(context.deck)
     context.players.pssv.shift(context.deck)
+    context.table.shift(context.deck)
+    context.stock.shift(context.deck)
 
 
 ## CHECKING PLAYER'S MOVE FUNCTIONS
@@ -152,17 +154,18 @@ def gameIsOver(context: Context) -> GameStage:
 
 
 def whoIsFool(players: Players) -> int:
-    p1_vol    = players.actv.vol
-    p2_vol    = players.pssv.vol
-    if p1_vol == 0 and p2_vol == 0:
-        # return players.getIdByRole('actv')
-        return -1
-    elif p2_vol == 0:
-        players.actv.iAmFool()
-        return players.pssv.name
-    elif p1_vol == 0:
-        players.pssv.iAmFool()
-        return players.pssv.name
+    actv_vol    = players.actv.vol
+    pssv_vol    = players.pssv.vol
+    # DEAD HEAT
+    if actv_vol == 0 and pssv_vol == 0:
+        fool_id = -1
+    elif pssv_vol == 0:
+        fool_id = players.getIdByRole('actv')
+    elif actv_vol == 0:
+        fool_id = players.getIdByRole('pssv')
     else: # wrong call
+        print('ERROR: wrong call of whoIsFool func!')
         return None
+    players.setFoolStatus(fool_id)
+
 
