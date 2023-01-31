@@ -4,8 +4,7 @@ from enum import IntEnum
 # from params import MAGIC_CONST, FLAG_DEBUG
 from card    import Rank, Suit, Card
 from elems   import Pile
-from context import Context
-from rules   import CARDS_KIT
+# from rules   import CARDS_KIT
 
 class Status(IntEnum):
     ATTACKER  = 1
@@ -21,6 +20,7 @@ class Word(IntEnum):
 
 class Player(Pile):
     def __init__(self, name = 'John Doe'):
+        super().__init__()
         # main params        
         self.name = name#str(Player.counter) + ': ' + name
         self.status = None
@@ -32,9 +32,13 @@ class Player(Pile):
                                          card.rank.value)
         self.losing_counter = 0
         
-    def addCard(self, card):
-        Pile.addCard(self, card)
-        self.__cards.sort(key = self.__get_weight)
+    # @property
+    # def cards(self):
+    #     return self._cards
+    
+    def addCard(self, card: Card) -> None:
+        super().addCard(card)
+        self._cards.sort(key = self.__get_weight)
     
     # TODO: add decorators:
     #   - sort cards
@@ -61,9 +65,9 @@ class Player(Pile):
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status
-        self.__cards.sort(key = self.__get_weight)
+        self._cards.sort(key = self.__get_weight)
     
-    def move(self, context: Context):
+    def move(self, context):
         move = {}
         card = self.getCard(context)
         if card is None:
@@ -100,30 +104,12 @@ class Players(ABC):
         else:
             return None
     
-    def getIdByRole(self, role: str):
+    def getIdByRole(self, role: str) -> int:
         if role == 'actv' or role == 'pssv':
-            return self._players[self._refs[role]]
+            return self._refs[role]
         else:
             return None
     
-    # if stock doesn't have enough cards then everyone will get equal amount
-    def howManyToComplete(self, stock_vol: int):
-        # players volume
-        actv_vol = self.actv.vol
-        pssv_vol = self.pssv.vol
-        # need to add
-        actv_add = 0
-        pssv_add = 0
-        while stock_vol > 0 and (actv_vol < CARDS_KIT or pssv_vol < CARDS_KIT):
-            if actv_vol < pssv_vol:
-                actv_add += 1
-                actv_vol += 1
-            else:
-                pssv_add += 1
-                pssv_vol += 1
-            stock_vol -= 1
-        return actv_add, pssv_add
-
     # now in first game first move is given to first player (by order),
     #     if dead heat then to player which throws last card 
     #     and to winner otherwise
@@ -139,41 +125,6 @@ class Players(ABC):
             self.getPlayerById(fool_id).status = Status.FOOL
             self.score[fool_id] += 1
 
-
-# class PlayersFaceToFace:
-#     def __init__(self, pl_1, pl_2):
-#         self.plrs = [pl_1, pl_2]
-#         self.actv = pl_1
-#         self.pssv = pl_2
-
-#     def swapRole(self):
-#         self.actv, self.pssv = self.pssv, self.actv
-
-#     # now first move is given
-#     #   to first by order player in first game,
-#     #   to winner if he is,
-#     #   to player which throws last card if dead heat
-#     def setStatusInNewGame(self):
-#         self.actv.status = Status.ATTACKER
-#         self.pssv.status = Status.DEFENDING
-
-#     def getNumToAdd(self, stock_vol):
-#         pv = {'actv': self.actv.vol(), 'pssv': self.pssv.vol()}
-#         dv = {'actv': 0, 'pssv': 0}
-#         s  = stock_vol
-#         while (s > 0 and (pv['actv'] < MAGIC_CONST or
-#                           pv['pssv'] < MAGIC_CONST)):
-#             if pv['actv'] < pv['pssv']:
-#                 dv['actv'] += 1
-#                 pv['actv'] += 1
-#             else:
-#                 dv['pssv'] += 1
-#                 pv['pssv'] += 1
-#             s -= 1
-#         return dv
-
-# #    def changeStatus(self):
-# #        ...
 
 # # TODO: class for playing with 3 players
 # #class PlayersThreesome

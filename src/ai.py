@@ -1,74 +1,72 @@
-# import pygame
-from card  import Rank
+from abc import abstractmethod
+
+from card  import Rank, Card
 from player import Player, Status
-from rules  import isChoiceCorrect, canCardBeThrown
+from context import Context
+from rules  import doesCardFit, canCardBeThrown
 
 # Artificial Intelligence 
 class ArtInt(Player):
     def __init__(self):
         name = str(self.__class__.__name__)
-        Player.__init__(self, name, False)
+        Player.__init__(self, name)
     
-    def move(self, stock_vol, rival):
-        indxs = self.getAvailableCards(stock_vol, rival.vol)
-        dcsn  = self.makeDecision(indxs, stock_vol, rival)
-        
-        if dcsn:
-            indx = self.getCardIndx(indxs, stock_vol, rival)
-            card = self.getCard(indx)
-            mv = {'card': card}
-        else:
-            word = self.sayWord()
-            mv = {'word': word}
-        return mv
+    def getFitCards(self, context: Context):
+        fit_cards = []
+        for card in self._cards:
+            if doesCardFit(card, context) and canCardBeThrown(context):
+                fit_cards.append(card)
+        return fit_cards
     
-    # decision "do I throw any card?"
-    def makeDecision(self, indxs, stock_vol, rival):
-        print('WARNING: abstract method of ArtInt does nothing')
+    @abstractmethod
+    def getCard(self, context: Context) -> Card:
+        pass
     
-    def getCardIndx(self, indxs, table, stock_vol, rival):
-        print('WARNING: abstract method of ArtInt does nothing')
+    # def getWeightOfSet(self, cards):        
+    #     sw = 0
+    #     for c in cards:
+    #         sw += self.__get_weight(c)
+    #     return sw
     
-    # PARAM IN: stock_vol for detecting of Endspiel
-    def getAvailableCards(self, stock_vol, rival_vol):
-        indxs = []
-        if canCardBeThrown(self.status, self.table, rival_vol):
-            for i in range(self.vol()):
-                card = self._showCard(i)
-                move_correct = (isChoiceCorrect(self.status, 
-                                                self.table, 
-                                                card, 
-                                                self.trump))
-                if move_correct:
-                    indxs.append(i)
-        return indxs
-    
-    def getWeightOfSet(self, cards):        
-        sw = 0
-        for c in cards:
-            sw += self.get_weight(c)
-        return sw
-    
-    def getMeanWeight(self, cards = []):  
-        mw = 0
-        if cards == []:
-            cards = self._cards
-        sw = self.getWeightOfSet(self, cards)
-        vol = len(cards)
-        if vol > 0:
-            mw = sw/vol
-        return mw
-
+    # def getMeanWeight(self, cards = []):  
+    #     mw = 0
+    #     if cards == []:
+    #         cards = self.cards
+    #     sw = self.getWeightOfSet(self, cards)
+    #     vol = len(cards)
+    #     if vol > 0:
+    #         mw = sw/vol
+    #     return mw
 
 class Nikita_A(ArtInt): 
-    def makeDecision(self, indxs, stock_vol, rival):
-        if len(indxs) > 0:
-            return True            
+    def getCard(self, context: Context) -> Card:
+        fit_cards = self.getFitCards(context)
+        if fit_cards:
+            return fit_cards[0]
         else:
-            return False
+            return None
+
+class Sergey_C(ArtInt):
+    # if no cards on table I throw least by weight card,
+    # else I throw greatest one 
+    def getCard(self, context: Context) -> Card:
+        fit_cards = self.getFitCards(context)
+        if fit_cards:
+            if context.table.vol() > 0 and not self.status == Status.DEFENDING:
+                return fit_cards[-1]
+            return fit_cards[0]
+        else:
+            return None
+
+# class Nikita_A(ArtInt): 
+#     def makeDecision(self, indxs, stock_vol, rival):
+#         if len(indxs) > 0:
+#             return True            
+#         else:
+#             return False
         
-    def getCardIndx(self, indxs, stock_vol, rival):
-        return indxs[0]
+#     def getCardIndx(self, indxs, stock_vol, rival):
+#         return indxs[0]
         
        
 class Alexander_P(ArtInt):
@@ -119,19 +117,19 @@ class Gregory_P(ArtInt):
     def getCardIndx(self, indxs,  stock_vol, rival):
         return indxs[0]
 
-class Sergey_C(ArtInt):
-    def makeDecision(self, indxs, stock_vol, rival): 
-        if len(indxs) > 0:
-            return True
-        else:
-            return False
+# class Sergey_C(ArtInt):
+#     def makeDecision(self, indxs, stock_vol, rival): 
+#         if len(indxs) > 0:
+#             return True
+#         else:
+#             return False
         
-    # if no cards on table I throw least by weight card,
-    # else I throw greatest one 
-    def getCardIndx(self, indxs, stock_vol, rival):
-        if self.table.vol() > 0 and not self.status == Status.DEFENDING:
-            return indxs[-1]
-        return indxs[0]
+#     # if no cards on table I throw least by weight card,
+#     # else I throw greatest one 
+#     def getCardIndx(self, indxs, stock_vol, rival):
+#         if self.table.vol() > 0 and not self.status == Status.DEFENDING:
+#             return indxs[-1]
+#         return indxs[0]
 
 
 AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]

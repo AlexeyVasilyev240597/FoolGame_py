@@ -25,21 +25,42 @@ class GameStage(IntEnum):
 
 ## CARDS TRANSFERING FUNCTIONS
 
+# if stock doesn't have enough cards then everyone will get equal amount
+def howManyToComplete(context: Context):
+    stock_vol = context.stock.vol
+    # players volume
+    actv_vol = context.players.actv.vol
+    pssv_vol = context.players.pssv.vol
+    # need to add
+    actv_add = 0
+    pssv_add = 0
+    while stock_vol > 0 and (actv_vol < CARDS_KIT or pssv_vol < CARDS_KIT):
+        if actv_vol < pssv_vol:
+            actv_add += 1
+            actv_vol += 1
+        else:
+            pssv_add += 1
+            pssv_vol += 1
+        stock_vol -= 1
+    return actv_add, pssv_add
+
 
 # now in first game first move is given to first player (by order),
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
 def deal(context: Context):
-    context.deck.shuffle()
-    trump = context.stock.setTrump()
-    context.players.setNewGameParams(trump, context.players.fool_id)
+    # TODO: uncommnet this line - just for debugging comment
+    # context.deck.shuffle()
     context.deck.shift(context.players.actv, CARDS_KIT)
     context.deck.shift(context.players.pssv, CARDS_KIT)
+    context.deck.shift(context.stock)
+    trump = context.stock.setTrump()
+    context.players.setNewGameParams(trump, context.players.fool_id)
 
 
 # TODO: describe according to the rules
 def complete(context: Context):
-    actv_add, pssv_add = context.players.howManyToComplete(context.stock.vol)
+    actv_add, pssv_add = howManyToComplete(context)
     # firstly cards are adding to passive player
     context.deck.shift(context.players.pssv, pssv_add)
     # then to active one
@@ -65,7 +86,7 @@ def collect(context: Context):
 def doesCardFit(card: Card, context: Context) -> bool:
     status = context.players.actv.status
     if (status == Status.ATTACKER and
-        context.table.vol == 0):
+        context.table.vol() == 0):
         return True
     if (status == Status.ATTACKER or status == Status.ADDING):
         return context.table.hasRank(card.rank)
@@ -97,7 +118,7 @@ def isMoveCorrect(move, context: Context) -> bool:
     if 'card' in move:
         card = move.get('card')
         return (doesCardFit(card, context) and 
-                canCardBeThrown(card, context))
+                canCardBeThrown(context))
     if 'word' in move:
         word = move.get('word')
         return not (word == Word.BEATEN and

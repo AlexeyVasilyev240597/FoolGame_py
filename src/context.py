@@ -1,8 +1,8 @@
 from abc import ABC
-from copy import copy
+from copy import deepcopy
 
 from elems  import Deck, Stock, Table
-from player import Player, Players
+from player import Players
 
 class Context(ABC):
     def __init__(self,
@@ -16,7 +16,7 @@ class Context(ABC):
         self.deck    = deck
 
     def getPartialCopy(self, player_viewer_id: int):
-        new_context = copy(self)
+        new_context = deepcopy(self)
         # NOTE: valid for game with two players,
         #       if > 2 players:
         #           rivals_ids = list(range(NUM_OF_PLAYERS))

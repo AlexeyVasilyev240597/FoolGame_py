@@ -6,14 +6,14 @@ from card import Rank, Suit, Card
 
 class Pile(ABC):
     def __init__(self):
-        self.__cards = []
+        self._cards = []
     
     def addCard(self, card: Card) -> None:
-        self.__cards.append(card)
+        self._cards.append(card)
         
     def getCard(self, index:int = 0) -> Card:
-        if self.vol() > 0:
-            return self.__cards.pop(index)
+        if self.vol > 0:
+            return self._cards.pop(index)
         else:
             return None
 
@@ -26,11 +26,11 @@ class Pile(ABC):
             dest.addCard(self.getCard())
 
     def hideCards(self) -> None:
-        self.__cards = [None]*self.vol
+        self._cards = [None]*self.vol
 
     @property
     def vol(self):
-        return len(self.__cards)
+        return len(self._cards)
 
 
 class Deck(Pile):
@@ -42,7 +42,7 @@ class Deck(Pile):
                 self.addCard(c)
 
     def shuffle(self):
-        random.shuffle(self.__cards)
+        random.shuffle(self._cards)
             
 
 class Stock(Pile):
@@ -52,7 +52,7 @@ class Stock(Pile):
         self.__last = None
     
     def setTrump(self) -> Suit:
-        if self.vol() > 0:
+        if self.vol > 0:
             first_card = self.getCard()
             self.__trump = first_card.suit
             # put first_card to the bottom
@@ -63,12 +63,12 @@ class Stock(Pile):
     def hideCards(self) -> None:
         last = self.last
         super().hideCards()
-        self.__cards[-1] = last
+        self._cards[-1] = last
     
     # non-empty Stock can show only last card
     @property
     def last(self) -> Card:
-        if self.vol() > 0:
+        if self.vol > 0:
             return self.__last
         else:
             return None
@@ -80,31 +80,31 @@ class Stock(Pile):
 
 class Table(Pile):
     def __init__(self):
-        self.__cards = {'up': [], 'down': []}
+        self._cards = {'up': [], 'down': []}
 
     def addCard(self, card: Card, atop: bool):
         if atop:
-            self.__cards['up'].append(card)
+            self._cards['up'].append(card)
         else:
-            self.__cards['down'].append(card)
+            self._cards['down'].append(card)
      
     def shift(self, pile):
-        self.__cards = self.__cards['up'] + self.__cards['down']
+        self._cards = self._cards['up'] + self._cards['down']
         super().shift(self, pile)
-        self.__cards = {'up': [], 'down': []}
+        self._cards = {'up': [], 'down': []}
     
     # by default: sum of volumes of down and up piles
     def vol(self, key = None):
         if key == None:
-            return len(self.__cards['up'] + self.__cards['down'])
+            return len(self._cards['up'] + self._cards['down'])
         elif key == 'down' or key == 'up':
-            return len(self.__cards[key])
+            return len(self._cards[key])
         else:
             return None            
     
     def hasRank(self, r: Rank):
-        for layer in self.__cards:
-            for card in self.__cards[layer]:
+        for layer in self._cards:
+            for card in self._cards[layer]:
                 if card.rank == r:
                     return True
         else:
@@ -112,7 +112,7 @@ class Table(Pile):
 
     def showLastDown(self) -> Card:
         if self.vol() > 0:
-            return self.__cards['down'][-1]
+            return self._cards['down'][-1]
         else:
             return None
     
@@ -121,4 +121,4 @@ class Table(Pile):
     
     @property
     def cards(self):
-        return copy(self.__cards)
+        return copy(self._cards)

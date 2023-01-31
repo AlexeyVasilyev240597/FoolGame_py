@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum, Flag
+from enum import IntEnum, Enum
 
 class Rank(IntEnum):
     SIX   = 6
@@ -22,7 +22,7 @@ DECK_VOLUME = len(Rank)*len(Suit)
 
 
 class Card:        
-    def __init__(self, suit, rank):        
+    def __init__(self, suit: Suit, rank: Rank):        
         self.suit = suit
         self.rank = rank
 
