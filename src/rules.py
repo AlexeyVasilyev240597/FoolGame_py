@@ -62,9 +62,9 @@ def deal(context: Context):
 def complete(context: Context):
     actv_add, pssv_add = howManyToComplete(context)
     # firstly cards are adding to passive player
-    context.deck.shift(context.players.pssv, pssv_add)
+    context.stock.shift(context.players.pssv, pssv_add)
     # then to active one
-    context.deck.shift(context.players.actv, actv_add)
+    context.stock.shift(context.players.actv, actv_add)
 
 
 # collecting cards from all elements back to deck,
@@ -86,7 +86,7 @@ def collect(context: Context):
 def doesCardFit(card: Card, context: Context) -> bool:
     status = context.players.actv.status
     if (status == Status.ATTACKER and
-        context.table.vol() == 0):
+        context.table.vol == 0):
         return True
     if (status == Status.ATTACKER or status == Status.ADDING):
         return context.table.hasRank(card.rank)
@@ -108,8 +108,8 @@ def canCardBeThrown(context: Context) -> bool:
     # number of taking player's cards => ADDING should say TAKE_AWAY
     if ((context.players.actv.status == Status.ATTACKER or 
          context.players.actv.status == Status.ADDING) and 
-        ((context.table.vol('down') - context.table.vol('up')) == context.players.pssv.vol or 
-          context.table.vol('down') == CARDS_KIT)):
+        ((context.table.volOn('down') - context.table.volOn('up')) == context.players.pssv.vol or 
+          context.table.volOn('down') == CARDS_KIT)):
             return False
     return True
 
@@ -142,7 +142,7 @@ def reactToWord(word: Word, context: Context) -> None:
     if word == Word.TAKE_AWAY:
         context.table.shift(context.players.pssv)
         # context.players.actv.status  = Status.ATTACKER
-        context.players.pssv.status = Status.DEFENDING
+        # context.players.pssv.status = Status.DEFENDING
         complete(context)
     return gameIsOver(context)
 

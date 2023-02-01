@@ -29,7 +29,7 @@ class Pile(ABC):
         self._cards = [None]*self.vol
 
     @property
-    def vol(self):
+    def vol(self) -> int:
         return len(self._cards)
 
 
@@ -63,7 +63,8 @@ class Stock(Pile):
     def hideCards(self) -> None:
         last = self.last
         super().hideCards()
-        self._cards[-1] = last
+        if last:
+            self._cards[-1] = last
     
     # non-empty Stock can show only last card
     @property
@@ -88,17 +89,24 @@ class Table(Pile):
         else:
             self._cards['down'].append(card)
      
-    def shift(self, pile):
-        self._cards = self._cards['up'] + self._cards['down']
-        super().shift(self, pile)
-        self._cards = {'up': [], 'down': []}
+    def shift(self, dest):
+        for layer in self._cards:
+            for _ in range(self.volOn(layer)):
+                dest.addCard(self._cards[layer].pop())
+     
+    # def shift(self, pile):
+    #     self._cards = self._cards['up'] + self._cards['down']
+    #     super().shift(pile)
+    #     self._cards = {'up': [], 'down': []}
+    
+    @property
+    def vol(self) -> int:
+        return len(self._cards['up'] + self._cards['down'])
     
     # by default: sum of volumes of down and up piles
-    def vol(self, key = None):
-        if key == None:
-            return len(self._cards['up'] + self._cards['down'])
-        elif key == 'down' or key == 'up':
-            return len(self._cards[key])
+    def volOn(self, layer) -> int:
+        if layer == 'down' or layer == 'up':
+            return len(self._cards[layer])
         else:
             return None            
     
@@ -111,7 +119,7 @@ class Table(Pile):
             return False
 
     def showLastDown(self) -> Card:
-        if self.vol() > 0:
+        if self.vol > 0:
             return self._cards['down'][-1]
         else:
             return None

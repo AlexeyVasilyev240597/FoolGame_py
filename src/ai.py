@@ -52,7 +52,7 @@ class Sergey_C(ArtInt):
     def getCard(self, context: Context) -> Card:
         fit_cards = self.getFitCards(context)
         if fit_cards:
-            if context.table.vol() > 0 and not self.status == Status.DEFENDING:
+            if context.table.vol > 0 and not self.status == Status.DEFENDING:
                 return fit_cards[-1]
             return fit_cards[0]
         else:

@@ -27,9 +27,10 @@ class Player(Pile):
                 
         # game params
         self.trump = None
-        self.__get_weight = lambda card : ((card.suit == self.trump)*
-                                         Rank.ACE.value +
-                                         card.rank.value)
+        # self.__get_weight = lambda card : ((card.suit == self.trump)*
+        #                                   Rank.ACE.value +
+        #                                   card.rank.value)
+        self.__get_weight = lambda card : card.rank.value
         self.losing_counter = 0
         
     # @property
@@ -38,7 +39,9 @@ class Player(Pile):
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)
-        self._cards.sort(key = self.__get_weight)
+        # in case if card is None
+        if card:
+            self._cards.sort(key = self.__get_weight)
     
     # TODO: add decorators:
     #   - sort cards
@@ -53,14 +56,13 @@ class Player(Pile):
         
     def sayWord(self):
         if self.status == Status.ATTACKER:
-            word = Word.BEATEN
             self.status = Status.DEFENDING
+            return Word.BEATEN
         if self.status == Status.DEFENDING:
-            word = Word.TAKE
+            return Word.TAKE
         if self.status == Status.ADDING:
-            word = Word.TAKE_AWAY
             self.status = Status.ATTACKER
-        return word
+            return Word.TAKE_AWAY
         
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
@@ -75,7 +77,12 @@ class Player(Pile):
             move = {'word': word}
         else:
             move = {'card': card}
+            self._cards.remove(card)
         return move
+    
+    @property
+    def cards(self):
+        return self._cards
 
 
 # structure for working with two players
