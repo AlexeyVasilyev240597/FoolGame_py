@@ -93,12 +93,7 @@ class Table(Pile):
         for layer in self._cards:
             for _ in range(self.volOn(layer)):
                 dest.addCard(self._cards[layer].pop())
-     
-    # def shift(self, pile):
-    #     self._cards = self._cards['up'] + self._cards['down']
-    #     super().shift(pile)
-    #     self._cards = {'up': [], 'down': []}
-    
+        
     @property
     def vol(self) -> int:
         return len(self._cards['up'] + self._cards['down'])

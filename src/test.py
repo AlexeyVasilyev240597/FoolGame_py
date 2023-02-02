@@ -39,8 +39,8 @@
 from ai import Nikita_A, Sergey_C
 from fool import FoolGame
 
-pl_1 = Nikita_A()
-pl_2 = Sergey_C()
+pl_1 = Nikita_A(0)
+pl_2 = Sergey_C(1)
 
-game = FoolGame(pl_1, pl_2)
+game = FoolGame([pl_1, pl_2])
 game.playGameRound()

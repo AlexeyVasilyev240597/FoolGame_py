@@ -13,10 +13,9 @@ class GameStage(IntEnum):
     PLAYING   = 2
     GAME_OVER = 3
     
-# TODO:
-# class WrongMoveTypes(IntEnum):
+# TODO: class WrongMoveTypes(IntEnum):
 
-# TODO:
+# TODO: add
 # class PlayersEnum(IntEnum):
 #     NOBODY   = -1
 #     PLAYER_1 =  0
@@ -119,6 +118,7 @@ def isMoveCorrect(move, context: Context) -> bool:
         card = move.get('card')
         return (doesCardFit(card, context) and 
                 canCardBeThrown(context))
+    # also need to check if word corresponds to status of active player
     if 'word' in move:
         word = move.get('word')
         return not (word == Word.BEATEN and
@@ -132,7 +132,7 @@ def isMoveCorrect(move, context: Context) -> bool:
 def reactToWord(word: Word, context: Context) -> None:
     if word == Word.BEATEN:
         context.table.shift(context.deck)
-        # context.players.actv.status = Status.DEFENDING
+        context.players.actv.status = Status.DEFENDING
         context.players.pssv.status = Status.ATTACKER
         complete(context)
         context.players.swapRoles()
@@ -141,7 +141,8 @@ def reactToWord(word: Word, context: Context) -> None:
         context.players.swapRoles()
     if word == Word.TAKE_AWAY:
         context.table.shift(context.players.pssv)
-        # context.players.actv.status  = Status.ATTACKER
+        context.players.actv.status  = Status.ATTACKER
+        # status stays still the same
         # context.players.pssv.status = Status.DEFENDING
         complete(context)
     return gameIsOver(context)
@@ -151,7 +152,9 @@ def reactToWord(word: Word, context: Context) -> None:
 def reactToMove(move, context: Context) -> None:
     game_stage = GameStage.PLAYING
     if 'card' in move:
-        card = move.get('card')
+        # some module outside should check if the move is correct!
+        card_indx = context.players.actv.cards.index(move.get('card'))
+        card = context.players.actv.getCard(card_indx)
         atop = context.players.actv.status == Status.DEFENDING
         context.table.addCard(card, atop)
         if not context.players.actv.status == Status.ADDING:
@@ -174,7 +177,7 @@ def gameIsOver(context: Context) -> GameStage:
         return GameStage.PLAYING
 
 
-def whoIsFool(players: Players) -> int:
+def whoIsFool(players: Players):
     actv_vol    = players.actv.vol
     pssv_vol    = players.pssv.vol
     # DEAD HEAT
@@ -187,6 +190,8 @@ def whoIsFool(players: Players) -> int:
     else: # wrong call
         print('ERROR: wrong call of whoIsFool func!')
         return None
-    players.setFoolStatus(fool_id)
+    say = {'pl_id': fool_id, 
+           'move': {'word': players.setFoolStatus(fool_id)}}
+    return say
 
 

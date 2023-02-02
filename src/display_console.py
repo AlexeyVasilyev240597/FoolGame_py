@@ -1,5 +1,5 @@
 from elems import Stock, Table
-from player import Player, Word
+from player import Player
 from context import Context
 
 # def display_set(cards, align):
@@ -17,6 +17,14 @@ from context import Context
 #     def __init__(self, player_id):
 #         self.player_id = player_id
 
+def get_prefix(context: Context, pl_id: int):
+    if (pl_id == context.last_move['pl_id'] and
+        'word' in context.last_move['move']):
+        word = context.last_move['move']['word'].name
+        prefix = f'({word}!)'
+    else:
+        prefix = '(!)'
+    return prefix
 
 def display_set(cards):
     cards_repr = []
@@ -40,14 +48,10 @@ def display_stock(stock: Stock):
     return stock_repr
 
 
-def display_player(player: Player, is_acive: bool, word: Word):
+def display_player(player: Player, prefix: str):
     player_repr = ''
     player_repr += player.status.name[0:2]
-    if is_acive:
-        player_repr += '(!) '
-    else:
-        if word:
-            player_repr += f'({word.name}!) '
+    player_repr += prefix
     player_repr += display_set(player.cards)
     player_repr += '\n'
     return player_repr
@@ -61,19 +65,17 @@ def display_table(table: Table):
     return table_repr
 
 
-def display_field(context_vis: Context, move, moved_id):
-    if 'word' in move:
-        word = move.get('word')
-    else:
-        word = None
+def display_field(context_vis: Context):
     field = ''
     field += display_stock(context_vis.stock)
+    
     field += display_player(context_vis.players.getPlayerById(0), 
-                            context_vis.players.getIdByRole('actv') == 0,
-                            word if moved_id == 0 else None)
+                            get_prefix(context_vis, 0))
+    
     field += display_table(context_vis.table)
-    field += display_player(context_vis.players.getPlayerById(1), 
-                            context_vis.players.getIdByRole('actv') == 1,
-                            word if moved_id == 1 else None)
+    
+    field += display_player(context_vis.players.getPlayerById(1),
+                            get_prefix(context_vis, 1))
+    
     field += '\n'
     print(field)

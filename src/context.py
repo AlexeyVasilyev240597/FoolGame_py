@@ -14,6 +14,8 @@ class Context(ABC):
         self.table   = table
         self.players = players
         self.deck    = deck
+        
+        self.last_move = {'pl_id': -1, 'move': None}
 
     def getPartialCopy(self, player_viewer_id: int):
         new_context = deepcopy(self)

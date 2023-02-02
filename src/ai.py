@@ -1,26 +1,39 @@
 from abc import abstractmethod
 
 from card  import Rank, Card
-from player import Player, Status
+from player import PlayerSbj, Status
 from context import Context
 from rules  import doesCardFit, canCardBeThrown
 
 # Artificial Intelligence 
-class ArtInt(Player):
-    def __init__(self):
+class ArtInt(PlayerSbj):
+    def __init__(self, id: int):
         name = str(self.__class__.__name__)
-        Player.__init__(self, name)
+        super().__init__(id, name)
     
     def getFitCards(self, context: Context):
         fit_cards = []
-        for card in self._cards:
+        for card in context.players.actv.cards:
             if doesCardFit(card, context) and canCardBeThrown(context):
                 fit_cards.append(card)
         return fit_cards
     
+    def move(self, context):
+        move = {}
+        card = self.chooseCard(context)
+        if card is None:
+            word = context.players.actv.sayWord()
+            move = {'word': word}
+        else:
+            move = {'card': card}
+            
+        return move
+
     @abstractmethod
-    def getCard(self, context: Context) -> Card:
+    def chooseCard(self, context: Context) -> Card:
         pass
+    
+    
     
     # def getWeightOfSet(self, cards):        
     #     sw = 0
@@ -39,7 +52,7 @@ class ArtInt(Player):
     #     return mw
 
 class Nikita_A(ArtInt): 
-    def getCard(self, context: Context) -> Card:
+    def chooseCard(self, context: Context) -> Card:
         fit_cards = self.getFitCards(context)
         if fit_cards:
             return fit_cards[0]
@@ -49,25 +62,15 @@ class Nikita_A(ArtInt):
 class Sergey_C(ArtInt):
     # if no cards on table I throw least by weight card,
     # else I throw greatest one 
-    def getCard(self, context: Context) -> Card:
+    def chooseCard(self, context: Context) -> Card:
         fit_cards = self.getFitCards(context)
         if fit_cards:
-            if context.table.vol > 0 and not self.status == Status.DEFENDING:
+            if (context.table.vol > 0 and 
+                not context.players.actv.status == Status.DEFENDING):
                 return fit_cards[-1]
             return fit_cards[0]
         else:
             return None
-
-# class Nikita_A(ArtInt): 
-#     def makeDecision(self, indxs, stock_vol, rival):
-#         if len(indxs) > 0:
-#             return True            
-#         else:
-#             return False
-        
-#     def getCardIndx(self, indxs, stock_vol, rival):
-#         return indxs[0]
-        
        
 class Alexander_P(ArtInt):
     def makeDecision(self, indxs, stock_vol, rival):
@@ -80,7 +83,7 @@ class Alexander_P(ArtInt):
                 return True
         return False
     
-    def getCardIndx(self, indxs, stock_vol, rival):
+    def chooseCard(self, indxs, stock_vol, rival):
         return indxs[0]
 
 
@@ -96,7 +99,7 @@ class George_P(ArtInt):
                 return True   
         return False
         
-    def getCardIndx(self, indxs, stock_vol, rival):
+    def chooseCard(self, indxs, stock_vol, rival):
         return indxs[0]
 
 
@@ -114,7 +117,7 @@ class Gregory_P(ArtInt):
                 return True   
         return False
      
-    def getCardIndx(self, indxs,  stock_vol, rival):
+    def chooseCard(self, indxs,  stock_vol, rival):
         return indxs[0]
 
 # class Sergey_C(ArtInt):
