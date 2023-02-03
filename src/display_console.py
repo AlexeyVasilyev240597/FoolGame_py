@@ -18,12 +18,14 @@ from context import Context
 #         self.player_id = player_id
 
 def get_prefix(context: Context, pl_id: int):
+    prefix = ''
     if (pl_id == context.last_move['pl_id'] and
         'word' in context.last_move['move']):
         word = context.last_move['move']['word'].name
-        prefix = f'({word}!)'
+        prefix = f'({word})'
     else:
-        prefix = '(!)'
+        if pl_id == context.players.getIdByRole('actv'):
+            prefix = '(!)'
     return prefix
 
 def display_set(cards):

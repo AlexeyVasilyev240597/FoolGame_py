@@ -1,28 +1,32 @@
 from elems  import Deck, Stock, Table
-from player import Player, Players
+from player import Player, Players, PlayersSbjs
 from context import Context
 # from ai     import AIGenerator
 from rules import GameStage, deal, isMoveCorrect, collect, whoIsFool, reactToMove
 from display_console import display_field
 
 class FoolGame:
-    def __init__(self, pl_sbj) -> None:
+    def __init__(self, pl_sbj: PlayersSbjs) -> None:
         self.pl_sbj = pl_sbj
-        players = Players(Player(pl_sbj[0].id, pl_sbj[0].name), 
-                          Player(pl_sbj[1].id, pl_sbj[1].name))
-        self.context = Context(Stock(), Table(), players, Deck())
+        self.context = Context(Stock(), 
+                               Table(), 
+                               Players(Player(pl_sbj.getNameByID(0)),
+                                       Player(pl_sbj.getNameByID(1))), 
+                               Deck())
         # TODO: replace line by setting this value by argument of __init__
         self.user_id = 0
 
-    def update_field(self):
+    def update_field(self, last_move):
+        self.context.last_move = last_move
+        self.pl_sbj.setActvID(self.context.players.getIdByRole('actv'))
         context_u = self.context.getPartialCopy(self.user_id)
         display_field(context_u)
 
     def playGameRound(self):
-        
-        game_stage = GameStage.START
         deal(self.context)
-        self.update_field()
+        
+        last_move = {'pl_id': None, 'move': None}
+        self.update_field(last_move)
         
         game_stage = GameStage.PLAYING
         while game_stage == GameStage.PLAYING:
@@ -32,17 +36,16 @@ class FoolGame:
             # notify player that his/her move is wrong (instead 'pass');
             # and break loop after several (3-6) trying
             while not isMoveCorrect(move := 
-                                    self.pl_sbj[actv_id].move(context_p), 
+                                    self.pl_sbj.actv.move(context_p), 
                                     context_p):
                 pass        
-            self.context.last_move['pl_id'] = actv_id
-            self.context.last_move['move'] = move
+            last_move['pl_id'] = actv_id
             game_stage = reactToMove(move, self.context)
-            self.update_field()
+            last_move['move'] = move
+            self.update_field(last_move)
             
         say = whoIsFool(self.context.players)
-        self.context.last_move = say
-        self.update_field()
+        self.update_field(say)
         
         collect(self.context)
 

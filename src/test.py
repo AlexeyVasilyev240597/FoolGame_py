@@ -36,11 +36,49 @@
 #     pass
 # print(f'yes, {n} is even')
 
+# from enum import Enum
+
+# class Rank(Enum):
+#     SIX   = '6'
+#     SEVEN = '7'
+#     EIGHT = '8'
+#     NINE  = '9'
+#     TEN   = '10'
+#     JACK  = 'J'
+#     QUEEN = 'Q'
+#     KING  = 'K'
+#     ACE   = 'A'
+
+#     def int(self):
+#         if self.value == 'J':
+#             return 11
+#         elif self.value == 'Q':
+#             return 12
+#         elif self.value == 'K':
+#             return 13
+#         elif self.value == 'A':
+#             return 14
+#         else:
+#             return int(self.value)
+
+
+# r1 = Rank(Rank.JACK)
+# r2 = Rank('6')
+# print(r1.int()+r2.int()+Rank.ACE.int())
+
+
+
+
 from ai import Nikita_A, Sergey_C
+from human_console import HumanConsole
+from player import PlayersSbjs
 from fool import FoolGame
 
-pl_1 = Nikita_A(0)
-pl_2 = Sergey_C(1)
+pl_1 = HumanConsole()
+pl_2 = Sergey_C()
+# pl_2 = Nikita_A()
 
-game = FoolGame([pl_1, pl_2])
+pls = PlayersSbjs(pl_1, pl_2)
+
+game = FoolGame(pls)
 game.playGameRound()

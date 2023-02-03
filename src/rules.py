@@ -49,7 +49,7 @@ def howManyToComplete(context: Context):
 #     and to winner otherwise
 def deal(context: Context):
     # TODO: uncommnet this line - just for debugging comment
-    # context.deck.shuffle()
+    context.deck.shuffle()
     context.deck.shift(context.players.actv, CARDS_KIT)
     context.deck.shift(context.players.pssv, CARDS_KIT)
     context.deck.shift(context.stock)
@@ -91,7 +91,7 @@ def doesCardFit(card: Card, context: Context) -> bool:
         return context.table.hasRank(card.rank)
     if status == Status.DEFENDING:
         last = context.table.showLastDown()
-        return (last.suit == card.suit and last.rank < card.rank or 
+        return (last.suit == card.suit and last.rank.int() < card.rank.int() or 
                 not last.suit == card.suit and card.suit == context.stock.trump)
 
 # PARAM IN:
@@ -118,12 +118,17 @@ def isMoveCorrect(move, context: Context) -> bool:
         card = move.get('card')
         return (doesCardFit(card, context) and 
                 canCardBeThrown(context))
-    # also need to check if word corresponds to status of active player
     if 'word' in move:
         word = move.get('word')
+        status = context.players.actv.status
+        if (word == Word.BEATEN and not status == Status.ATTACKER):
+            return False
+        if (word == Word.TAKE and not status == Status.DEFENDING):
+            return False
+        if (word == Word.TAKE_AWAY and not status == Status.ADDING):
+            return False
         return not (word == Word.BEATEN and
-                    context.table.vol == 0 and 
-                    context.players.actv.status == Status.ATTACKER)
+                    context.table.vol == 0 and status == Status.ATTACKER)
     return False
 
 

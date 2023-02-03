@@ -7,9 +7,9 @@ from rules  import doesCardFit, canCardBeThrown
 
 # Artificial Intelligence 
 class ArtInt(PlayerSbj):
-    def __init__(self, id: int):
+    def __init__(self):
         name = str(self.__class__.__name__)
-        super().__init__(id, name)
+        super().__init__(name)
     
     def getFitCards(self, context: Context):
         fit_cards = []
@@ -141,3 +141,6 @@ def AIGenerator(ai_name):
         ai_o = ai_c()
         if ai_name == ai_o.name:
             return ai_o
+    else:
+        print(f'WARNING: no such AI with name {ai_name}')
+        return None
