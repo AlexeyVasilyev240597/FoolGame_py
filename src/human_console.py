@@ -1,5 +1,7 @@
 from card import Rank, Suit, Card
-from player import Word, PlayerSbj
+from player import Word
+from context import Context
+from player_sbj import PlayerSbj
 
 class HumanConsole(PlayerSbj):
     def __init__(self) -> None:
@@ -10,8 +12,8 @@ class HumanConsole(PlayerSbj):
     def str2card(card_str: str) -> Card:
         card_str = card_str.split('-')
         if len(card_str) == 2:
-            suit = card_str[0] 
-            rank = card_str[1]
+            rank = card_str[0]
+            suit = card_str[1]
         else:
             return None
         if suit in [s.value for s in Suit]:
@@ -36,13 +38,18 @@ class HumanConsole(PlayerSbj):
         else:
             return None
     
-    def move(self, context):
+    def chooseCard(self, context):
+        pass
+    
+    def move(self, context: Context):
         print(f'{self.name}, your move: ')
+        my_id = context.players.getIdByRole('actv')
+        move = {'pl_id': my_id}
         move_str = input()
         if card := HumanConsole.str2card(move_str):
-            return {'card': card}
+            move['move'] = {'card': card}
         elif word := HumanConsole.str2word(move_str):
-            return {'word': word}
+            move['move'] = {'word': word}
         else:
-            return None
-        
+            move['move'] = {}
+        return move    

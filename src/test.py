@@ -71,12 +71,12 @@
 
 from ai import Nikita_A, Sergey_C
 from human_console import HumanConsole
-from player import PlayersSbjs
+from player_sbj import PlayersSbjs
 from fool import FoolGame
 
 pl_1 = HumanConsole()
+# pl_1 = Nikita_A()
 pl_2 = Sergey_C()
-# pl_2 = Nikita_A()
 
 pls = PlayersSbjs(pl_1, pl_2)
 

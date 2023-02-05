@@ -1,9 +1,10 @@
 from abc import abstractmethod
 
 from card  import Rank, Card
-from player import PlayerSbj, Status
+from player import Status
+from player_sbj import PlayerSbj
 from context import Context
-from rules  import doesCardFit, canCardBeThrown
+from rules  import doesCardFit, canCardBeThrown, MoveType
 
 # Artificial Intelligence 
 class ArtInt(PlayerSbj):
@@ -14,21 +15,11 @@ class ArtInt(PlayerSbj):
     def getFitCards(self, context: Context):
         fit_cards = []
         for card in context.players.actv.cards:
-            if doesCardFit(card, context) and canCardBeThrown(context):
+            if (doesCardFit(card, context) == MoveType.CORRECT_MOVE and 
+                canCardBeThrown(context) == MoveType.CORRECT_MOVE):
                 fit_cards.append(card)
         return fit_cards
     
-    def move(self, context):
-        move = {}
-        card = self.chooseCard(context)
-        if card is None:
-            word = context.players.actv.sayWord()
-            move = {'word': word}
-        else:
-            move = {'card': card}
-            
-        return move
-
     @abstractmethod
     def chooseCard(self, context: Context) -> Card:
         pass

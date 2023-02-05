@@ -13,7 +13,24 @@ class GameStage(IntEnum):
     PLAYING   = 2
     GAME_OVER = 3
     
-# TODO: class WrongMoveTypes(IntEnum):
+class MoveType(IntEnum):
+    CORRECT_MOVE      = 0
+    # the move is neither a card, nor a word
+    UNKNOWN_TYPE      = 1
+    # player threw a card that is not in his hand
+    SHARPIE           = 2
+    # ATTACKER and ADDING shall trow card with ranks which already are on the table
+    NO_SUCH_RANK      = 3
+    # DEFENDING shall trow card with more weight than last thrown one is
+    LIGHTER_THAN_LAST = 4
+    # there is no more space on the table (6 pair or rival wouldn't be able to beat that much)
+    NO_MORE_SPACE     = 5
+    # the word doesn't correspond the status of player
+    WRONG_WORD        = 6
+    # it was expected a card instead of a word
+    CARD_EXPECTED     = 7
+    
+    
 
 # TODO: add
 # class PlayersEnum(IntEnum):
@@ -82,54 +99,71 @@ def collect(context: Context):
 #   game context
 # PARAM OUT:
 #   answer: is chosen card correct
-def doesCardFit(card: Card, context: Context) -> bool:
+def doesCardFit(card: Card, context: Context) -> MoveType:
     status = context.players.actv.status
-    if (status == Status.ATTACKER and
-        context.table.vol == 0):
-        return True
-    if (status == Status.ATTACKER or status == Status.ADDING):
-        return context.table.hasRank(card.rank)
+    if status == Status.ATTACKER and context.table.vol == 0:
+        return MoveType.CORRECT_MOVE
+    if status == Status.ATTACKER or status == Status.ADDING:
+        if not context.table.hasRank(card.rank):
+            return MoveType.NO_SUCH_RANK
     if status == Status.DEFENDING:
         last = context.table.showLastDown()
-        return (last.suit == card.suit and last.rank.int() < card.rank.int() or 
-                not last.suit == card.suit and card.suit == context.stock.trump)
+        trump = context.stock.trump
+        if not (last.suit == card.suit and last.rank.int() < card.rank.int() or 
+                not last.suit == trump and card.suit == trump):
+            return MoveType.LIGHTER_THAN_LAST
+    return MoveType.CORRECT_MOVE
 
 # PARAM IN:
-#   status of actv player (which threw card)
-#   table is object with actual state of table
-#   rival_vol is number of cards in rival's hand
+#   game context
 # PARAM OUT:
-#   answer: can card be thrown to table
-def canCardBeThrown(context: Context) -> bool:
+# is there enough space on the table?
+# MoveType.CORRECT_MOVE if so
+# MoveType.NO_MORE_SPACE otherwise
+def canCardBeThrown(context: Context) -> MoveType:
     # 6*2 = 12 cards on table => ATTACKER should say BEATEN
     # or DEFENDING player do not have cards
     # number of cards added by ADDING player on table equals 
     # number of taking player's cards => ADDING should say TAKE_AWAY
     if ((context.players.actv.status == Status.ATTACKER or 
          context.players.actv.status == Status.ADDING) and 
-        ((context.table.volOn('down') - context.table.volOn('up')) == context.players.pssv.vol or 
+        ((context.table.volOn('down') - context.table.volOn('up')) == 
+          context.players.pssv.vol or 
           context.table.volOn('down') == CARDS_KIT)):
-            return False
-    return True
+            return MoveType.NO_MORE_SPACE
+    return MoveType.CORRECT_MOVE
 
 
-def isMoveCorrect(move, context: Context) -> bool:
+def isMoveCorrect(move, context: Context) -> MoveType:
     if 'card' in move:
         card = move.get('card')
-        return (doesCardFit(card, context) and 
-                canCardBeThrown(context))
+        if not isinstance(card, Card):
+            return MoveType.UNKNOWN_TYPE
+        if not card in context.players.actv.cards:
+            return MoveType.SHARPIE
+        if not (move_type := doesCardFit(card, context)) == MoveType.CORRECT_MOVE:
+            return move_type
+        if not (move_type := canCardBeThrown(context)) == MoveType.CORRECT_MOVE:
+            return move_type
+        return MoveType.CORRECT_MOVE
+            
     if 'word' in move:
         word = move.get('word')
+        if not isinstance(word, Word):
+            return MoveType.UNKNOWN_TYPE
         status = context.players.actv.status
         if (word == Word.BEATEN and not status == Status.ATTACKER):
-            return False
+            return MoveType.WRONG_WORD
         if (word == Word.TAKE and not status == Status.DEFENDING):
-            return False
+            return MoveType.WRONG_WORD
         if (word == Word.TAKE_AWAY and not status == Status.ADDING):
-            return False
-        return not (word == Word.BEATEN and
-                    context.table.vol == 0 and status == Status.ATTACKER)
-    return False
+            return MoveType.WRONG_WORD
+        if (word == Word.BEATEN and
+            context.table.vol == 0 and status == Status.ATTACKER):
+            return MoveType.CARD_EXPECTED
+        return MoveType.CORRECT_MOVE
+    return MoveType.UNKNOWN_TYPE
+
 
 
 ## UPDATING GAME CONTEXT AFTER PLAYER'S MOVE
@@ -195,8 +229,7 @@ def whoIsFool(players: Players):
     else: # wrong call
         print('ERROR: wrong call of whoIsFool func!')
         return None
-    say = {'pl_id': fool_id, 
-           'move': {'word': players.setFoolStatus(fool_id)}}
-    return say
+    players.setFoolStatus(fool_id)
+    return fool_id
 
 

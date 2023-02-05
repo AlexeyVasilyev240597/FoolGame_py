@@ -42,4 +42,5 @@ class Card:
         return self.suit == __o.suit and self.rank == __o.rank
 
     def __repr__(self):
-        return f'{self.suit.value}-{self.rank.value:<2}'
+        # return f'{self.suit.value}-{self.rank.value:<2}'
+        return f'{self.rank.value:>2}-{self.suit.value}'

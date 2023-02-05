@@ -17,11 +17,11 @@ from context import Context
 #     def __init__(self, player_id):
 #         self.player_id = player_id
 
-def get_prefix(context: Context, pl_id: int):
+def get_prefix(context: Context, pl_id: int, last_move: dict):
     prefix = ''
-    if (pl_id == context.last_move['pl_id'] and
-        'word' in context.last_move['move']):
-        word = context.last_move['move']['word'].name
+    if (pl_id == last_move['pl_id'] and
+        'word' in last_move['move']):
+        word = last_move['move']['word'].name
         prefix = f'({word})'
     else:
         if pl_id == context.players.getIdByRole('actv'):
@@ -67,17 +67,17 @@ def display_table(table: Table):
     return table_repr
 
 
-def display_field(context_vis: Context):
+def display_field(context_vis: Context, last_move: dict):
     field = ''
     field += display_stock(context_vis.stock)
     
     field += display_player(context_vis.players.getPlayerById(0), 
-                            get_prefix(context_vis, 0))
+                            get_prefix(context_vis, 0, last_move))
     
     field += display_table(context_vis.table)
     
     field += display_player(context_vis.players.getPlayerById(1),
-                            get_prefix(context_vis, 1))
+                            get_prefix(context_vis, 1, last_move))
     
     field += '\n'
     print(field)
