@@ -69,10 +69,10 @@
 
 
 
-from ai import Nikita_A, Sergey_C
-from human_console import HumanConsole
-from player_sbj import PlayersSbjs
-from fool import FoolGame
+from ..subjects.ai import Nikita_A, Sergey_C
+from ..subjects.human_console import HumanConsole
+from ..subjects.player_sbj import PlayersSbjs
+from ..fool import FoolGame
 
 pl_1 = HumanConsole()
 # pl_1 = Nikita_A()

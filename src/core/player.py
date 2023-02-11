@@ -1,8 +1,8 @@
 from abc  import ABC
 from enum import IntEnum
 
-from card    import Rank, Suit, Card
-from elems   import Pile
+from .card    import Rank, Suit, Card
+from .elems   import Pile
 
 
 class Status(IntEnum):

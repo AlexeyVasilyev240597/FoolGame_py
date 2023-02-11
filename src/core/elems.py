@@ -2,7 +2,7 @@ from abc import ABC
 from copy import copy
 import random
 
-from card import Rank, Suit, Card
+from .card import Rank, Suit, Card
 
 class Pile(ABC):
     def __init__(self):

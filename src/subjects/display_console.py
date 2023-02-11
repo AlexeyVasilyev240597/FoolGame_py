@@ -1,6 +1,6 @@
-from elems import Stock, Table
-from player import Player
-from context import Context
+from ..core.elems import Stock, Table
+from ..core.player import Player
+from ..core.context import Context
 
 # def display_set(cards, align):
 #     cards_repr = '['

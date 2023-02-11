@@ -1,12 +1,10 @@
-from elems  import Deck, Stock, Table
-from player import Player, Players
-from player_sbj import PlayersSbjs
-from context import Context
-from rules import (GameStage, deal, collect, isMoveCorrect,
-                   whoIsFool, reactToMove, MoveType, CARDS_KIT)
-from display_console import display_field
-
-# MAX_TRIES_NUM = CARDS_KIT
+from .core.elems  import Deck, Stock, Table
+from .core.player import Player, Players
+from .subjects.player_sbj import PlayersSbjs
+from .core.context import Context
+from .core.rules import (GameStage, deal, collect, isMoveCorrect,
+                   whoIsFool, reactToMove, MoveType)
+from .subjects.display_console import display_field
 
 class FoolGame:
     def __init__(self, pl_sbj: PlayersSbjs) -> None:

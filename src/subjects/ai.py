@@ -1,10 +1,10 @@
 from abc import abstractmethod
 
-from card  import Rank, Card
-from player import Status
-from player_sbj import PlayerSbj
-from context import Context
-from rules  import doesCardFit, canCardBeThrown, MoveType
+from ..core.card  import Rank, Card
+from ..core.player import Status
+from .player_sbj import PlayerSbj
+from ..core.context import Context
+from ..core.rules  import doesCardFit, canCardBeThrown, MoveType
 
 # Artificial Intelligence 
 class ArtInt(PlayerSbj):

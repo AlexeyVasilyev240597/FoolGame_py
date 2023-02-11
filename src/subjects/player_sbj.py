@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from card import Card
-from player import Status, Word
-from context import Context
+from ..core.card import Card
+from ..core.player import Status, Word
+from ..core.context import Context
 
 
 class PlayerSbj(ABC):
