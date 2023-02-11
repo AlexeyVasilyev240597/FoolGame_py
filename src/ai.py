@@ -56,7 +56,7 @@ class Sergey_C(ArtInt):
     def chooseCard(self, context: Context) -> Card:
         fit_cards = self.getFitCards(context)
         if fit_cards:
-            if (context.table.vol > 0 and 
+            if (context.table.low.vol > 0 and 
                 not context.players.actv.status == Status.DEFENDING):
                 return fit_cards[-1]
             return fit_cards[0]
@@ -81,7 +81,7 @@ class Alexander_P(ArtInt):
 class George_P(ArtInt):
     def makeDecision(self, indxs, stock_vol, rival): 
         if len(indxs) > 0:
-            if (self.status == Status.ATTACKER and self.table.vol() > 0 or
+            if (self.status == Status.ATTACKER and self.table.low.vol > 0 or
                 self.status == Status.ADDING):
                 w = self.get_weight(self._showCard(indxs[0]))
                 if w <= Rank.TEN.value:
@@ -100,7 +100,7 @@ class Gregory_P(ArtInt):
             # if it is not 1st move in party and
             # it is not endspiel yet then 
             # I am weighting card
-            if self.table.vol() > 0 and stock_vol > 0:
+            if self.table.low.vol > 0 and stock_vol > 0:
                 w = self.get_weight(self._showCard(indxs[0]))
                 if w <= Rank.ACE.value:#Rank.TEN.value:
                     return True
@@ -110,20 +110,6 @@ class Gregory_P(ArtInt):
      
     def chooseCard(self, indxs,  stock_vol, rival):
         return indxs[0]
-
-# class Sergey_C(ArtInt):
-#     def makeDecision(self, indxs, stock_vol, rival): 
-#         if len(indxs) > 0:
-#             return True
-#         else:
-#             return False
-        
-#     # if no cards on table I throw least by weight card,
-#     # else I throw greatest one 
-#     def getCardIndx(self, indxs, stock_vol, rival):
-#         if self.table.vol() > 0 and not self.status == Status.DEFENDING:
-#             return indxs[-1]
-#         return indxs[0]
 
 
 AI_list = [Nikita_A, Alexander_P, George_P, Sergey_C, Gregory_P]

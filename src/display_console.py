@@ -61,8 +61,8 @@ def display_player(player: Player, prefix: str):
 
 def display_table(table: Table):
     table_repr = ''
-    table_repr += display_set(table.cards['down'])
-    table_repr += display_set(table.cards['up'])
+    table_repr += display_set(table.low.cards)
+    table_repr += display_set(table.top.cards)
     table_repr += '\n'
     return table_repr
 

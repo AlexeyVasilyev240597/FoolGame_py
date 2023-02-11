@@ -31,21 +31,17 @@ class Player(Pile):
         self.__get_weight = lambda card : ((card.suit == self.trump)*
                                           Rank.ACE.int() +
                                           card.rank.int())
-        
-    @property
-    def cards(self):
-        return self._cards
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)
         # in case if card is None
         if card:
-            self._cards.sort(key = self.__get_weight)
+            self.cards.sort(key = self.__get_weight)
     
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status
-        self._cards.sort(key = self.__get_weight)
+        self.cards.sort(key = self.__get_weight)
     
 
 # structure for working with two players

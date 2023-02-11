@@ -101,7 +101,7 @@ def collect(context: Context):
 #   answer: is chosen card correct
 def doesCardFit(card: Card, context: Context) -> MoveType:
     status = context.players.actv.status
-    if status == Status.ATTACKER and context.table.vol == 0:
+    if status == Status.ATTACKER and context.table.low.vol == 0:
         return MoveType.CORRECT_MOVE
     if status == Status.ATTACKER or status == Status.ADDING:
         if not context.table.hasRank(card.rank):
@@ -127,9 +127,9 @@ def canCardBeThrown(context: Context) -> MoveType:
     # number of taking player's cards => ADDING should say TAKE_AWAY
     if ((context.players.actv.status == Status.ATTACKER or 
          context.players.actv.status == Status.ADDING) and 
-        ((context.table.volOn('down') - context.table.volOn('up')) == 
+        ((context.table.low.vol - context.table.top.vol) == 
           context.players.pssv.vol or 
-          context.table.volOn('down') == CARDS_KIT)):
+          context.table.low.vol == CARDS_KIT)):
             return MoveType.NO_MORE_SPACE
     return MoveType.CORRECT_MOVE
 
@@ -159,7 +159,7 @@ def isMoveCorrect(move, context: Context) -> MoveType:
         if (word == Word.TAKE_AWAY and not status == Status.ADDING):
             return MoveType.WRONG_WORD
         if (word == Word.BEATEN and
-            context.table.vol == 0 and status == Status.ATTACKER):
+            context.table.low.vol == 0 and status == Status.ATTACKER):
             return MoveType.CARD_EXPECTED
         return MoveType.CORRECT_MOVE
     return MoveType.UNKNOWN_TYPE
@@ -188,14 +188,17 @@ def reactToWord(word: Word, context: Context) -> None:
 
 
 # updating context by reaction to a active player's move
-def reactToMove(move, context: Context) -> None:
+def reactToMove(move: dict, context: Context) -> None:
     game_stage = GameStage.PLAYING
     if 'card' in move:
         # some module outside should check if the move is correct!
         card_indx = context.players.actv.cards.index(move.get('card'))
         card = context.players.actv.getCard(card_indx)
-        atop = context.players.actv.status == Status.DEFENDING
-        context.table.addCard(card, atop)
+        if context.players.actv.status == Status.DEFENDING:
+            context.table.top.addCard(card)
+        # Status.ATTACKER or Status.ADDING
+        else:
+            context.table.low.addCard(card)
         if not context.players.actv.status == Status.ADDING:
             context.players.swapRoles()
     if 'word' in move:
