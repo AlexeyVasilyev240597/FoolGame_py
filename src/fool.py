@@ -36,10 +36,10 @@ class FoolGame:
             context_p = self.context.getPartialCopy(actv_id)
             
             while (wrong_move := isMoveCorrect(
-                    (move := self.pl_sbj.actv.move(context_p))['move'], context_p)):
+                    (move := self.pl_sbj.actv.move(context_p)), context_p)):
                 print(wrong_move)
             
-            game_stage = reactToMove(move['move'], self.context)
+            game_stage = reactToMove(move, self.context)
             self.update_field(move)
             
         say = self.pl_sbj.setFoolStatus(whoIsFool(self.context.players))

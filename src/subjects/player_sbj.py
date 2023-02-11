@@ -14,10 +14,10 @@ class PlayerSbj(ABC):
         move = {'pl_id': my_id}
         card = self.chooseCard(context)
         if card:
-            move['move'] = {'card': card}
+            move['card'] = card
         else:
             word = self.sayWord(context.players.actv.status)
-            move['move'] = {'word': word}
+            move['word'] = word
         
         return move
 

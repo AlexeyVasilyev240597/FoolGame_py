@@ -47,9 +47,7 @@ class HumanConsole(PlayerSbj):
         move = {'pl_id': my_id}
         move_str = input()
         if card := HumanConsole.str2card(move_str):
-            move['move'] = {'card': card}
+            move['card'] = card
         elif word := HumanConsole.str2word(move_str):
-            move['move'] = {'word': word}
-        else:
-            move['move'] = {}
-        return move    
+            move['word'] = word
+        return move
