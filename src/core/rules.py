@@ -1,9 +1,9 @@
 from enum import IntEnum
 
-from .card    import Card
-from .context import Context
+from src.core.card    import Card
+from src.core.context import Context
+from src.core.player  import Status, Word, Players
 # fro.m game_exception import WrongInitException
-from .player  import Status, Word, Players
 
 
 CARDS_KIT = 6

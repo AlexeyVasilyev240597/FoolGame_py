@@ -1,7 +1,7 @@
-from ..core.card import Rank, Suit, Card
-from ..core.player import Word
-from ..core.context import Context
-from .player_sbj import PlayerSbj
+from src.core.card import Rank, Suit, Card
+from src.core.player import Word
+from src.core.context import Context
+from src.subjects.player_sbj import PlayerSbj
 
 class HumanConsole(PlayerSbj):
     def __init__(self) -> None:

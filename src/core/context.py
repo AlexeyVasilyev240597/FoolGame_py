@@ -1,8 +1,8 @@
 from abc import ABC
 from copy import deepcopy
 
-from .elems  import Deck, Stock, Table
-from .player import Players
+from src.core.elems  import Deck, Stock, Table
+from src.core.player import Players
 
 class Context(ABC):
     def __init__(self,
