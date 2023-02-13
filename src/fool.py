@@ -20,40 +20,43 @@ class FoolGame:
     def update_field(self, last_move):
         if last_move:
             self.pl_sbj.last_move = last_move
-        self.pl_sbj.setActvID(self.context.players.getIdByRole('actv'))
         context_u = self.context.getPartialCopy(self.user_id)
         display_field(context_u, self.pl_sbj.last_move)
 
     def playGameRound(self):
+        print('-----------start of round-----------')
         deal(self.context)
         
         self.update_field(None)
         
         game_stage = GameStage.PLAYING
         while game_stage == GameStage.PLAYING:
+            print('------------------------------------')
             actv_id = self.context.players.getIdByRole('actv')
 
             context_p = self.context.getPartialCopy(actv_id)
             
             while (wrong_move := isMoveCorrect(
-                    (move := self.pl_sbj.actv.move(context_p)), context_p)):
+                    (move := self.pl_sbj.ask2move(context_p, actv_id)), 
+                    context_p)):
                 print(wrong_move)
             
             game_stage = reactToMove(move, self.context)
             self.update_field(move)
+            print('------------------------------------')
             
-        say = self.pl_sbj.setFoolStatus(whoIsFool(self.context.players))
+        fool_id = whoIsFool(self.context.players)
+        say = self.pl_sbj.setFoolStatus(fool_id)
         self.update_field(say)
         
         collect(self.context)
+        print('------------end of round------------')
 
     def playGameSeries(self, num_of_wins: int):
         while max(self.pl_sbj.score) < num_of_wins:
             self.playGameRound()
     
-    def handle_move(move) -> bool:
-        pass
-    
+
     
     
               

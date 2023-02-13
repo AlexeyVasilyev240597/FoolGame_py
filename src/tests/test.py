@@ -69,7 +69,7 @@
 
 
 
-from src.subjects.ai import Sergey_C #, Nikita_A
+from src.subjects.ai import Sergey_C, Nikita_A
 from src.subjects.human_console import HumanConsole
 from src.subjects.player_sbj import PlayersSbjs
 from src.fool import FoolGame
@@ -83,3 +83,4 @@ pls = PlayersSbjs(pl_1, pl_2)
 
 game = FoolGame(pls)
 game.playGameRound()
+# game.playGameRound()
