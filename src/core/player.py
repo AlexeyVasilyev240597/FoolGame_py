@@ -15,7 +15,7 @@ class Word(IntEnum):
     BEATEN    = 1
     TAKE      = 2
     TAKE_AWAY = 3
-    LOST      = 4
+    # LOST      = 4
     # GIVE_IN   = 5
 
 
@@ -50,7 +50,6 @@ class Players(ABC):
         self._players = [pl_1, pl_2]
         self._refs = {'actv': 0,
                       'pssv': 1}
-        self.fool_id = -1
 
     @property
     def actv(self):
@@ -75,18 +74,13 @@ class Players(ABC):
         else:
             return None
     
-    # now in first game first move is given to first player (by order),
-    #     if dead heat then to player which throws last card 
-    #     and to winner otherwise
-    # TODO: make rules above more explicit in the code
-    def setNewGameParams(self, trump: Suit, fool_id):
-        if self._refs['actv'] == fool_id or fool_id == -1:
+    def setNewGameParams(self, trump: Suit, pl_1st: int):
+        if not self._refs['actv'] == pl_1st:
             self.swapRoles()
         self.actv.setNewGameParams(trump, Status.ATTACKER)
         self.pssv.setNewGameParams(trump, Status.DEFENDING)
     
     def setFoolStatus(self, fool_id: int) -> None:
-        self.fool_id = fool_id
         if fool_id == 0 or fool_id == 1:
             fool = self.getPlayerById(fool_id)
             fool.status = Status.FOOL

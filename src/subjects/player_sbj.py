@@ -10,8 +10,7 @@ class PlayerSbj(ABC):
         self.name = name
     
     def move(self, context: Context):
-        my_id = context.players.getIdByRole('actv')
-        move = {'pl_id': my_id}
+        move = {}
         card = self.chooseCard(context)
         if card:
             move['card'] = card
@@ -28,8 +27,8 @@ class PlayerSbj(ABC):
             word = Word.TAKE
         elif status == Status.ADDING:
             word = Word.TAKE_AWAY
-        elif status == Status.FOOL:
-            word = Word.LOST
+        # elif status == Status.FOOL:
+        #     word = Word.LOST
         return word
         
 
@@ -40,7 +39,7 @@ class PlayerSbj(ABC):
 class PlayersSbjs(ABC):
     def __init__(self, pl_1: PlayerSbj, pl_2: PlayerSbj) -> None:
         self._players = [pl_1, pl_2]
-        self.last_move = {'pl_id': None, 'move': None}
+        self.last_move = {}
         self.score = [0, 0]
         if pl_1.name == pl_2.name:
             name = pl_1.name
@@ -54,9 +53,6 @@ class PlayersSbjs(ABC):
         return move
         
     
-    def setActvID(self, a_id: int) -> None:
-        self._actv_id = a_id
-    
     def getNameByID(self, id: int) -> str:
         if id == 0 or id == 1:
             return self._players[id].name
@@ -66,14 +62,18 @@ class PlayersSbjs(ABC):
     
     
     # TODO: need to test DEAD HEAT
-    def setFoolStatus(self, fool_id: int) -> Word:
+    def setFoolStatus(self, fool_id: int) -> None:
         if fool_id == 0 or fool_id == 1:
             self.score[fool_id] += 1
             fool = self._players[fool_id]
-            say = {}
-            say['word'] = fool.sayWord(Status.FOOL)
-            say['pl_id'] = fool_id
+            # say = {}
+            # say['word'] = fool.sayWord(Status.FOOL)
+            # say['pl_id'] = fool_id
             print(f'{fool.name} is a Fool')
-            for i in range(2):
-                print(f'score:{self._players[i].name} is a Fool {self.score[i]} times')
-            return say
+        self.last_move = {}
+        # return say
+    
+    def print_score(self):
+        for i in range(2):
+            print(f'score:{self._players[i].name} is a Fool '\
+                  f'{self.score[i]} times')

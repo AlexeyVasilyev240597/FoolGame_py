@@ -9,7 +9,8 @@ class Pile(ABC):
         self.cards = []
     
     def addCard(self, card: Card) -> None:
-        self.cards.append(card)
+        if isinstance(card, Card):
+            self.cards.append(card)
         
     def getCard(self, index:int = 0) -> Card:
         if self.vol > 0:
@@ -51,14 +52,13 @@ class Stock(Pile):
         self.__trump = None
         self.__last = None
     
-    def setTrump(self) -> Suit:
+    def setTrump(self) -> None:
         if self.vol > 0:
             first_card = self.getCard()
             self.__trump = first_card.suit
             # put first_card to the bottom
             self.addCard(first_card)
             self.__last = first_card
-        return self.trump
     
     def hideCards(self) -> None:
         last = self.last

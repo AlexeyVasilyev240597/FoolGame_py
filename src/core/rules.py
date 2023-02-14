@@ -2,8 +2,8 @@ from enum import IntEnum
 
 from src.core.card    import Card
 from src.core.context import Context
-from src.core.player  import Status, Word, Players
-# fro.m game_exception import WrongInitException
+from src.core.player  import Status, Word
+# from game_exception import WrongInitException
 
 
 CARDS_KIT = 6
@@ -28,15 +28,16 @@ class MoveType(IntEnum):
     # the word doesn't correspond the status of player
     WRONG_WORD        = 6
     # it was expected a card instead of a word
-    CARD_EXPECTED     = 7
+    CARD_EXPECTED     = 7,
+    # when fool must say that he/she lose
+    WORD_EXPECTED     = 8
     
     
 
-# TODO: add
-# class PlayersEnum(IntEnum):
-#     NOBODY   = -1
-#     PLAYER_1 =  0
-#     PLAYER_2 =  1
+class ResultOfRaund(IntEnum):
+    NEW_GAME    = 0
+    FOOL_EXISTS = 1
+    DEAD_HEAT   = 2
 
 
 ## CARDS TRANSFERING FUNCTIONS
@@ -61,6 +62,19 @@ def howManyToComplete(context: Context):
     return actv_add, pssv_add
 
 
+def whoseFirstMove(prev_result: tuple) -> None:
+    # in first round the first move is given to first player (by order)
+    if prev_result[0] == ResultOfRaund.NEW_GAME:
+        pl_1st = 0
+    # if dead heat then to player which throws last card
+    # and to winner otherwise
+    elif (prev_result[0] == ResultOfRaund.DEAD_HEAT or
+          prev_result[0] == ResultOfRaund.FOOL_EXISTS):
+        pl_1st = int(not prev_result[1])
+    else:
+        return None
+    return pl_1st
+
 # now in first game first move is given to first player (by order),
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
@@ -70,11 +84,9 @@ def deal(context: Context):
     context.deck.shift(context.players.actv, CARDS_KIT)
     context.deck.shift(context.players.pssv, CARDS_KIT)
     context.deck.shift(context.stock)
-    trump = context.stock.setTrump()
-    context.players.setNewGameParams(trump, context.players.fool_id)
+    context.stock.setTrump()
 
 
-# TODO: describe according to the rules
 def complete(context: Context):
     actv_add, pssv_add = howManyToComplete(context)
     # firstly cards are adding to passive player
@@ -135,15 +147,20 @@ def canCardBeThrown(context: Context) -> MoveType:
 
 
 def isMoveCorrect(move, context: Context) -> MoveType:
+    status = context.players.actv.status
     if 'card' in move:
         card = move.get('card')
         if not isinstance(card, Card):
             return MoveType.UNKNOWN_TYPE
+        if status == Status.FOOL:
+            return MoveType.WORD_EXPECTED
         if not card in context.players.actv.cards:
             return MoveType.SHARPIE
-        if not (move_type := doesCardFit(card, context)) == MoveType.CORRECT_MOVE:
+        if not ((move_type := doesCardFit(card, context)) == 
+                MoveType.CORRECT_MOVE):
             return move_type
-        if not (move_type := canCardBeThrown(context)) == MoveType.CORRECT_MOVE:
+        if not ((move_type := canCardBeThrown(context)) == 
+                MoveType.CORRECT_MOVE):
             return move_type
         return MoveType.CORRECT_MOVE
             
@@ -151,7 +168,6 @@ def isMoveCorrect(move, context: Context) -> MoveType:
         word = move.get('word')
         if not isinstance(word, Word):
             return MoveType.UNKNOWN_TYPE
-        status = context.players.actv.status
         if (word == Word.BEATEN and not status == Status.ATTACKER):
             return MoveType.WRONG_WORD
         if (word == Word.TAKE and not status == Status.DEFENDING):
@@ -168,7 +184,7 @@ def isMoveCorrect(move, context: Context) -> MoveType:
 
 ## UPDATING GAME CONTEXT AFTER PLAYER'S MOVE
 
-def reactToWord(word: Word, context: Context) -> None:
+def react2Word(word: Word, context: Context) -> None:
     if word == Word.BEATEN:
         context.table.shift(context.deck)
         context.players.actv.status = Status.DEFENDING
@@ -188,7 +204,7 @@ def reactToWord(word: Word, context: Context) -> None:
 
 
 # updating context by reaction to a active player's move
-def reactToMove(move: dict, context: Context) -> None:
+def react2Move(move: dict, context: Context) -> None:
     game_stage = GameStage.PLAYING
     if 'card' in move:
         # some module outside should check if the move is correct!
@@ -203,7 +219,7 @@ def reactToMove(move: dict, context: Context) -> None:
             context.players.swapRoles()
     if 'word' in move:
         word = move.get('word')
-        game_stage = reactToWord(word, context)
+        game_stage = react2Word(word, context)
     return game_stage
 
 
@@ -219,20 +235,25 @@ def gameIsOver(context: Context) -> GameStage:
         return GameStage.PLAYING
 
 
-def whoIsFool(players: Players):
-    actv_vol    = players.actv.vol
-    pssv_vol    = players.pssv.vol
+def whoIsFool(context: Context):
+    players  = context.players
+    actv_vol = players.actv.vol
+    actv_id  = players.getIdByRole('actv')
+    pssv_vol = players.pssv.vol
+    pssv_id  = players.getIdByRole('pssv')
+    
     # DEAD HEAT
     if actv_vol == 0 and pssv_vol == 0:
-        fool_id = -1
-    elif pssv_vol == 0:
-        fool_id = players.getIdByRole('actv')
-    elif actv_vol == 0:
-        fool_id = players.getIdByRole('pssv')
-    else: # wrong call
-        print('ERROR: wrong call of whoIsFool func!')
-        return None
-    players.setFoolStatus(fool_id)
-    return fool_id
+        result = [ResultOfRaund.DEAD_HEAT, pssv_id]
+    else:
+        if pssv_vol == 0:
+            fool_id = actv_id
+        elif actv_vol == 0:
+            fool_id = pssv_id    
+        else: # wrong call
+            print('ERROR: wrong call of whoIsFool func!')
+            return None
+        result = [ResultOfRaund.FOOL_EXISTS, fool_id]
+    return result
 
 

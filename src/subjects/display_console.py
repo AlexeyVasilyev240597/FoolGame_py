@@ -19,7 +19,8 @@ from src.core.context import Context
 
 def get_prefix(context: Context, pl_id: int, last_move: dict):
     prefix = ''
-    if (pl_id == last_move['pl_id'] and
+    if ('pl_id' in last_move and 
+        pl_id == last_move['pl_id'] and
         'word' in last_move):
         word = last_move['word'].name
         prefix = f'({word})'
