@@ -4,7 +4,7 @@ from .subjects.player_sbj import PlayersSbjs
 from .core.context import Context
 from .core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
                          react2Move, ResultOfRaund, collect)
-from .subjects.display_console import display_field
+from .view.console.display_console import display_field
 
 class FoolGame:
     def __init__(self, deck: Deck, pl_sbj: PlayersSbjs, user_id) -> None:
@@ -24,7 +24,7 @@ class FoolGame:
         if last_move:
             self.pl_sbj.last_move = last_move
         context_u = self.context.getPartialCopy(self.user_id)
-        display_field(context_u, self.pl_sbj.last_move)
+        display_field(context_u, self.pl_sbj.last_move, self.user_id)
         
     def processingRoundResult(self, result):
         if result[0] == ResultOfRaund.FOOL_EXISTS:
