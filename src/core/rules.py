@@ -121,7 +121,7 @@ def doesCardFit(card: Card, context: Context) -> MoveType:
     if status == Status.DEFENDING:
         last = context.table.showLastDown()
         trump = context.stock.trump
-        if not (last.suit == card.suit and last.rank.int() < card.rank.int() or 
+        if not (last.suit == card.suit and last.rank.value < card.rank.value or 
                 not last.suit == trump and card.suit == trump):
             return MoveType.LIGHTER_THAN_LAST
     return MoveType.CORRECT_MOVE

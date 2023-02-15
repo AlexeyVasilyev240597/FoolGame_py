@@ -1,9 +1,61 @@
+from src.core.card import Rank, Suit, Card
+
 from src.core.elems import Stock, Table
 from src.core.player import Player
 from src.core.context import Context
 
 from src.view.elems_view import StockView, TableView
 from src.view.player_view import PlayerView
+
+class CardViewStr:
+    def __init__(self, card: Card):
+        if card:
+            if card.rank.value > 10:
+                self.rank = card.rank.name[0]
+            else:
+                self.rank = str(card.rank.value)
+            #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
+            self.suit = card.suit.value
+        else:
+            self.rank = '*'
+            self.suit = '*'
+
+    def rankVal(rank_char: str):
+        if not isinstance(rank_char, str):
+            return None
+        if not (0 < len(rank_char) and len(rank_char) <= 2):
+            return None
+        if rank_char == 'J':
+            return Rank.JACK
+        elif rank_char == 'Q':
+            return Rank.QUEEN
+        elif rank_char == 'K':
+            return Rank.KING
+        elif rank_char == 'A':
+            return Rank.ACE
+        elif 6 <= int(rank_char) and int(rank_char) <= 10:
+            return Rank(int(rank_char))
+        else:
+            return None
+
+    def str2card(card_str: str) -> Card:
+        card_str = card_str.split('-')
+        if len(card_str) == 2:
+            rank = card_str[0]
+            suit = card_str[1]
+        else:
+            return None
+        if suit in [s.value for s in Suit]:
+            suit = Suit(suit)
+        else:
+            return None
+        if rank := CardViewStr.rankVal(rank):
+            return Card(suit, rank)
+        else:
+            return None
+
+    def __str__(self):
+        return f'{self.rank:>2}-{self.suit}'
 
 # def display_set(cards, align):
 #     cards_repr = '['
@@ -35,10 +87,7 @@ def get_prefix(context: Context, pl_id: int, last_move: dict):
 def display_set(cards):
     cards_repr = []
     for c in cards:
-        if c:
-            cards_repr.append(str(c))
-        else:
-            cards_repr.append('*-*')
+        cards_repr.append(str(CardViewStr(c)))
     cards_repr = str(cards_repr) + '\n'
     return cards_repr
 
@@ -50,7 +99,7 @@ class StockViewConsole(StockView):
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
         if self.vol > 0:
-            stock_repr += str(self.last)
+            stock_repr += str(CardViewStr(self.last))
         else:
             stock_repr += self.trump.value
         stock_repr += '|' + '\n'

@@ -1,29 +1,16 @@
-from enum import Enum
+from enum import IntEnum, Enum
 
-class Rank(Enum):
-    SIX   = '6'
-    SEVEN = '7'
-    EIGHT = '8'
-    NINE  = '9'
-    TEN   = '10'
-    JACK  = 'J'
-    QUEEN = 'Q'
-    KING  = 'K'
-    ACE   = 'A'
+class Rank(IntEnum):
+    SIX   = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE  = 9
+    TEN   = 10
+    JACK  = 11
+    QUEEN = 12
+    KING  = 13
+    ACE   = 14
 
-    def int(self):
-        if self.value == 'J':
-            return 11
-        elif self.value == 'Q':
-            return 12
-        elif self.value == 'K':
-            return 13
-        elif self.value == 'A':
-            return 14
-        else:
-            return int(self.value)
-
-#[ '\u2660', '\u2665', '\u2666', '\u2663' ]
 class Suit(Enum):
     SPADES   = 'S'
     HEARTS   = 'H'
@@ -40,7 +27,3 @@ class Card:
 
     def __eq__(self, __o: object) -> bool:
         return self.suit == __o.suit and self.rank == __o.rank
-
-    def __repr__(self):
-        # return f'{self.suit.value}-{self.rank.value:<2}'
-        return f'{self.rank.value:>2}-{self.suit.value}'

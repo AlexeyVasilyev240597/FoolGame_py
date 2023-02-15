@@ -1,31 +1,14 @@
-from src.core.card import Rank, Suit, Card
 from src.core.player import Word
 from src.core.context import Context
 from src.subjects.player_sbj import PlayerSbj
+from src.view.console.display_console import CardViewStr
 
 class HumanConsole(PlayerSbj):
     def __init__(self) -> None:
         print('type your name')
         name = input()
         super().__init__(name)
-    
-    def str2card(card_str: str) -> Card:
-        card_str = card_str.split('-')
-        if len(card_str) == 2:
-            rank = card_str[0]
-            suit = card_str[1]
-        else:
-            return None
-        if suit in [s.value for s in Suit]:
-            suit = Suit(suit)
-        else:
-            return None
-        if rank in [r.value for r in Rank]:
-            rank = Rank(rank)
-        else:
-            return None
-        return Card(suit, rank)
-    
+       
     def str2word(word_str: str) -> Word:
         if word_str == 'BT':
             return Word.BEATEN
@@ -46,7 +29,7 @@ class HumanConsole(PlayerSbj):
         my_id = context.players.getIdByRole('actv')
         move = {'pl_id': my_id}
         move_str = input()
-        if card := HumanConsole.str2card(move_str):
+        if card := CardViewStr.str2card(move_str):
             move['card'] = card
         elif word := HumanConsole.str2word(move_str):
             move['word'] = word

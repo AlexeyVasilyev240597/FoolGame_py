@@ -29,8 +29,7 @@ class Player(Pile):
         # game params
         self.trump = None
         self.__get_weight = lambda card : ((card.suit == self.trump)*
-                                          Rank.ACE.int() +
-                                          card.rank.int())
+                                           Rank.ACE.value + card.rank.value)
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)

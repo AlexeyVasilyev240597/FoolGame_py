@@ -76,8 +76,8 @@ from src.subjects.player_sbj import PlayersSbjs
 from src.fool import FoolGame
 
 
-# pl_1 = HumanConsole()
-pl_1 = Nikita_A()
+pl_1 = HumanConsole()
+# pl_1 = Nikita_A()
 pl_2 = Sergey_C()
 
 pls = PlayersSbjs(pl_1, pl_2)
