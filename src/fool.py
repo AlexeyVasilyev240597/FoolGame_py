@@ -11,8 +11,8 @@ class FoolGame:
         self.pl_sbj = pl_sbj
         self.context = Context(Stock(), 
                                Table(), 
-                               Players(Player(pl_sbj.getNameByID(0)),
-                                       Player(pl_sbj.getNameByID(1))), 
+                               Players(Player(),
+                                       Player()), 
                                deck)
         self.user_id = user_id
 

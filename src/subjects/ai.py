@@ -8,9 +8,9 @@ from src.core.rules  import doesCardFit, canCardBeThrown, MoveType
 
 # Artificial Intelligence 
 class ArtInt(PlayerSbj):
-    def __init__(self):
+    def __init__(self, id: int):
         name = str(self.__class__.__name__)
-        super().__init__(name)
+        super().__init__(name, id)
     
     def getFitCards(self, context: Context):
         fit_cards = []

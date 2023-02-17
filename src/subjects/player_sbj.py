@@ -6,18 +6,19 @@ from src.core.context import Context
 
 
 class PlayerSbj(ABC):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, id: int) -> None:
         self.name = name
+        self.id = id
     
     def move(self, context: Context):
         move = {}
-        card = self.chooseCard(context)
-        if card:
-            move['card'] = card
-        else:
-            word = self.sayWord(context.players.actv.status)
-            move['word'] = word
-        
+        if self.id == context.players.getIdByRole('actv'):
+            card = self.chooseCard(context)
+            if card:
+                move['card'] = card
+            else:
+                word = self.sayWord(context.players.actv.status)
+                move['word'] = word
         return move
 
     def sayWord(self, status: Status):
@@ -37,14 +38,15 @@ class PlayerSbj(ABC):
         pass
 
 class PlayersSbjs(ABC):
+    # TODO: get two pairs of arguments: (Player's name, is human) 
+    #       and call fabric, pass to it just id of each player
     def __init__(self, pl_1: PlayerSbj, pl_2: PlayerSbj) -> None:
         self._players = [pl_1, pl_2]
-        self.last_move = {}
+        # self.last_move = {}
         self.score = [0, 0]
         if pl_1.name == pl_2.name:
-            name = pl_1.name
-            pl_1.name = name + '#1'
-            pl_2.name = name + '#2'
+            pl_1.name += '#1'
+            pl_2.name += '#2'
 
 
     def ask2move(self, context: Context, pl_id: int) -> dict:
@@ -70,7 +72,7 @@ class PlayersSbjs(ABC):
             # say['word'] = fool.sayWord(Status.FOOL)
             # say['pl_id'] = fool_id
             print(f'{fool.name} is a Fool')
-        self.last_move = {}
+        # self.last_move = {}
         # return say
     
     def print_score(self):

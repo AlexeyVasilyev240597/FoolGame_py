@@ -4,11 +4,11 @@ from src.subjects.player_sbj import PlayerSbj
 from src.view.console.display_console import CardViewStr
 
 class HumanConsole(PlayerSbj):
-    def __init__(self) -> None:
+    def __init__(self, id: int) -> None:
         print('type your name')
         name = input()
-        super().__init__(name)
-       
+        super().__init__(name, id)
+    
     def str2word(word_str: str) -> Word:
         if word_str == 'BT':
             return Word.BEATEN
@@ -26,8 +26,7 @@ class HumanConsole(PlayerSbj):
     
     def move(self, context: Context):
         print(f'{self.name}, your move: ')
-        my_id = context.players.getIdByRole('actv')
-        move = {'pl_id': my_id}
+        move = {}
         move_str = input()
         if card := CardViewStr.str2card(move_str):
             move['card'] = card

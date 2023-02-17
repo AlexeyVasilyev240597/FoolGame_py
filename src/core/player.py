@@ -20,10 +20,9 @@ class Word(IntEnum):
 
 
 class Player(Pile):
-    def __init__(self, name: str):
+    def __init__(self):
         super().__init__()
-        # main params        
-        self.name = name
+        # main params
         self.status = None
                 
         # game params
