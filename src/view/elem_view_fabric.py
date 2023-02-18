@@ -4,7 +4,7 @@
 from .elems_view import DeckView, StockView, TableView
 from .player_view import PlayerView, PlayerSbjView
 
-from .console.display_console import (StockViewConsole, TableViewConsole, 
+from .console.game_view_console import (StockViewConsole, TableViewConsole, 
                                       PlayerViewConsole, PlayerSbjViewConsole, 
                                       DeckViewConsole)
 

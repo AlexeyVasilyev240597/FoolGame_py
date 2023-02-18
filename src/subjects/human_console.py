@@ -1,7 +1,7 @@
 from src.core.player import Word
 from src.core.context import Context
 from src.subjects.player_sbj import PlayerSbj
-from src.view.console.display_console import CardViewStr
+from src.view.console.game_view_console import CardViewStr
 
 class HumanConsole(PlayerSbj):
     def __init__(self, id: int) -> None:

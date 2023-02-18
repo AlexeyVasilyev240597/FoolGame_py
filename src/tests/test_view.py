@@ -8,7 +8,7 @@ from src.subjects.ai import Sergey_C
 from src.subjects.human_console import HumanConsole
 # from src.subjects.player_sbj import PlayersSbjs
 from src.core.rules import deal
-from src.view.context_view import GameView
+from src.view.game_view import GameView
 
 deck = Deck()
 context = Context(Stock(), 
