@@ -1,10 +1,9 @@
-from .core.elems  import Deck, Stock, Table
-from .core.player import Player, Players
-from .subjects.player_sbj import PlayersSbjs
-from .core.context import Context
-from .core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
+from src.core.elems  import Deck, Stock, Table
+from src.core.player import Player, Players
+from src.subjects.player_sbj import PlayersSbjs
+from src.core.context import Context
+from src.core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
                          react2Move, ResultOfRaund, collect)
-from .view.console.display_console import display_field
 
 class FoolGame:
     def __init__(self, deck: Deck, pl_sbj: PlayersSbjs, user_id) -> None:
@@ -20,11 +19,9 @@ class FoolGame:
         pl_1st = whoseFirstMove(prev_res)
         self.context.players.setNewGameParams(self.context.stock.trump, pl_1st)
 
-    def update_field(self, last_move = None):
-        if last_move:
-            self.pl_sbj.last_move = last_move
+    def update_field(self):
         context_u = self.context.getPartialCopy(self.user_id)
-        display_field(context_u, self.pl_sbj.last_move, self.user_id)
+        self.pl_sbj.game_view.update(context_u)
         
     def processingRoundResult(self, result):
         if result[0] == ResultOfRaund.FOOL_EXISTS:
@@ -57,7 +54,7 @@ class FoolGame:
                 print(wrong_move)
             
             game_stage = react2Move(move, self.context)
-            self.update_field(move)
+            self.update_field()
             print('------------------------------------')
             
         result = whoIsFool(self.context)

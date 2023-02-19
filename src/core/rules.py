@@ -220,6 +220,7 @@ def react2Move(move: dict, context: Context) -> None:
     if 'word' in move:
         word = move.get('word')
         game_stage = react2Word(word, context)
+    context.last_move = move
     return game_stage
 
 

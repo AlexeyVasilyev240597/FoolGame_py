@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 
 # from .card_view import CardView
+from src.view.elems_view import PileView
+from src.view.card_convert import CardConverter
 from src.core.player import Player
 
 
-class PlayerView(ABC):
-    def __init__(self):
-        ABC.__init__(self)
+class PlayerView(PileView):
+    def __init__(self, is_graphic):
+        PileView.__init__(self, is_graphic)
         self.status = None
         # game params
         self.trump  = None
@@ -17,19 +19,7 @@ class PlayerView(ABC):
         self.status = player.status
         # game params
         self.trump  = player.trump
-        # self.cards  = [CardView(card) for card in player.cards]
-        self.cards  = player.cards
-    
-    @abstractmethod
-    def draw(self):
-        pass
-
-
-# class PlayersView(ABC):
-#     def __init__(self, pl_1_v: PlayerView, pl_2_v: PlayerView):
-#         ABC.__init__(self)
-#         self.rival = pl_1_v
-#         self.me = pl_2_v
+        self.cards  = [CardConverter.card2cardView(card, self.is_graphic) for card in player.cards]
     
     
 class PlayerSbjView(ABC):

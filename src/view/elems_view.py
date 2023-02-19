@@ -1,25 +1,34 @@
 from abc import ABC, abstractmethod
 
-# from .card_view import CardView
-from src.core.elems import Deck, Stock, Table
+from src.view.card_convert import CardConverter
+from src.core.elems import Pile, Deck, Stock, Table
 
 
-class DeckView(ABC):
-    def __init__(self):
+class PileView(ABC):
+    def __init__(self, is_graphic: bool):
         ABC.__init__(self)
+        self.is_graphic = is_graphic
+    
+    @abstractmethod
+    def draw(self):
+        pass
+  
+    @abstractmethod
+    def update(self, pile: Pile):
+        pass
+
+class DeckView(PileView):
+    def __init__(self, is_graphic: bool):
+        PileView.__init__(self)
         self.vol = 0
 
     def update(self, deck: Deck):
         self.vol = deck.vol
     
-    @abstractmethod
-    def draw(self):
-        pass
 
-
-class StockView(ABC):
-    def __init__(self):
-        ABC.__init__(self)
+class StockView(PileView):
+    def __init__(self, is_graphic: bool):
+        PileView.__init__(self)
         self.trump = None
         self.last  = None
         self.vol   = 0
@@ -29,23 +38,18 @@ class StockView(ABC):
         self.last  = stock.last
         self.vol   = stock.vol
     
-    @abstractmethod
-    def draw(self):
-        pass
 
-
-class TableView(ABC):
-    def __init__(self):
-        ABC.__init__(self)
+class TableView(PileView):
+    def __init__(self, is_graphic: bool):
+        PileView.__init__(self)
         self.top = []
         self.low = []
 
     def update(self, table: Table):
-        # self.top = [CardView(card) for card in table.top.cards]
-        # self.low = [CardView(card) for card in table.low.cards]
-        self.top = table.top.cards
-        self.low = table.low.cards
+        # for card_view in self.top.cards:
+        #     if not card
+        self.top = [CardConverter.card2cardView(card, self.is_graphic) for card in table.top.cards]
+        self.low = [CardConverter.card2cardView(card, self.is_graphic) for card in table.low.cards]
+        # self.top = table.top.cards
+        # self.low = table.low.cards
     
-    @abstractmethod
-    def draw(self):
-        pass

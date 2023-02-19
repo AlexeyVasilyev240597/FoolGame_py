@@ -4,7 +4,7 @@ from src.core.context import Context
 # from .elems_view import DeckView, StockView, TableView
 # from .player_view import PlayerView
 
-from .elem_view_fabric import ElemViewFabric
+from src.view.elem_view_fabric import ElemViewFabric
 
 class GameView:
     def __init__(self, 

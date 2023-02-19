@@ -1,13 +1,10 @@
-# from abc import ABC, abstractmethod
 
-# from src.core.context import Context
-from .elems_view import DeckView, StockView, TableView
-from .player_view import PlayerView, PlayerSbjView
+from src.view.elems_view import DeckView, StockView, TableView
+from src.view.player_view import PlayerView, PlayerSbjView
 
-from .console.game_view_console import (StockViewConsole, TableViewConsole, 
+from src.view.console.game_view_console import (StockViewConsole, TableViewConsole, 
                                       PlayerViewConsole, PlayerSbjViewConsole, 
                                       DeckViewConsole)
-
 
 class ElemViewFabric:
     
@@ -40,3 +37,4 @@ class ElemViewFabric:
             return None
         else:
             return DeckViewConsole()
+

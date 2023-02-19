@@ -1,7 +1,7 @@
 from src.core.player import Word
 from src.core.context import Context
 from src.subjects.player_sbj import PlayerSbj
-from src.view.console.game_view_console import CardViewStr
+from src.view.console.card_convert_console import CardViewStr
 
 class HumanConsole(PlayerSbj):
     def __init__(self, id: int) -> None:
@@ -28,7 +28,7 @@ class HumanConsole(PlayerSbj):
         print(f'{self.name}, your move: ')
         move = {}
         move_str = input()
-        if card := CardViewStr.str2card(move_str):
+        if card := CardViewStr.cardView2card(move_str):
             move['card'] = card
         elif word := HumanConsole.str2word(move_str):
             move['word'] = word

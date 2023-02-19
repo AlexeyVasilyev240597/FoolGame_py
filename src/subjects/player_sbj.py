@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from src.core.card import Card
 from src.core.player import Status, Word
 from src.core.context import Context
+from src.view.game_view import GameView
 
 
 class PlayerSbj(ABC):
@@ -42,11 +43,11 @@ class PlayersSbjs(ABC):
     #       and call fabric, pass to it just id of each player
     def __init__(self, pl_1: PlayerSbj, pl_2: PlayerSbj) -> None:
         self._players = [pl_1, pl_2]
-        # self.last_move = {}
         self.score = [0, 0]
         if pl_1.name == pl_2.name:
             pl_1.name += '#1'
             pl_2.name += '#2'
+        self.game_view = GameView(False, pl_2.name, pl_1.name, 0, True)
 
 
     def ask2move(self, context: Context, pl_id: int) -> dict:
@@ -72,7 +73,6 @@ class PlayersSbjs(ABC):
             # say['word'] = fool.sayWord(Status.FOOL)
             # say['pl_id'] = fool_id
             print(f'{fool.name} is a Fool')
-        # self.last_move = {}
         # return say
     
     def print_score(self):
