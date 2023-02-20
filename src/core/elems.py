@@ -1,5 +1,5 @@
 from abc import ABC
-from copy import copy
+# from copy import copy
 import random
 
 from src.core.card import Rank, Suit, Card
@@ -12,11 +12,14 @@ class Pile(ABC):
         if isinstance(card, Card):
             self.cards.append(card)
         
-    def getCard(self, index:int = 0) -> Card:
+    def getCard(self, index: int = 0) -> Card:
         if self.vol > 0:
             return self.cards.pop(index)
         else:
             return None
+
+    def swop(self, receiver, index: int = 0) -> None:
+        receiver.addCard(self.getCard(index))
 
     # cards is being shifted from current pile into 'dest'
     # amount of cards to be moved, by default - all
@@ -24,7 +27,7 @@ class Pile(ABC):
         if amount == None:
             amount = self.vol
         for _ in range(amount):
-            receiver.addCard(self.getCard())
+            self.swop(receiver)
 
     def hideCards(self) -> None:
         self.cards = [None]*self.vol

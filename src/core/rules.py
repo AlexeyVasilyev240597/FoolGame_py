@@ -209,12 +209,12 @@ def react2Move(move: dict, context: Context) -> None:
     if 'card' in move:
         # some module outside should check if the move is correct!
         card_indx = context.players.actv.cards.index(move.get('card'))
-        card = context.players.actv.getCard(card_indx)
         if context.players.actv.status == Status.DEFENDING:
-            context.table.top.addCard(card)
+            table_layer = context.table.top
         # Status.ATTACKER or Status.ADDING
         else:
-            context.table.low.addCard(card)
+            table_layer = context.table.low
+        context.players.actv.swop(table_layer, card_indx)
         if not context.players.actv.status == Status.ADDING:
             context.players.swapRoles()
     if 'word' in move:
