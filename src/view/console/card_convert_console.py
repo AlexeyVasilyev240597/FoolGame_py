@@ -14,6 +14,7 @@ class CardViewStr(CardView):
         else:
             self.rank = '*'
             self.suit = '*'
+        self.repr = f'{self.rank:>2}-{self.suit}'
 
     def _rankVal(rank_char: str):
         if not isinstance(rank_char, str):
@@ -52,10 +53,10 @@ class CardViewStr(CardView):
             return None
 
     def __str__(self):
-        return f'{self.rank:>2}-{self.suit}'
+        return self.repr
 
     def draw(self):
-        print(f'{self.rank:>2}-{self.suit}')
+        print(self.repr)
     
     def __eq__(self, __o: object) -> bool:
         if self.open and __o.open:

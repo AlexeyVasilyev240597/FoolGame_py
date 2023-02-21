@@ -35,7 +35,7 @@ class StockView(PileView):
     
     def update(self, stock: Stock):
         self.trump = stock.trump
-        self.last  = stock.last
+        self.last  = CardConverter.card2cardView(stock.last, self.is_graphic)
         self.vol   = stock.vol
     
 
@@ -46,10 +46,6 @@ class TableView(PileView):
         self.low = []
 
     def update(self, table: Table):
-        # for card_view in self.top.cards:
-        #     if not card
         self.top = [CardConverter.card2cardView(card, self.is_graphic) for card in table.top.cards]
         self.low = [CardConverter.card2cardView(card, self.is_graphic) for card in table.low.cards]
-        # self.top = table.top.cards
-        # self.low = table.low.cards
     

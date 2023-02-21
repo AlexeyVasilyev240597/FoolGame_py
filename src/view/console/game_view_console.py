@@ -2,27 +2,12 @@ from src.view.elems_view import PileView, DeckView, StockView, TableView
 from src.view.player_view import PlayerView, PlayerSbjView
 from src.view.console.card_convert_console import CardViewStr
 
-# def display_set(cards, align):
-#     cards_repr = '['
-#     for c in cards:
-#         card = str(c)
-#         if align == 'left':
-#             cards_repr += f'{card:<7},'
-#         elif align == 'right':
-#             cards_repr += f'{card:>7},'
-#     cards_repr += ']\n'
-#     return cards_repr
-
-# class FieldView:
-#     def __init__(self, player_id):
-#         self.player_id = player_id
-
 
 def display_set(cards):
-    cards_repr = []
-    for c in cards:
-        cards_repr.append(str(c))
-    cards_repr = str(cards_repr) + '\n'
+    cards_repr = '[ '
+    for card in cards:
+        cards_repr += card.repr + ' '
+    cards_repr += ']\n'
     return cards_repr
 
 class PileViewConsole(PileView):
@@ -39,7 +24,7 @@ class StockViewConsole(PileViewConsole, StockView):
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
         if self.vol > 0:
-            stock_repr += str(CardViewStr(self.last))
+            stock_repr += self.last.repr
         else:
             stock_repr += self.trump.value
         stock_repr += '|' + '\n'

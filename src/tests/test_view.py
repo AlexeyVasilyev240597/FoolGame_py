@@ -4,9 +4,9 @@
 from src.core.elems import Deck, Stock, Table
 from src.core.player import Player, Players
 from src.core.context import Context
-from src.subjects.ai import Sergey_C
-from src.subjects.human_console import HumanConsole
-# from src.subjects.player_sbj import PlayersSbjs
+from src.controller.bot.ai import Sergey_C
+from src.controller.human.console.human_console import HumanConsole
+# from src.controller.player_sbj import PlayersSbjs
 from src.core.rules import deal
 from src.view.game_view import GameView
 

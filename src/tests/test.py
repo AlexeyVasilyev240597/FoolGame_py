@@ -70,9 +70,9 @@
 
 
 from src.core.elems import Deck
-from src.subjects.ai import Sergey_C, Nikita_A
-from src.subjects.human_console import HumanConsole
-from src.subjects.player_sbj import PlayersSbjs
+from src.controller.bot.ai import Sergey_C, Nikita_A
+from src.controller.human.console.human_console import HumanConsole
+from src.controller.player_sbj import PlayersSbjs
 from src.fool import FoolGame
 
 

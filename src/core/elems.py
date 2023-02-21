@@ -5,8 +5,8 @@ import random
 from src.core.card import Rank, Suit, Card
 
 class Pile(ABC):
-    def __init__(self):
-        self.cards = []
+    def __init__(self, type = list):
+        self._cards = type()
     
     def addCard(self, card: Card) -> None:
         if isinstance(card, Card):
@@ -18,10 +18,12 @@ class Pile(ABC):
         else:
             return None
 
+    # swop of one card from current pile into 'receiver'
+    # index is 0 by default (from top if it is simple pile)
     def swop(self, receiver, index: int = 0) -> None:
         receiver.addCard(self.getCard(index))
 
-    # cards is being shifted from current pile into 'dest'
+    # cards are being shifted from current pile into 'receiver'
     # amount of cards to be moved, by default - all
     def shift(self, receiver, amount: int = None):
         if amount == None:
@@ -30,11 +32,15 @@ class Pile(ABC):
             self.swop(receiver)
 
     def hideCards(self) -> None:
-        self.cards = [None]*self.vol
+        self._cards = [None]*self.vol
 
     @property
     def vol(self) -> int:
         return len(self.cards)
+    
+    @property
+    def cards(self):
+        return self._cards
     
 
 class Deck(Pile):
@@ -91,7 +97,7 @@ class Table(ABC):
         self.top.shift(receiver)
         self.low.shift(receiver)
         
-    def hasRank(self, r: Rank):
+    def hasRank(self, r: Rank) -> bool:
         piles = [self.top, self.low]
         for pile in piles:
             for card in pile.cards:

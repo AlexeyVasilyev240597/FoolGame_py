@@ -1,6 +1,6 @@
 from src.core.elems  import Deck, Stock, Table
 from src.core.player import Player, Players
-from src.subjects.player_sbj import PlayersSbjs
+from src.controller.player_sbj import PlayersSbjs
 from src.core.context import Context
 from src.core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
                          react2Move, ResultOfRaund, collect)
