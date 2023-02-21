@@ -57,8 +57,3 @@ class CardViewStr(CardView):
 
     def draw(self):
         print(self.repr)
-    
-    def __eq__(self, __o: object) -> bool:
-        if self.open and __o.open:
-            return self.suit == __o.suit and self.rank == __o.rank
-        return False

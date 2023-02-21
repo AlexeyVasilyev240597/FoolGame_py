@@ -1,12 +1,11 @@
 from abc import ABC
-# from copy import copy
 import random
 
 from src.core.card import Rank, Suit, Card
 
 class Pile(ABC):
-    def __init__(self, type = list):
-        self._cards = type()
+    def __init__(self):
+        self.cards = []
     
     def addCard(self, card: Card) -> None:
         if isinstance(card, Card):
@@ -32,16 +31,12 @@ class Pile(ABC):
             self.swop(receiver)
 
     def hideCards(self) -> None:
-        self._cards = [None]*self.vol
+        self.cards = [Card()]*self.vol
 
     @property
     def vol(self) -> int:
         return len(self.cards)
-    
-    @property
-    def cards(self):
-        return self._cards
-    
+        
 
 class Deck(Pile):
     def __init__(self):
@@ -59,7 +54,7 @@ class Stock(Pile):
     def __init__(self):
         super().__init__()
         self.__trump = None
-        self.__last = None
+        self.__last = Card()
     
     def setTrump(self) -> None:
         if self.vol > 0:

@@ -1,5 +1,11 @@
 from enum import IntEnum, Enum
 
+class Suit(Enum):
+    SPADES   = 'S'
+    HEARTS   = 'H'
+    DIAMONDS = 'D'
+    CLUBS    = 'C'
+
 class Rank(IntEnum):
     SIX   = 6
     SEVEN = 7
@@ -11,20 +17,19 @@ class Rank(IntEnum):
     KING  = 13
     ACE   = 14
 
-class Suit(Enum):
-    SPADES   = 'S'
-    HEARTS   = 'H'
-    DIAMONDS = 'D'
-    CLUBS    = 'C'
-
 DECK_VOLUME = len(Rank)*len(Suit)
 
 
-class Card:        
-    def __init__(self, suit: Suit, rank: Rank):        
+class Card:
+    # if both arguments are None then the card is face down
+    def __init__(self, suit: Suit = None, rank: Rank = None):
+        if suit == None and rank == None:
+            self.open = False
+        else:
+            self.open = True
         self.suit = suit
         self.rank = rank
 
     def __eq__(self, __o: object) -> bool:
-        return self.suit == __o.suit and self.rank == __o.rank
+        return self.open and self.suit == __o.suit and self.rank == __o.rank
 
