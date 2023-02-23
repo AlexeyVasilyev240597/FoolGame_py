@@ -1,6 +1,5 @@
 from src.view.elems_view import PileView, DeckView, StockView, TableView
 from src.view.player_view import PlayerView, PlayerSbjView
-from src.view.console.card_convert_console import CardViewStr
 
 
 def display_set(cards):
@@ -23,7 +22,7 @@ class StockViewConsole(PileViewConsole, StockView):
     def draw(self):
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
-        if self.vol > 0:
+        if self.last:
             stock_repr += self.last.repr
         else:
             stock_repr += self.trump.value
