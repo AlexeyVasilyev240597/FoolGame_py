@@ -71,17 +71,6 @@ class Players(ABC):
             return self._refs[role]
         else:
             return None
-    
-    def setNewGameParams(self, trump: Suit, pl_1st: int):
-        if not self._refs['actv'] == pl_1st:
-            self.swapRoles()
-        self.actv.setNewGameParams(trump, Status.ATTACKER)
-        self.pssv.setNewGameParams(trump, Status.DEFENDING)
-    
-    def setFoolStatus(self, fool_id: int) -> None:
-        if fool_id == 0 or fool_id == 1:
-            fool = self.getPlayerById(fool_id)
-            fool.status = Status.FOOL
             
     
 # # TODO: class for playing with 3 players

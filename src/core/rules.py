@@ -75,6 +75,13 @@ def whoseFirstMove(prev_result: tuple) -> None:
         return None
     return pl_1st
 
+def setOrderOfMoving(context: Context, prev_res) -> None:
+    pl_1st = whoseFirstMove(prev_res)
+    if not context.players.getIdByRole('actv') == pl_1st:
+        context.players.swapRoles()
+    context.players.actv.setNewGameParams(context.stock.trump, Status.ATTACKER)
+    context.players.pssv.setNewGameParams(context.stock.trump, Status.DEFENDING)
+
 # now in first game first move is given to first player (by order),
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
@@ -252,6 +259,7 @@ def whoIsFool(context: Context):
             print('ERROR: wrong call of whoIsFool func!')
             return None
         result = [ResultOfRaund.FOOL_EXISTS, fool_id]
+        context.players.getPlayerById(fool_id).status = Status.FOOL
     return result
 
 

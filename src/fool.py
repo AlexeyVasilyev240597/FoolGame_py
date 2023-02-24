@@ -2,7 +2,7 @@ from src.core.elems  import Deck, Stock, Table
 from src.core.player import Player, Players
 from src.controller.player_sbj import PlayersSbjs
 from src.core.context import Context
-from src.core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
+from src.core.rules import (deal, whoIsFool, setOrderOfMoving, GameStage, isMoveCorrect,
                          react2Move, ResultOfRaund, collect, gameIsOver)
 
 class FoolGame:
@@ -15,10 +15,6 @@ class FoolGame:
                                deck)
         self.user_id = user_id
 
-    def setOrderOfMoving(self, prev_res) -> None:
-        pl_1st = whoseFirstMove(prev_res)
-        self.context.players.setNewGameParams(self.context.stock.trump, pl_1st)
-
     def update_field(self):
         context_u = self.context.getPartialCopy(self.user_id)
         self.pl_sbj.game_view.update(context_u)
@@ -26,7 +22,6 @@ class FoolGame:
     def processingRoundResult(self, result):
         if result[0] == ResultOfRaund.FOOL_EXISTS:
             fool_id = result[1]
-            self.context.players.setFoolStatus(fool_id)
             self.pl_sbj.setFoolStatus(fool_id)
             self.update_field()
         else:
@@ -38,7 +33,7 @@ class FoolGame:
         print('-----------start of round-----------')
         
         deal(self.context)
-        self.setOrderOfMoving(prev_res)
+        setOrderOfMoving(self.context, prev_res)
         self.update_field()
         
         game_stage = GameStage.PLAYING
