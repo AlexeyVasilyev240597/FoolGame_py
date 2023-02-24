@@ -3,7 +3,7 @@ from src.core.player import Player, Players
 from src.controller.player_sbj import PlayersSbjs
 from src.core.context import Context
 from src.core.rules import (deal, whoIsFool, whoseFirstMove, GameStage, isMoveCorrect,
-                         react2Move, ResultOfRaund, collect)
+                         react2Move, ResultOfRaund, collect, gameIsOver)
 
 class FoolGame:
     def __init__(self, deck: Deck, pl_sbj: PlayersSbjs, user_id) -> None:
@@ -53,7 +53,8 @@ class FoolGame:
                     context_p)):
                 print(wrong_move)
             
-            game_stage = react2Move(move, self.context)
+            react2Move(move, self.context)
+            game_stage = gameIsOver(self.context)
             self.update_field()
             print('------------------------------------')
             

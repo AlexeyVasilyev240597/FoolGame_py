@@ -200,12 +200,10 @@ def react2Word(word: Word, context: Context) -> None:
         # status stays still the same
         # context.players.pssv.status = Status.DEFENDING
         complete(context)
-    return gameIsOver(context)
 
 
 # updating context by reaction to a active player's move
 def react2Move(move: dict, context: Context) -> None:
-    game_stage = GameStage.PLAYING
     if 'card' in move:
         # some module outside should check if the move is correct!
         card_indx = context.players.actv.cards.index(move.get('card'))
@@ -219,21 +217,20 @@ def react2Move(move: dict, context: Context) -> None:
             context.players.swapRoles()
     if 'word' in move:
         word = move.get('word')
-        game_stage = react2Word(word, context)
+        react2Word(word, context)
     context.last_move = move
-    return game_stage
 
 
 ## REPRESENTING OF RESULT OF THE GAME
 
 def gameIsOver(context: Context) -> GameStage:
-    stock_vol = context.stock.vol
-    p1_vol    = context.players.actv.vol
-    p2_vol    = context.players.pssv.vol
-    if stock_vol == 0 and (p1_vol == 0 or p2_vol == 0):        
-        return GameStage.GAME_OVER
-    else:
-        return GameStage.PLAYING
+    if 'word' in context.last_move:
+        stock_vol = context.stock.vol
+        p1_vol    = context.players.actv.vol
+        p2_vol    = context.players.pssv.vol
+        if stock_vol == 0 and (p1_vol == 0 or p2_vol == 0):        
+            return GameStage.GAME_OVER
+    return GameStage.PLAYING
 
 
 def whoIsFool(context: Context):
