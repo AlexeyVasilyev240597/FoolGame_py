@@ -13,6 +13,7 @@ class GameStage(IntEnum):
     PLAYING   = 2
     GAME_OVER = 3
     
+
 class MoveType(IntEnum):
     CORRECT_MOVE      = 0
     # the move is neither a card, nor a word
@@ -32,13 +33,12 @@ class MoveType(IntEnum):
     # when fool must say that he/she lose
     WORD_EXPECTED     = 8
     
-    
 
 class ResultOfRaund(IntEnum):
     NEW_GAME    = 0
     FOOL_EXISTS = 1
     DEAD_HEAT   = 2
-
+    
 
 ## CARDS TRANSFERING FUNCTIONS
 
@@ -88,8 +88,8 @@ def setOrderOfMoving(context: Context, prev_res) -> None:
 def deal(context: Context):
     # TODO: uncommnet this line - just for debugging comment
     context.deck.shuffle()
-    context.deck.shift(context.players.actv, CARDS_KIT)
-    context.deck.shift(context.players.pssv, CARDS_KIT)
+    context.deck.shift(context.players.actv, to_flip=True, amount=CARDS_KIT)
+    context.deck.shift(context.players.pssv, to_flip=True, amount=CARDS_KIT)
     context.deck.shift(context.stock)
     context.stock.setTrump()
 
@@ -97,17 +97,17 @@ def deal(context: Context):
 def complete(context: Context):
     actv_add, pssv_add = howManyToComplete(context)
     # firstly cards are adding to passive player
-    context.stock.shift(context.players.pssv, pssv_add)
+    context.stock.shift(context.players.pssv, to_flip=True, amount=pssv_add)
     # then to active one
-    context.stock.shift(context.players.actv, actv_add)
+    context.stock.shift(context.players.actv, to_flip=True, amount=actv_add)
 
 
 # collecting cards from all elements back to deck,
 # call in finish of Game
 def collect(context: Context):
-    context.players.actv.shift(context.deck)
-    context.players.pssv.shift(context.deck)
-    context.table.shift(context.deck)
+    context.players.actv.shift(context.deck, to_flip=True)
+    context.players.pssv.shift(context.deck, to_flip=True)
+    context.table.shift(context.deck, to_flip=True)
     context.stock.shift(context.deck)
 
 
@@ -193,7 +193,7 @@ def isMoveCorrect(move, context: Context) -> MoveType:
 
 def react2Word(word: Word, context: Context) -> None:
     if word == Word.BEATEN:
-        context.table.shift(context.deck)
+        context.table.shift(context.deck, to_flip=True)
         context.players.actv.status = Status.DEFENDING
         context.players.pssv.status = Status.ATTACKER
         complete(context)
@@ -219,7 +219,7 @@ def react2Move(move: dict, context: Context) -> None:
         # Status.ATTACKER or Status.ADDING
         else:
             table_layer = context.table.low
-        context.players.actv.swop(table_layer, card_indx)
+        context.players.actv.swop(table_layer, index=card_indx)
         if not context.players.actv.status == Status.ADDING:
             context.players.swapRoles()
     if 'word' in move:

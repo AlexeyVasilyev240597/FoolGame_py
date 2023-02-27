@@ -5,13 +5,15 @@ from src.view.player_view import PlayerView, PlayerSbjView
 def display_set(cards):
     cards_repr = '[ '
     for card in cards:
-        cards_repr += card.repr + ' '
+        cards_repr += card.draw() + ' '
     cards_repr += ']\n'
     return cards_repr
+
 
 class PileViewConsole(PileView):
     def __init__(self):
         PileView.__init__(self, False)
+
 
 class DeckViewConsole(PileViewConsole, DeckView):
     def draw(self):
@@ -23,7 +25,7 @@ class StockViewConsole(PileViewConsole, StockView):
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
         if self.last:
-            stock_repr += self.last.repr
+            stock_repr += self.last.draw()
         else:
             stock_repr += self.trump.value
         stock_repr += '|' + '\n'

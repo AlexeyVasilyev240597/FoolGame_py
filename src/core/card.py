@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum
+from enum import IntEnum, Enum, Flag
 
 class Suit(Enum):
     SPADES   = 'S'
@@ -17,18 +17,42 @@ class Rank(IntEnum):
     KING  = 13
     ACE   = 14
 
+class Side(Flag):
+    BACK = 0
+    FACE = 1
+
 DECK_VOLUME = len(Rank)*len(Suit)
 
 
 class Card:
-    # if both arguments are None then the card is face down
-    def __init__(self, suit: Suit = None, rank: Rank = None):
-        if suit == None and rank == None:
-            self.open = False
+    def __init__(self, suit: Suit, rank: Rank, side: Side = Side.BACK):
+        self._suit = suit
+        self._rank = rank
+        self._side = side
+
+    @property
+    def suit(self):
+        if self.open:
+            return self._suit
         else:
-            self.open = True
-        self.suit = suit
-        self.rank = rank
+            return None
+    
+    @property
+    def rank(self):
+        if self.open:
+            return self._rank
+        else:
+            return None
+
+    @property
+    def open(self):
+        if self._side == Side.BACK:
+            return False
+        else:
+            return True
+    
+    def flip(self):
+        self._side = Side(not self._side)
 
     def __eq__(self, __o: object) -> bool:
         return self.open and self.suit == __o.suit and self.rank == __o.rank

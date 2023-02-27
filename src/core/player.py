@@ -36,6 +36,9 @@ class Player(Pile):
         if card:
             self.cards.sort(key = self.__get_weight)
     
+    def hidCards(self) -> None:
+        [card.flip() for card in self.cards if card.open]
+    
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status

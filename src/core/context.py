@@ -24,7 +24,7 @@ class Context(ABC):
         #           rivals_ids = list(range(NUM_OF_PLAYERS))
         #           rivals_ids.pop(player_viewer_id)
         rival_id = int(not player_viewer_id)
-        new_context.stock.hideCards()
-        new_context.players.getPlayerById(rival_id).hideCards()
-        new_context.deck.hideCards()
+        # new_context.stock.hideCards()
+        new_context.players.getPlayerById(rival_id).hidCards()
+        # new_context.deck.hideCards()
         return new_context

@@ -11,27 +11,27 @@ class Pile(ABC):
         if isinstance(card, Card):
             self.cards.append(card)
         
-    def getCard(self, index: int = 0) -> Card:
+    def getCard(self, to_flip: bool = False, index: int = 0) -> Card:
         if self.vol > 0:
-            return self.cards.pop(index)
+            card = self.cards.pop(index)
+            if to_flip:
+                card.flip()
+            return card
         else:
             return None
 
     # swop of one card from current pile into 'receiver'
     # index is 0 by default (from top if it is simple pile)
-    def swop(self, receiver, index: int = 0) -> None:
-        receiver.addCard(self.getCard(index))
+    def swop(self, receiver, to_flip: bool = False, index: int = 0) -> None:
+        receiver.addCard(self.getCard(to_flip, index))
 
     # cards are being shifted from current pile into 'receiver'
-    # amount of cards to be moved, by default - all
-    def shift(self, receiver, amount: int = None):
+    # amount of cards to be moved, all by default
+    def shift(self, receiver, to_flip: bool = False, amount: int = None):
         if amount == None:
             amount = self.vol
         for _ in range(amount):
-            self.swop(receiver)
-
-    def hideCards(self) -> None:
-        self.cards = [Card()]*self.vol
+            self.swop(receiver, to_flip)
 
     @property
     def vol(self) -> int:
@@ -54,33 +54,39 @@ class Stock(Pile):
     def __init__(self):
         super().__init__()
         self.__trump = None
-        self.__last = Card()
+        self.__last = None
+    
+    def getCard(self, to_flip: bool = False, index: int = 0) -> Card:
+        # last card is open
+        if self.vol == 1:
+            to_flip = not to_flip
+        return super().getCard(to_flip, index)
     
     def setTrump(self) -> None:
         if self.vol > 0:
-            first_card = self.getCard()
-            self.__trump = first_card.suit
+            first_card = self.getCard(to_flip=True)
+            self._trump = first_card.suit
             # put first_card to the bottom
             self.addCard(first_card)
-            self.__last = first_card
+            self._last = first_card
     
-    def hideCards(self) -> None:
-        last = self.last
-        super().hideCards()
-        if last:
-            self.cards[-1] = last
+    # def hideCards(self) -> None:
+    #     last = self.last
+    #     super().hideCards()
+    #     if last:
+    #         self.cards[-1] = last
     
     # non-empty Stock can show only last card
     @property
     def last(self) -> Card:
         if self.vol > 0:
-            return self.__last
+            return self._last
         else:
             return None
     
     @property
     def trump(self) -> Suit:
-        return self.__trump
+        return self._trump
 
 
 class Table(ABC):
@@ -88,9 +94,9 @@ class Table(ABC):
         self.top = Pile()
         self.low = Pile()
      
-    def shift(self, receiver: Pile):
-        self.top.shift(receiver)
-        self.low.shift(receiver)
+    def shift(self, receiver: Pile, to_flip: bool = False):
+        self.top.shift(receiver, to_flip)
+        self.low.shift(receiver, to_flip)
         
     def hasRank(self, r: Rank) -> bool:
         piles = [self.top, self.low]

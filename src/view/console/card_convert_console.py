@@ -1,21 +1,7 @@
-from src.core.card import Rank, Suit, Card
+from src.core.card import Rank, Suit, Side, Card
 from src.view.card_view import CardView
 
 class CardViewStr(CardView):
-    def __init__(self, card: Card):
-        CardView.__init__(self, card)
-        if self.open:
-            if card.rank.value > 10:
-                self.rank = card.rank.name[0]
-            else:
-                self.rank = str(card.rank.value)
-            #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
-            self.suit = card.suit.value
-        else:
-            self.rank = '*'
-            self.suit = '*'
-        self.repr = f'{self.rank:>2}-{self.suit}'
-
     def _rankVal(rank_char: str):
         if not isinstance(rank_char, str):
             return None
@@ -29,10 +15,15 @@ class CardViewStr(CardView):
             return Rank.KING
         elif rank_char == 'A':
             return Rank.ACE
-        elif 6 <= int(rank_char) and int(rank_char) <= 10:
-            return Rank(int(rank_char))
-        else:
+        try:
+            rank_int = int(rank_char)
+            if 6 <= rank_int and rank_int <= 10:
+                return Rank(rank_int)
+            else:
+                return None
+        except:
             return None
+        
 
     def cardView2card(card_str: str) -> Card:
         if not isinstance(card_str, str):
@@ -48,12 +39,25 @@ class CardViewStr(CardView):
         else:
             return None
         if rank := CardViewStr._rankVal(rank):
-            return Card(suit, rank)
+            return Card(suit, rank, Side.FACE)
         else:
             return None
 
-    def __str__(self):
-        return self.repr
+    # def __str__(self):
+    #     return self.repr
+
+    def __repr__(self):
+        if self.open:
+            if self.rank.value > 10:
+                rank = self.rank.name[0]
+            else:
+                rank = str(self.rank.value)
+            #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
+            suit = self.suit.value
+        else:
+            rank = '*'
+            suit = '*'
+        return f'{rank:>2}-{suit}'        
 
     def draw(self):
-        print(self.repr)
+        return self.__repr__()
