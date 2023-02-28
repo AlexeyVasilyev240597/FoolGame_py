@@ -86,8 +86,6 @@ def setOrderOfMoving(context: Context, prev_res) -> None:
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
 def deal(context: Context):
-    # TODO: uncommnet this line - just for debugging comment
-    context.deck.shuffle()
     context.deck.shift(context.players.actv, to_flip=True, amount=CARDS_KIT)
     context.deck.shift(context.players.pssv, to_flip=True, amount=CARDS_KIT)
     context.deck.shift(context.stock)

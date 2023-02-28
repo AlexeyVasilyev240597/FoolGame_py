@@ -33,6 +33,9 @@ class Pile(ABC):
         for _ in range(amount):
             self.swop(receiver, to_flip)
 
+    def hideCards(self) -> None:
+        [card.hide() for card in self.cards]
+
     @property
     def vol(self) -> int:
         return len(self.cards)
@@ -53,14 +56,22 @@ class Deck(Pile):
 class Stock(Pile):
     def __init__(self):
         super().__init__()
-        self.__trump = None
-        self.__last = None
+        self._trump = None
+        self._last = None
     
     def getCard(self, to_flip: bool = False, index: int = 0) -> Card:
         # last card is open
         if self.vol == 1:
             to_flip = not to_flip
         return super().getCard(to_flip, index)
+    
+    def hideCards(self) -> None:
+        last = self.last
+        super().hideCards()
+        if last:
+            self.cards[-1] = last
+            # TODO: check if this line does not need
+            self._last = last
     
     def setTrump(self) -> None:
         if self.vol > 0:

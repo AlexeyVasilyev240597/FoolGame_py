@@ -27,22 +27,38 @@ class Player(Pile):
                 
         # game params
         self.trump = None
-        self.__get_weight = lambda card : ((card.suit == self.trump)*
-                                           Rank.ACE.value + card.rank.value)
+        self._get_weight = lambda card : ((card.suit == self.trump)*
+                                            Rank.ACE.value + card.rank.value)
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)
         # in case if card is None
         if card:
-            self.cards.sort(key = self.__get_weight)
+            self.cards.sort(key = self._get_weight)
     
-    def hidCards(self) -> None:
-        [card.flip() for card in self.cards if card.open]
+    # def _get_weight(self, card: Card):
+    #     w = len(Rank)
+    #     if not card.suit == self.trump:
+    #         if card.suit == Suit.SPADES:
+    #             w *= 0
+    #         elif card.suit == Suit.HEARTS:
+    #             w *= 1
+    #         elif card.suit == Suit.DIAMONDS:
+    #             w *= 2
+    #         elif card.suit == Suit.CLUBS:
+    #             w *= 3
+    #     else:
+    #         w *= 4
+    #     w += card.rank.value - Rank.SIX.value
+    #     return w
+    
+    def flipCards(self):
+        [card.flip() for card in self.cards]
     
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status
-        self.cards.sort(key = self.__get_weight)
+        self.cards.sort(key = self._get_weight)
     
 
 # structure for working with two players

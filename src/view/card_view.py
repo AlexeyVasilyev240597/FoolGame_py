@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.core.card import Card, Side
+from src.core.card import Suit, Side, Card
 
 class CardView(ABC, Card):
     def __init__(self, card: Card):
@@ -18,3 +18,6 @@ class CardView(ABC, Card):
     @abstractmethod
     def draw(self):
         pass
+    
+    def __eq__(self, __o: object) -> bool:
+        return self.open and self.suit == __o.suit and self.rank == __o.rank

@@ -47,7 +47,6 @@ class PlayersSbjs(ABC):
         if pl_1.name == pl_2.name:
             pl_1.name += '#1'
             pl_2.name += '#2'
-        self.game_view = GameView(False, pl_2.name, pl_1.name, 0, True)
 
 
     def ask2move(self, context: Context, pl_id: int) -> dict:
