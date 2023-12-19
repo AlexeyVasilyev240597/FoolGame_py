@@ -1,7 +1,7 @@
 # from abc import ABC, abstractmethod
 
 from src.core.elems import Deck
-from src.core.player import Players
+from src.core.players_hand import PlayersHands
 from src.core.context import Context
 # from .elems_view import DeckView, StockView, TableView
 # from .player_view import PlayerView
@@ -19,14 +19,14 @@ class GameView(Context):
         Context.__init__(self,
                         ElemViewFabric.getStockView(is_graphic),
                         ElemViewFabric.getTableView(is_graphic),
-                        Players(ElemViewFabric.getPlayerView(is_graphic),
+                        PlayersHands(ElemViewFabric.getPlayerView(is_graphic),
                                 ElemViewFabric.getPlayerView(is_graphic)),
                         ElemViewFabric.getDeckView(is_graphic))
         
                          
         # self.stock     = ElemViewFabric.getStockView(is_graphic)
         # self.table     = ElemViewFabric.getTableView(is_graphic)
-        # self.players   = Players(ElemViewFabric.getPlayerView(is_graphic),
+        # self.players   = PlayersHands(ElemViewFabric.getPlayerView(is_graphic),
         #                          ElemViewFabric.getPlayerView(is_graphic))
         # self.deck      = ElemViewFabric.getDeckView(is_graphic, deck)
         

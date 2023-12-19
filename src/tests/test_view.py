@@ -2,7 +2,7 @@
 
 
 from src.core.elems import Deck, Stock, Table
-from src.core.player import Player, Players
+from src.core.players_hand import PlayersHand, PlayersHands
 from src.core.context import Context
 from src.controller.bot.ai import Sergey_C
 from src.controller.human.console.human_console import HumanConsole
@@ -13,8 +13,8 @@ from src.view.game_view import GameView
 deck = Deck()
 context = Context(Stock(), 
                   Table(), 
-                  Players(Player(),
-                          Player()), 
+                  PlayersHands(PlayersHand(),
+                          PlayersHand()),
                   deck)
 
 pl_1 = HumanConsole(0)

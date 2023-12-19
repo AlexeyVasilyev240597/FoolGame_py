@@ -19,7 +19,7 @@ class Word(IntEnum):
     # GIVE_IN   = 5
 
 
-class Player(Pile):
+class PlayersHand(Pile):
     def __init__(self):
         super().__init__()
         # main params
@@ -62,8 +62,8 @@ class Player(Pile):
     
 
 # structure for working with two players
-class Players(ABC):
-    def __init__(self, pl_1: Player, pl_2: Player) -> None:
+class PlayersHands(ABC):
+    def __init__(self, pl_1: PlayersHand, pl_2: PlayersHand) -> None:
         self._players = [pl_1, pl_2]
         self._refs = {'actv': 0,
                       'pssv': 1}
@@ -79,7 +79,7 @@ class Players(ABC):
     def swapRoles(self):
         self._refs['actv'], self._refs['pssv'] = self._refs['pssv'], self._refs['actv']
     
-    def getPlayerById(self, id: int) -> Player:
+    def getPlayerById(self, id: int) -> PlayersHand:
         if id == 0 or id == 1:
             return self._players[id]
         else:

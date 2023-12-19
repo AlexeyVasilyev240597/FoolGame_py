@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.core.card import Card
-from src.core.player import Status, Word
+from src.core.players_hand import Status, Word
 from src.core.context import Context
 from src.view.game_view import GameView
 

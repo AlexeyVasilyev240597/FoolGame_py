@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from src.core.card  import Rank, Card
-from src.core.player import Status
+from src.core.players_hand import Status
 from src.controller.player_sbj import PlayerSbj
 from src.core.context import Context
 from src.core.rules  import doesCardFit, canCardBeThrown, MoveType

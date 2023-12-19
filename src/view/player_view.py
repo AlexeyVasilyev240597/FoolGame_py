@@ -3,15 +3,15 @@ from abc import ABC, abstractmethod
 # from .card_view import CardView
 from src.view.elems_view import ItemView
 from src.view.card_convert import CardConverter
-from src.core.player import Player
+from src.core.players_hand import PlayersHand
 
 
-class PlayerView(Player, ItemView):
+class PlayerView(PlayersHand, ItemView):
     def __init__(self, is_graphic):
-        Player.__init__(self)
+        PlayersHand.__init__(self)
         ItemView.__init__(self, is_graphic)
     
-    # def update(self, player: Player):
+    # def update(self, player: PlayersHand):
     #     self.status = player.status
     #     # game params
     #     self.trump  = player.trump

@@ -2,13 +2,13 @@ from abc import ABC
 from copy import deepcopy
 
 from src.core.elems  import Deck, Stock, Table
-from src.core.player import Player, Players
+from src.core.players_hand import PlayersHand, PlayersHands
 
 class Context(ABC):
     def __init__(self,
                  stock: Stock,
                  table: Table,
-                 players: Players,
+                 players: PlayersHands,
                  deck: Deck) -> None:
         self.stock   = stock
         self.table   = table
@@ -16,7 +16,7 @@ class Context(ABC):
         self.deck    = deck
         # self.stock   = Stock()
         # self.table   = Table()
-        # self.players = Players(Player(), Player())
+        # self.players = PlayersHands(PlayersHand(), PlayersHand())
         # self.deck    = deck
         
         self.last_move = {}

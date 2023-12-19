@@ -2,7 +2,7 @@ from enum import IntEnum
 
 from src.core.card    import Card
 from src.core.context import Context
-from src.core.player  import Status, Word
+from src.core.players_hand  import Status, Word
 # from game_exception import WrongInitException
 
 

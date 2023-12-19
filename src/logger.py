@@ -1,7 +1,7 @@
 from   enum import IntEnum
 import json
 
-from player import Word
+from players_hand import Word
 
 class LogMode(IntEnum):
     ALL      = 1,

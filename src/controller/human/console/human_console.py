@@ -1,4 +1,4 @@
-from src.core.player import Word
+from src.core.players_hand import Word
 from src.core.context import Context
 from src.controller.player_sbj import PlayerSbj
 from src.view.console.card_convert_console import CardViewStr
