@@ -1,0 +1,5 @@
+The branch moving_GV_to_player was created from no_graphic.
+
+Main design goal:
+	move the GameView class inside PlayerSbj class, and
+	make the FoolGame just a class that only works with a simple context (without any view attributes).
