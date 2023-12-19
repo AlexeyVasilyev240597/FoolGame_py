@@ -9,7 +9,7 @@ src_folder = Path(os.path.dirname(__file__)).parent.parent.parent
 img_folder = os.path.join(src_folder, 'pic')
 
 class CardViewGraph(CardView, pygame.sprite.Sprite):
-    def __init__(self, card: Card, pos):
+    def __init__(self, card: Card, pos: list = [0, 0]):
         CardView.__init__(self, card)
         if self.open:
             p2f = os.path.join(img_folder, 
