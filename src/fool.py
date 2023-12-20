@@ -15,8 +15,7 @@ class FoolGame:
                                 Table(), 
                                 PlayersHands(PlayersHand(), PlayersHand()), 
                                 deck)
-        # TODO: update GameView of user and context_p both of players!
-
+    # TODO: update GameView of user and context_p both of players!
     # def update_field(self):
     #     context_u = self.context.getPartialCopy(self.user_id)
     #     self.pl_sbj.game_view.update(context_u)
