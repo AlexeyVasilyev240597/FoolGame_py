@@ -37,11 +37,11 @@ class GameView(Context):
     def rival_id(self):
         return int(not self.me_myself.id)
     
-    def _flipRivalCards(self):
-        self.players.getPlayerById(self.rival_id).flipCards()
+    # def _flipRivalCards(self):
+    #     self.players.getPlayerById(self.rival_id).flipCards()
     
     def update(self):
-        self._flipRivalCards()
+        # self._flipRivalCards()
         # self.stock_v.update(context.stock)
         self.rival.update(self.last_move, 
                           self.players.getIdByRole('actv'))
@@ -52,7 +52,7 @@ class GameView(Context):
                               self.players.getIdByRole('actv'))
         # self.deck_v.update(context.deck)
         self.draw()
-        self._flipRivalCards()
+        # self._flipRivalCards()
     
     def draw(self):
         self.stock.draw()

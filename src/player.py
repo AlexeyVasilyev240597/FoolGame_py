@@ -4,6 +4,7 @@ from src.core.context           import Context
 from src.core.rules             import react2Move
 from src.controller.player_sbj  import PlayerSbj, PlayersSbjs
 from src.view.game_view         import GameView
+from src.view.card_convert      import CardConverter
 
 
 class Player:
@@ -30,18 +31,39 @@ class Player:
         
         react2Move(last_move, self.view)
         
-        #  TODO:
-        #   find closed cards in self.hand, 
-        #   find diff between self.hand and new_context.players.getById(self.sbj.id)
-        #   replace closed dummy cards by found in diff
-        if 'word' in last_move and last_move['word'] == Word.BEATEN:
-            return
         
+        if 'word' in last_move and last_move['word'] == Word.BEATEN:
+            # find closed cards in self.hand, 
+            old_hand_v = self.view.players.getPlayerById(self.sbj.id).cards
+            closed_cards_ids = [i for i in range(len(old_hand_v)) if not old_hand_v[i].open]
+            if not closed_cards_ids:
+                return
+ 
+            # find diff between self.hand and new_context.players.getById(self.sbj.id)
+            known_cards = []
+            for card_v in old_hand_v:
+                if card_v.open:
+                    # ASSUMPTION: is_graphic = False
+                    known_cards.append(CardConverter.cardView2card(card_v, False))
             
+            new_hand = new_context.players.getPlayerById(self.sbj.id).cards
+            unknown_cards = []
+            for card in new_hand:
+                if not card in known_cards:
+                    unknown_cards.append(card)
+            
+            # replace closed dummy cards by found in diff
+            j = 0
+            for i in closed_cards_ids:
+                # ASSUMPTION: is_graphic = False
+                old_hand_v[i] = CardConverter.card2cardView(unknown_cards[j], False)
+                j += 1
+        
+        self.view.update()
             
             
     def _flipRivalCards(self, rival_id: int, card: Card = None):
-        rivals_hand = self.view.players.getPlayerById(rival_id)
+        rivals_hand = self.view.players.getPlayerById(rival_id).cards
         if card and rivals_hand:
             rivals_hand[0] = card
         else:        
@@ -55,6 +77,7 @@ class Players:
         # TODO: make meeting with rival better
         for id, pl in zip(range(len(self._players)), self._players):
             pl.sbj = PlayerSbj(pl.name, id)
+            # ASSUMPTION: is_graphic = False
             pl.view = GameView(False, self._players[(not id)], pl.name, id)
         
         # self._players = PlayersSbj()
