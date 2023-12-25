@@ -73,16 +73,17 @@ from src.core.elems import Deck
 from src.controller.bot.ai import Sergey_C, Nikita_A
 from src.controller.human.console.human_console import HumanConsole
 from src.controller.player_sbj import PlayersSbjs
+from src.player import Player, Players
 from src.fool import FoolGame
 
 
-pl_1 = HumanConsole(0)
+pl_1 = Player(HumanConsole())
 # pl_1 = Nikita_A(0)
-pl_2 = Sergey_C(1)
+pl_2 = Player(Sergey_C())
 
-pls = PlayersSbjs(pl_1, pl_2)
+pls = Players(pl_1, pl_2)
 
 deck = Deck()
-game = FoolGame(deck, pls, 0)
+game = FoolGame(deck, pls)
 game.playGameSeries(2)
 # game.playGameRound()

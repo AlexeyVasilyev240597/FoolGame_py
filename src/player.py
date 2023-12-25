@@ -8,13 +8,17 @@ from src.view.card_convert      import CardConverter
 
 
 class Player:
-    def __init__(self, name: str) -> None:
-        self.name = name
+    def __init__(self, pl_sbj: PlayerSbj) -> None:
+        self.name = pl_sbj.name
         self.hand = PlayersHand()
-        # TODO: set after a deal form partial copy of general context
+        # model: will set after a deal form partial copy of general context
         self.context = None
+        # view and controller: will set after meetinf with a rival
+        self.view = None
+        self.sbj = pl_sbj
         
     def updateContext(self, new_context: Context):
+        is_graphic = self.view.is_graphic
         self.context = new_context
         
         rival_id = not self.sbj.id
@@ -43,8 +47,7 @@ class Player:
             known_cards = []
             for card_v in old_hand_v:
                 if card_v.open:
-                    # ASSUMPTION: is_graphic = False
-                    known_cards.append(CardConverter.cardView2card(card_v, False))
+                    known_cards.append(CardConverter.cardView2card(card_v, is_graphic))
             
             new_hand = new_context.players.getPlayerById(self.sbj.id).cards
             unknown_cards = []
@@ -55,8 +58,7 @@ class Player:
             # replace closed dummy cards by found in diff
             j = 0
             for i in closed_cards_ids:
-                # ASSUMPTION: is_graphic = False
-                old_hand_v[i] = CardConverter.card2cardView(unknown_cards[j], False)
+                old_hand_v[i] = CardConverter.card2cardView(unknown_cards[j], is_graphic)
                 j += 1
         
         self.view.update()
@@ -71,14 +73,18 @@ class Player:
                 
         
 
-class Players:
-    def __init__(self, pl_1: Player, pl_2: Player) -> None:
+class Players(PlayersSbjs):
+    def __init__(self, pl_1: Player, pl_2: Player, is_graphic: bool = False) -> None:
         self._players = [pl_1, pl_2]
         # TODO: make meeting with rival better
         for id, pl in zip(range(len(self._players)), self._players):
-            pl.sbj = PlayerSbj(pl.name, id)
-            # ASSUMPTION: is_graphic = False
-            pl.view = GameView(False, self._players[(not id)], pl.name, id)
-        
-        # self._players = PlayersSbj()
+            pl.view = GameView(is_graphic, self._players[(not id)], pl.name, id)
+        super().__init__(pl_1.sbj, pl_2.sbj)
+    
+    def getPlayerById(self, id: int) -> Player:
+        if id == 0 or id == 1:
+            return self._players[id]
+        else:
+            return None
+
     

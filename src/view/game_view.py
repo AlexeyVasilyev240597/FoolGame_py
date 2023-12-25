@@ -14,7 +14,7 @@ class GameView(Context):
                  rival_name: str,
                  my_name: str, 
                  my_id: int,
-                 deck: Deck
+                 # deck: Deck
                  ) -> None:       
         Context.__init__(self,
                         ElemViewFabric.getStockView(is_graphic),

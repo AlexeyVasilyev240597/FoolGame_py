@@ -4,10 +4,10 @@ from src.controller.player_sbj import PlayerSbj
 from src.view.console.card_convert_console import CardViewStr
 
 class HumanConsole(PlayerSbj):
-    def __init__(self, id: int) -> None:
+    def __init__(self) -> None:
         print('type your name')
         name = input()
-        super().__init__(name, id)
+        super().__init__(name)
     
     def str2word(word_str: str) -> Word:
         if word_str == 'BT':

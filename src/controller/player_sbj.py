@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 from src.core.card import Card
 from src.core.players_hand import Status, Word
 from src.core.context import Context
-from src.view.game_view import GameView
+# from src.view.game_view import GameView
 
 
 class PlayerSbj(ABC):
-    def __init__(self, name: str, id: int) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
-        self.id = id
+        self.id = None
     
     def move(self, context: Context):
         move = {}
@@ -43,6 +43,8 @@ class PlayersSbjs(ABC):
     #       and call fabric, pass to it just id of each player
     def __init__(self, pl_1: PlayerSbj, pl_2: PlayerSbj) -> None:
         self._players = [pl_1, pl_2]
+        pl_1.id = 0;
+        pl_2.id = 1
         self.score = [0, 0]
         if pl_1.name == pl_2.name:
             pl_1.name += '#1'

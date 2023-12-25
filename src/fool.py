@@ -2,30 +2,32 @@
 
 from src.core.elems  import Deck, Stock, Table
 from src.core.players_hand import PlayersHand, PlayersHands
-from src.controller.player_sbj import PlayersSbjs
+# from src.controller.player_sbj import PlayersSbjs
 from src.core.context import Context
 from src.core.rules import (deal, whoIsFool, setOrderOfMoving, GameStage, isMoveCorrect,
                          react2Move, ResultOfRaund, collect, gameIsOver)
+from src.player import Players
 # from src.view.game_view import GameView
 
 class FoolGame:
-    def __init__(self, deck: Deck, pl_sbj: PlayersSbjs) -> None:
-        self.pl_sbj = pl_sbj
+    def __init__(self, deck: Deck, pls: Players) -> None:
+        self.pls = pls
         self.context = Context(Stock(), 
                                 Table(), 
                                 PlayersHands(PlayersHand(), PlayersHand()), 
                                 deck)
-    # TODO: update GameView of user and context_p both of players!
-    # def update_field(self):
-    #     context_u = self.context.getPartialCopy(self.user_id)
-    #     self.pl_sbj.game_view.update(context_u)
+    
+    def updatePlayersContexts(self):
+        for id in range(2):
+            context_u = self.context.getPartialCopy(id)
+            self.pls.getPlayerById(id).updateContext(context_u)
+            
         
     def processingRoundResult(self, result):
         if result[0] == ResultOfRaund.FOOL_EXISTS:
             fool_id = result[1]
             self.pl_sbj.setFoolStatus(fool_id)
-            # TODO: update GameView of user and context_p both of players!
-            # self.update_field()
+            self.updatePlayersContexts()
         else:
             print(result[0].name)
         self.pl_sbj.print_score()
@@ -39,9 +41,10 @@ class FoolGame:
         
         deal(self.context)
         setOrderOfMoving(self.context, prev_res)
+        actv_id = self.context.players.getIdByRole('actv')
+        context_p = self.pla.getPartialCopy(actv_id)
         
-        # TODO: update GameView of user and context_p both of players!
-        # self.game_view.update()
+        self.updatePlayersContexts()
         
         game_stage = GameStage.PLAYING
         while game_stage == GameStage.PLAYING:
@@ -56,9 +59,7 @@ class FoolGame:
                         
             react2Move(move, self.context)
             game_stage = gameIsOver(self.context)
-            # TODO: update GameView of user and context_p both of players!
-            # self.game_view.update()
-            
+            self.updatePlayersContexts()    
         
         result = whoIsFool(self.context)
         self.processingRoundResult(result)
