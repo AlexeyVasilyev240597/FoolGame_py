@@ -1,4 +1,4 @@
-from src.view.elems_view import ItemView, DeckView, StockView, TableView
+from src.view.elems_view import ItemView, PileView, StockView, TableView, DeckView
 from src.view.player_view import PlayerView, PlayerSbjView
 
 
@@ -15,10 +15,14 @@ def display_set(cards):
 #         ItemView.__init__(self, False)
 
 
-class DeckViewConsole(DeckView):
+class PileViewConsole(PileView):
     def draw(self):
         pass
         # print(self.vol)
+
+class DeckViewConsole(DeckView):
+    def draw(self):
+        pass
 
 class StockViewConsole(StockView):    
     def draw(self):

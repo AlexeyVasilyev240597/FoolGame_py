@@ -1,6 +1,6 @@
 # from copy import deepcopy
 
-from src.core.elems  import Deck, Stock, Table
+from src.core.elems  import Pile, Deck, Stock, Table
 from src.core.players_hand import PlayersHand, PlayersHands
 # from src.controller.player_sbj import PlayersSbjs
 from src.core.context import Context
@@ -15,36 +15,37 @@ class FoolGame:
         self.context = Context(Stock(), 
                                 Table(), 
                                 PlayersHands(PlayersHand(), PlayersHand()), 
-                                deck)
+                                Pile())
+        self.deck = deck
     
-    def updatePlayersContexts(self):
-        for id in range(2):
-            context_u = self.context.getPartialCopy(id)
-            self.pls.getPlayerById(id).updateContext(context_u)
+        
+    def updatePlayersContexts(self, game_stage):
+        # for id in range(2):
+        # ASSUMPTION: User has id == 0
+        id = 0
+        context_u = self.context.getPartialCopy(id)
+        self.pls.getPlayerById(id).updateContext(context_u, game_stage)
             
         
     def processingRoundResult(self, result):
         if result[0] == ResultOfRaund.FOOL_EXISTS:
             fool_id = result[1]
-            self.pl_sbj.setFoolStatus(fool_id)
-            self.updatePlayersContexts()
+            self.pls.setFoolStatus(fool_id)
+            self.updatePlayersContexts(GameStage.GAME_OVER)
         else:
             print(result[0].name)
-        self.pl_sbj.print_score()
+        self.pls.print_score()
     
     
     def playGameRound(self, prev_res: dict) -> dict:
-        self.context.deck.shuffle()
+        self.deck.shuffle()
         
         print('\n\n')
         print('-----------start of round-----------')
         
-        deal(self.context)
+        deal(self.context, self.deck)
         setOrderOfMoving(self.context, prev_res)
-        actv_id = self.context.players.getIdByRole('actv')
-        context_p = self.pla.getPartialCopy(actv_id)
-        
-        self.updatePlayersContexts()
+        self.updatePlayersContexts(GameStage.START)
         
         game_stage = GameStage.PLAYING
         while game_stage == GameStage.PLAYING:
@@ -53,17 +54,17 @@ class FoolGame:
             context_p = self.context.getPartialCopy(actv_id)
             
             while (wrong_move := isMoveCorrect(
-                    (move := self.pl_sbj.ask2move(context_p, actv_id)), 
+                    (move := self.pls.ask2move(context_p, actv_id)), 
                     context_p)):
                 print(wrong_move)
                         
             react2Move(move, self.context)
             game_stage = gameIsOver(self.context)
-            self.updatePlayersContexts()    
+            self.updatePlayersContexts(game_stage)    
         
         result = whoIsFool(self.context)
         self.processingRoundResult(result)
-        collect(self.context)
+        collect(self.context, self.deck)
         
         print('------------end of round------------')
         print('\n\n')
@@ -73,7 +74,7 @@ class FoolGame:
 
     def playGameSeries(self, num_of_wins: int):
         result = [ResultOfRaund.NEW_GAME]
-        while max(self.pl_sbj.score) < num_of_wins:
+        while max(self.pls.score) < num_of_wins:
             result = self.playGameRound(result)
     
 

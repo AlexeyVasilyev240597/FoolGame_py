@@ -1,7 +1,8 @@
 from enum import IntEnum
 
-from src.core.card    import Card
-from src.core.context import Context
+from src.core.card          import Card
+from src.core.elems         import Deck
+from src.core.context       import Context
 from src.core.players_hand  import Status, Word
 # from game_exception import WrongInitException
 
@@ -85,10 +86,10 @@ def setOrderOfMoving(context: Context, prev_res) -> None:
 # now in first game first move is given to first player (by order),
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
-def deal(context: Context):
-    context.deck.shift(context.players.actv, to_flip=True, amount=CARDS_KIT)
-    context.deck.shift(context.players.pssv, to_flip=True, amount=CARDS_KIT)
-    context.deck.shift(context.stock)
+def deal(context: Context, deck: Deck):
+    deck.shift(context.players.actv, to_flip=True, amount=CARDS_KIT)
+    deck.shift(context.players.pssv, to_flip=True, amount=CARDS_KIT)
+    deck.shift(context.stock)
     context.stock.setTrump()
 
 
@@ -102,11 +103,12 @@ def complete(context: Context):
 
 # collecting cards from all elements back to deck,
 # call in finish of Game
-def collect(context: Context):
-    context.players.actv.shift(context.deck, to_flip=True)
-    context.players.pssv.shift(context.deck, to_flip=True)
-    context.table.shift(context.deck, to_flip=True)
-    context.stock.shift(context.deck)
+def collect(context: Context, deck: Deck):
+    context.players.actv.shift(context.pile, to_flip=True)
+    context.players.pssv.shift(context.pile, to_flip=True)
+    context.table.shift(context.pile, to_flip=True)
+    context.stock.shift(context.pile)
+    context.pile.shift(deck)
 
 
 ## CHECKING PLAYER'S MOVE FUNCTIONS
@@ -191,7 +193,7 @@ def isMoveCorrect(move, context: Context) -> MoveType:
 
 def react2Word(word: Word, context: Context) -> None:
     if word == Word.BEATEN:
-        context.table.shift(context.deck, to_flip=True)
+        context.table.shift(context.pile, to_flip=True)
         context.players.actv.status = Status.DEFENDING
         context.players.pssv.status = Status.ATTACKER
         complete(context)

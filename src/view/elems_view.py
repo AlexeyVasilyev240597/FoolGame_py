@@ -18,26 +18,45 @@ class ItemView(ABC):
     # def update(self, pile: Pile):
     #     pass
 
+class PileView(Pile, ItemView):
+    def __init__(self, is_graphic: bool):
+        Pile.__init__(self)
+        ItemView.__init__(self, is_graphic)
+
 class DeckView(Deck, ItemView):
     def __init__(self, is_graphic: bool):
         Deck.__init__(self)
         ItemView.__init__(self, is_graphic)
-        [card.flip() for card in self.cards]
+        [card.hide() for card in self.cards]
         for i in range(len(self.cards)):
             self.cards[i] = CardConverter.card2cardView(self.cards[i], self.is_graphic)
-        [card.flip() for card in self.cards]
+        
+def syncPile(pile_v: PileView, pile: Pile):
+    # remove absent cards
+    for card_v in pile_v.cards:
+        card = CardConverter.cardView2card(card_v, pile_v.is_graphic)
+        if not card in pile.cards:
+            pile_v.cards.remove(card_v)
+        
+    # add new cards
+    for card in pile.cards:
+        card_v = CardConverter.card2cardView(card, pile_v.is_graphic)
+        if not card_v in pile_v.cards:
+            pile_v.cards.append(card_v)
+
+            
     
-    def syncDeck(self, deck: Deck):
-        [card.flip() for card in self.cards]
-        [card.flip() for card in deck.cards]
-        for i in range(len(self.cards)):
-            card = Card(self.cards[i].suit, self.cards[i].rank, Side.FACE)
-            j = deck.cards.index(card)
-            self.cards[i], self.cards[j] = self.cards[j], self.cards[i]
-        # for c, c_v in zip(deck.cards, self.cards):
-        #         print(f'deck: {c.rank}-{c.suit}, deck_view: {c_v.rank}-{c_v.suit}')
-        [card.flip() for card in self.cards]
-        [card.flip() for card in deck.cards]
+    # def syncDeck(self, deck: Deck):
+    #     [card.flip() for card in self.cards]
+    #     [card.flip() for card in deck.cards]
+    #     for i in range(len(self.cards)):
+    #         card = Card(self.cards[i].suit, self.cards[i].rank, Side.FACE)
+    #         j = deck.cards.index(card)
+    #         self.cards[i], self.cards[j] = self.cards[j], self.cards[i]
+    #     # for c, c_v in zip(deck.cards, self.cards):
+    #     #         print(f'deck: {c.rank}-{c.suit}, deck_view: {c_v.rank}-{c_v.suit}')
+    #     [card.flip() for card in self.cards]
+    #     [card.flip() for card in deck.cards]
         # NOTE: you need to pass deepcopy of deck 
         # (for don't changing cards in original deck)
         # or need to call card.flip for stay deck closed!

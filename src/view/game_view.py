@@ -3,7 +3,7 @@
 from src.core.elems import Deck
 from src.core.players_hand import PlayersHands
 from src.core.context import Context
-# from .elems_view import DeckView, StockView, TableView
+from .elems_view import syncPile # DeckView, StockView, TableView
 # from .player_view import PlayerView
 
 from src.view.elem_view_fabric import ElemViewFabric
@@ -14,14 +14,16 @@ class GameView(Context):
                  rival_name: str,
                  my_name: str, 
                  my_id: int,
-                 # deck: Deck
                  ) -> None:       
         Context.__init__(self,
                         ElemViewFabric.getStockView(is_graphic),
                         ElemViewFabric.getTableView(is_graphic),
                         PlayersHands(ElemViewFabric.getPlayerView(is_graphic),
-                                ElemViewFabric.getPlayerView(is_graphic)),
-                        ElemViewFabric.getDeckView(is_graphic))
+                                     ElemViewFabric.getPlayerView(is_graphic)),
+                        ElemViewFabric.getPileView(is_graphic))
+        
+        self.deck = ElemViewFabric.getDeckView(is_graphic)
+        self.is_graphic = is_graphic
         
                          
         # self.stock     = ElemViewFabric.getStockView(is_graphic)
@@ -40,7 +42,14 @@ class GameView(Context):
     # def _flipRivalCards(self):
     #     self.players.getPlayerById(self.rival_id).flipCards()
     
-    def update(self):
+    def update(self, context: Context):
+        # syncPile(self.pile, context.pile)
+        # syncPile(self.stock, context.stock)
+        # syncPile(self.players.getPlayerById(self.me_myself.id), context.getPlayerById(self.me_myself.id))
+        # syncPile(self.players.getPlayerById(self.rival_id), context.getPlayerById(self.rival_id))
+        # syncPile(self.table.low, context.table.low)
+        # syncPile(self.table.top, context.table.top)
+        
         # self._flipRivalCards()
         # self.stock_v.update(context.stock)
         self.rival.update(self.last_move, 
@@ -61,7 +70,7 @@ class GameView(Context):
         self.table.draw()
         self.players.getPlayerById(self.me_myself.id).draw()
         self.me_myself.draw()
-        self.deck.draw()
+        self.pile.draw()
     
 # class GameView:
 #     def __init__(self, 

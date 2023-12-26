@@ -27,13 +27,12 @@ class PlayersHand(Pile):
                 
         # game params
         self.trump = None
-        self._get_weight = lambda card : ((card.suit == self.trump)*
-                                            Rank.ACE.value + card.rank.value)
+        self._get_weight = lambda card : (card.suit == self.trump)*Rank.ACE.value + card.rank.value
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)
         # in case if card is None
-        if card:
+        if card.open:
             self.cards.sort(key = self._get_weight)
     
     # def _get_weight(self, card: Card):

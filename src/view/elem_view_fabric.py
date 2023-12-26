@@ -1,11 +1,11 @@
 
-from src.core.elems import Deck
-from src.view.elems_view import DeckView, StockView, TableView
+# from src.core.elems import Deck
+from src.view.elems_view import PileView, StockView, TableView, DeckView
 from src.view.player_view import PlayerView, PlayerSbjView
 
 from src.view.console.game_view_console import (StockViewConsole, TableViewConsole, 
                                       PlayerViewConsole, PlayerSbjViewConsole, 
-                                      DeckViewConsole)
+                                      PileViewConsole, DeckViewConsole)
 
 class ElemViewFabric:
     
@@ -33,9 +33,14 @@ class ElemViewFabric:
         else:
             return PlayerSbjViewConsole(False, name, id)
     
+    def getPileView(is_graphic: bool) -> PileView:
+        if is_graphic:
+            return None
+        else:
+            return PileViewConsole(False)
+
     def getDeckView(is_graphic: bool) -> DeckView:
         if is_graphic:
             return None
         else:
             return DeckViewConsole(False)
-

@@ -48,8 +48,10 @@ class Card:
     def open(self):
         if self._side == Side.BACK:
             return False
-        else:
+        elif self._side == Side.FACE:
             return True
+        else:
+            return None
     
     def flip(self):
         self._side = Side(not self._side)
@@ -58,13 +60,13 @@ class Card:
         if self.open:
             self.flip()
         self._rank = None
-        self._side = None
+        self._suit = None
 
     def __eq__(self, __o: object) -> bool:
         return self.open and self.suit == __o.suit and self.rank == __o.rank
 
     def __repr__(self):
-        if self.side == Side.FACE:
+        if self.open:
             if self.rank.value == Rank.JACK:
                 rank = 'J'
             elif self.rank.value == Rank.QUEEN:
