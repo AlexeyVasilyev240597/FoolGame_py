@@ -1,4 +1,5 @@
 from src.core.card              import Card
+from sec.core.elems             import Pile
 from src.core.players_hand      import Word, PlayersHand, PlayersHands
 from src.core.context           import Context
 from src.core.rules             import GameStage, deal, setOrderOfMoving, react2Move, ResultOfRaund
@@ -49,6 +50,17 @@ class Player:
             pass
         
         self.view.update()  
+
+    # def replaceDummyCards(self, pile_v: Pile):
+    #     new_hand = self.context.players.getPlayerById(self.sbj.id).cards
+    #     old_hand = self.hand
+    #     unknown_cards = []
+    #     for card in new_hand:
+    #         if not card in old_hand:
+    #             unknown_cards.append(card)
+    #     for card in unknown_cards:
+    #         card_v = CardConverter.card2cardView(card, self.view.is_graphic)
+            
     
     def openCardsInMyHand(self):
         is_graphic = self.view.is_graphic

@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 
 from src.core.card import Card
-from src.core.players_hand import Status, Word
+from src.core.players_hand import Status, Word, PlayersHand
 from src.core.context import Context
 # from src.view.game_view import GameView
 
 
 class PlayerSbj(ABC):
     def __init__(self, name: str) -> None:
+        # self.hand = PlayersHand()
         self.name = name
         self.id = None
     
@@ -17,9 +18,12 @@ class PlayerSbj(ABC):
             card = self.chooseCard(context)
             if card:
                 move['card'] = card
+                # card_indx = self.hand.cards.index(card)
+                # card_indx = context.players.getPlayerById(self.id).cards[card_indx].flip()
             else:
                 word = self.sayWord(context.players.actv.status)
                 move['word'] = word
+        move['pl_id'] = self.id
         return move
 
     def sayWord(self, status: Status):
@@ -43,7 +47,7 @@ class PlayersSbjs(ABC):
     #       and call fabric, pass to it just id of each player
     def __init__(self, pl_1: PlayerSbj, pl_2: PlayerSbj) -> None:
         self._players = [pl_1, pl_2]
-        pl_1.id = 0;
+        pl_1.id = 0
         pl_2.id = 1
         self.score = [0, 0]
         if pl_1.name == pl_2.name:

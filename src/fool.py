@@ -14,7 +14,8 @@ class FoolGame:
         self.pls = pls
         self.context = Context(Stock(), 
                                 Table(), 
-                                PlayersHands(PlayersHand(), PlayersHand()), 
+                                PlayersHands(pls.getPlayerById(0).hand,
+                                             pls.getPlayerById(1).hand),
                                 Pile())
         self.deck = deck
     

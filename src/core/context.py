@@ -2,7 +2,7 @@ from abc import ABC
 from copy import deepcopy
 
 from src.core.elems  import Pile, Stock, Table
-from src.core.players_hand import PlayersHand, PlayersHands
+from src.core.players_hand import PlayersHands
 
 class Context(ABC):
     def __init__(self,
@@ -19,6 +19,7 @@ class Context(ABC):
 
     def getPartialCopy(self, player_viewer_id: int):
         new_context = deepcopy(self)
+        
         # NOTE: valid for game with two players,
         #       if > 2 players:
         #           rivals_ids = list(range(NUM_OF_PLAYERS))
@@ -27,4 +28,5 @@ class Context(ABC):
         new_context.stock.hideCards()
         new_context.players.getPlayerById(rival_id).hideCards()
         new_context.pile.hideCards()
+        
         return new_context
