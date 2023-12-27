@@ -55,7 +55,7 @@ class FoolGame:
             context_p = self.context.getPartialCopy(actv_id)
             
             while (wrong_move := isMoveCorrect(
-                    (move := self.pls.ask2move(context_p, actv_id)), 
+                    (move := self.pls.getPlayerById(actv_id).sbj.move(context_p)), 
                     context_p)):
                 print(wrong_move)
                         

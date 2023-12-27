@@ -42,7 +42,7 @@ class GameView(Context):
     # def _flipRivalCards(self):
     #     self.players.getPlayerById(self.rival_id).flipCards()
     
-    def update(self, context: Context):
+    def update(self):
         # syncPile(self.pile, context.pile)
         # syncPile(self.stock, context.stock)
         # syncPile(self.players.getPlayerById(self.me_myself.id), context.getPlayerById(self.me_myself.id))

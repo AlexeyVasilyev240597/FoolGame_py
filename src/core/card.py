@@ -25,7 +25,7 @@ DECK_VOLUME = len(Rank)*len(Suit)
 
 
 class Card:
-    def __init__(self, suit: Suit, rank: Rank, side: Side = Side.BACK):
+    def __init__(self, suit: Suit, rank: Rank, side: Side = Side.FACE):
         self._suit = suit
         self._rank = rank
         self._side = side
@@ -53,12 +53,13 @@ class Card:
         else:
             return None
     
-    def flip(self):
-        self._side = Side(not self._side)
+    # def flip(self):
+    #     self._side = Side(not self._side)
     
     def hide(self):
         if self.open:
-            self.flip()
+            self._side = Side(not self._side)
+            # self.flip()
         self._rank = None
         self._suit = None
 

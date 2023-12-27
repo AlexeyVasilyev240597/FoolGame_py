@@ -1,5 +1,5 @@
 from src.core.card              import Card
-from sec.core.elems             import Pile
+from src.core.elems             import Pile
 from src.core.players_hand      import Word, PlayersHand, PlayersHands
 from src.core.context           import Context
 from src.core.rules             import GameStage, deal, setOrderOfMoving, react2Move, ResultOfRaund
@@ -27,10 +27,11 @@ class Player:
         last_move = new_context.last_move
         
         if stage == GameStage.START:
+            # TODO: open last card in stock_v for setting the trump!
             deal(self.view, self.view.deck)
             # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
-            setOrderOfMoving(self.context, [ResultOfRaund.NEW_GAME])
+            setOrderOfMoving(self.view, [ResultOfRaund.NEW_GAME])
         elif stage == GameStage.PLAYING:
             if 'pl_id' in last_move:
                 if last_move['pl_id'] == rival_id:
@@ -92,7 +93,7 @@ class Player:
     def _flipRivalCards(self, rival_id: int, card: Card = None):
         rivals_hand = self.view.players.getPlayerById(rival_id).cards
         if card and rivals_hand:
-            rivals_hand[0] = card
+            rivals_hand[0] = CardConverter.card2cardView(card, self.view.is_graphic)
         else:        
             self.rival_id.flipCards()
                 
@@ -103,7 +104,7 @@ class Players(PlayersSbjs):
         self._players = [pl_1, pl_2]
         # TODO: make meeting with rival better
         for id, pl in zip(range(len(self._players)), self._players):
-            pl.view = GameView(is_graphic, self._players[(not id)], pl.name, id)
+            pl.view = GameView(is_graphic, self._players[(not id)].name, pl.name, id)
         super().__init__(pl_1.sbj, pl_2.sbj)
         self._players = [pl_1, pl_2]
     

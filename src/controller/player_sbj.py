@@ -55,10 +55,10 @@ class PlayersSbjs(ABC):
             pl_2.name += '#2'
 
 
-    def ask2move(self, context: Context, pl_id: int) -> dict:
-        move = self._players[pl_id].move(context)
-        move['pl_id'] = pl_id
-        return move
+    # def ask2move(self, context: Context, pl_id: int) -> dict:
+    #     move = self._players[pl_id].move(context)
+    #     move['pl_id'] = pl_id
+    #     return move
         
     
     def getNameByID(self, id: int) -> str:
