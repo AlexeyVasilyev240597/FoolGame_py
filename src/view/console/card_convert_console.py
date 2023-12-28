@@ -44,18 +44,18 @@ class CardViewStr(CardView):
             return None
 
 
-    def __repr__(self):
-        if self.open:
-            if self.rank.value > 10:
-                rank = self.rank.name[0]
-            else:
-                rank = str(self.rank.value)
-            #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
-            suit = self.suit.value
-        else:
-            rank = '*'
-            suit = '*'
-        return f'{rank:>2}-{suit}'        
+    # def __repr__(self):
+    #     if self.open:
+    #         if self.rank.value > 10:
+    #             rank = self.rank.name[0]
+    #         else:
+    #             rank = str(self.rank.value)
+    #         #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
+    #         suit = self.suit.value
+    #     else:
+    #         rank = '*'
+    #         suit = '*'
+    #     return f'{rank:>2}-{suit}'        
 
     def draw(self):
         return self.__repr__()

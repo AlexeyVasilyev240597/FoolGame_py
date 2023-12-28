@@ -23,7 +23,7 @@ class PlayerSbj(ABC):
             else:
                 word = self.sayWord(context.players.actv.status)
                 move['word'] = word
-        move['pl_id'] = self.id
+            move['pl_id'] = self.id
         return move
 
     def sayWord(self, status: Status):

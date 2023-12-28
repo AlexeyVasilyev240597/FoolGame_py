@@ -3,7 +3,7 @@
 from src.core.elems import Deck
 from src.core.players_hand import PlayersHands
 from src.core.context import Context
-from .elems_view import syncPile # DeckView, StockView, TableView
+# from .elems_view import syncPile # DeckView, StockView, TableView
 # from .player_view import PlayerView
 
 from src.view.elem_view_fabric import ElemViewFabric

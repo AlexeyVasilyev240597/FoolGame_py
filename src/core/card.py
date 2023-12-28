@@ -68,17 +68,13 @@ class Card:
 
     def __repr__(self):
         if self.open:
-            if self.rank.value == Rank.JACK:
-                rank = 'J'
-            elif self.rank.value == Rank.QUEEN:
-                rank = 'Q'
-            elif self.rank.value == Rank.KING:
-                rank = 'K'
-            elif self.rank.value == Rank.ACE:
-                rank = 'A'
+            if self.rank.value > 10:
+                rank = self.rank.name[0]
             else:
                 rank = str(self.rank.value)
-            return repr(rank + '-' + self.suit.value)
+            #[ '\u2660', '\u2665', '\u2666', '\u2663' ]
+            suit = self.suit.value
         else:
-            # unknown
-            return repr('UNK')
+            rank = '*'
+            suit = '*'
+        return f'{rank:>2}-{suit}'

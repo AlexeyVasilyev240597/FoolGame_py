@@ -57,7 +57,7 @@ class PlayersHand(Pile):
     #     return w
     
     def flipCards(self):
-        [card.flip() for card in self.cards]
+        [card.hide() for card in self.cards]
     
     def setNewGameParams(self, trump, status):
         self.trump  = trump        

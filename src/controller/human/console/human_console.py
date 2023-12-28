@@ -24,6 +24,7 @@ class HumanConsole(PlayerSbj):
     def chooseCard(self, context):
         pass
     
+    # TODO: remove, use PlayerSbj.move (!)
     def move(self, context: Context):
         print(f'{self.name}, your move: ')
         move = {}
@@ -32,4 +33,5 @@ class HumanConsole(PlayerSbj):
             move['card'] = card
         elif word := HumanConsole.str2word(move_str):
             move['word'] = word
+        move['pl_id'] = self.id
         return move

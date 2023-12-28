@@ -31,6 +31,8 @@ class Player:
             deal(self.view, self.view.deck)
             # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
+            self.view.stock.cards[-1] = CardConverter.card2cardView(
+                new_context.stock.last, self.view.is_graphic)
             setOrderOfMoving(self.view, [ResultOfRaund.NEW_GAME])
         elif stage == GameStage.PLAYING:
             if 'pl_id' in last_move:
@@ -44,7 +46,8 @@ class Player:
             react2Move(last_move, self.view)
             
             
-            if 'word' in last_move and last_move['word'] == Word.BEATEN:
+            if 'word' in last_move and (last_move['word'] == Word.BEATEN or
+                                        last_move['word'] == Word.TAKE_AWAY):
                 self.openCardsInMyHand()
         # TODO: process it!
         elif stage == GameStage.GAME_OVER:
@@ -75,7 +78,8 @@ class Player:
         known_cards = []
         for card_v in old_hand_v:
             if card_v.open:
-                known_cards.append(CardConverter.cardView2card(card_v, is_graphic))
+                # known_cards.append(CardConverter.cardView2card(card_v, is_graphic))
+                known_cards.append(card_v)
         
         new_hand = self.context.players.getPlayerById(self.sbj.id).cards
         unknown_cards = []
@@ -95,7 +99,7 @@ class Player:
         if card and rivals_hand:
             rivals_hand[0] = CardConverter.card2cardView(card, self.view.is_graphic)
         else:        
-            self.rival_id.flipCards()
+            self.view.players.getPlayerById(rival_id).flipCards()
                 
         
 

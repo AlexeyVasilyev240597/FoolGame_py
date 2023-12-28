@@ -55,15 +55,12 @@ class Stock(Pile):
     def __init__(self):
         super().__init__()
         self._trump = None
-        self._last = None
     
     def hideCards(self) -> None:
-        last = self.last
+        last = self.getCard(-1)
         super().hideCards()
         if last:
-            self.cards[-1] = last
-            # TODO: check if this line does not need
-            self._last = last
+            self.addCard(last)
     
     def setTrump(self) -> None:
         if self.vol > 0:
@@ -71,13 +68,12 @@ class Stock(Pile):
             self._trump = first_card.suit
             # put first_card to the bottom
             self.addCard(first_card)
-            self._last = first_card
     
     # non-empty Stock can show only last card
     @property
     def last(self) -> Card:
         if self.vol > 0:
-            return self._last
+            return self.cards[-1]
         else:
             return None
     

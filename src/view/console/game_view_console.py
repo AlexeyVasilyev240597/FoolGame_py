@@ -26,7 +26,6 @@ class DeckViewConsole(DeckView):
 
 class StockViewConsole(StockView):    
     def draw(self):
-        stock_repr = '------------------------------------'
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
         if self.last:

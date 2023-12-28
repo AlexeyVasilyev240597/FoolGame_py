@@ -31,18 +31,18 @@ class DeckView(Deck, ItemView):
         for i in range(len(self.cards)):
             self.cards[i] = CardConverter.card2cardView(self.cards[i], self.is_graphic)
         
-def syncPile(pile_v: PileView, pile: Pile):
-    # remove absent cards
-    for card_v in pile_v.cards:
-        card = CardConverter.cardView2card(card_v, pile_v.is_graphic)
-        if not card in pile.cards:
-            pile_v.cards.remove(card_v)
+# def syncPile(pile_v: PileView, pile: Pile):
+#     # remove absent cards
+#     for card_v in pile_v.cards:
+#         card = CardConverter.cardView2card(card_v, pile_v.is_graphic)
+#         if not card in pile.cards:
+#             pile_v.cards.remove(card_v)
         
-    # add new cards
-    for card in pile.cards:
-        card_v = CardConverter.card2cardView(card, pile_v.is_graphic)
-        if not card_v in pile_v.cards:
-            pile_v.cards.append(card_v)
+#     # add new cards
+#     for card in pile.cards:
+#         card_v = CardConverter.card2cardView(card, pile_v.is_graphic)
+#         if not card_v in pile_v.cards:
+#             pile_v.cards.append(card_v)
 
             
     
