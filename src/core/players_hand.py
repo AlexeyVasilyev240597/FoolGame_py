@@ -30,9 +30,7 @@ class PlayersHand(Pile):
     
     def addCard(self, card: Card) -> None:
         super().addCard(card)
-        # in case if card is None
-        if card.open:
-            self.cards.sort(key = self._get_weight)
+        self.sortHand()
     
     def _get_weight(self, card):
         if card.open:
@@ -58,11 +56,14 @@ class PlayersHand(Pile):
     
     def flipCards(self):
         [card.hide() for card in self.cards]
+        
+    def sortHand(self):
+        self.cards.sort(key = self._get_weight)
     
     def setNewGameParams(self, trump, status):
         self.trump  = trump        
         self.status = status
-        self.cards.sort(key = self._get_weight)
+        self.sortHand()
     
 
 # structure for working with two players

@@ -27,33 +27,34 @@ class Player:
         last_move = new_context.last_move
         
         if stage == GameStage.START:
-            # TODO: open last card in stock_v for setting the trump!
             deal(self.view, self.view.deck)
             # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
-            self.view.stock.cards[-1] = CardConverter.card2cardView(
+            self.view.stock.cards[0] = CardConverter.card2cardView(
                 new_context.stock.last, self.view.is_graphic)
+            self.view.stock.setTrump()
             setOrderOfMoving(self.view, [ResultOfRaund.NEW_GAME])
+            self.view.players.getPlayerById(self.sbj.id).sortHand()
         elif stage == GameStage.PLAYING:
-            if 'pl_id' in last_move:
-                if last_move['pl_id'] == rival_id:
-                    if 'card' in last_move:
+            if (last_move['pl_id'] == rival_id and
+                'card' in last_move):
                         self._flipRivalCards(rival_id, last_move['card'])
-                elif last_move['pl_id'] == self.sbj.id:
-                    if 'word' in last_move and last_move['word'] == Word.TAKE_AWAY:
-                        self._flipRivalCards(rival_id)
             
             react2Move(last_move, self.view)
+
+            if last_move['pl_id'] == self.sbj.id:
+                if 'word' in last_move and last_move['word'] == Word.TAKE_AWAY:
+                    self._flipRivalCards(rival_id)
+                    self.openCardsInMyHand()
             
             
-            if 'word' in last_move and (last_move['word'] == Word.BEATEN or
-                                        last_move['word'] == Word.TAKE_AWAY):
+            if 'word' in last_move and (last_move['word'] == Word.BEATEN):
                 self.openCardsInMyHand()
         # TODO: process it!
         elif stage == GameStage.GAME_OVER:
             pass
         
-        self.view.update()  
+        self.view.update()
 
     # def replaceDummyCards(self, pile_v: Pile):
     #     new_hand = self.context.players.getPlayerById(self.sbj.id).cards
@@ -92,6 +93,7 @@ class Player:
         for i in closed_cards_ids:
             old_hand_v[i] = CardConverter.card2cardView(unknown_cards[j], is_graphic)
             j += 1
+        self.view.players.getPlayerById(self.sbj.id).sortHand()
     
     
     def _flipRivalCards(self, rival_id: int, card: Card = None):

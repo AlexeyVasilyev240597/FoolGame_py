@@ -87,8 +87,9 @@ def setOrderOfMoving(context: Context, prev_res) -> None:
 #     if dead heat then to player which throws last card 
 #     and to winner otherwise
 def deal(context: Context, deck: Deck):
-    deck.shift(context.players.actv, amount=CARDS_KIT)
+    # deck.shift(context.players.actv, amount=CARDS_KIT)
     deck.shift(context.players.pssv, amount=CARDS_KIT)
+    deck.shift(context.players.actv, amount=CARDS_KIT)
     deck.shift(context.stock)
     context.stock.setTrump()
 
@@ -193,7 +194,7 @@ def isMoveCorrect(move, context: Context) -> MoveType:
 
 def react2Word(word: Word, context: Context) -> None:
     if word == Word.BEATEN:
-        context.table.shift(context.pile,)
+        context.table.shift(context.pile)
         context.players.actv.status = Status.DEFENDING
         context.players.pssv.status = Status.ATTACKER
         complete(context)
