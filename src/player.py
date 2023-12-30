@@ -6,7 +6,6 @@ from src.core.rules             import GameStage, deal, setOrderOfMoving, react2
 from src.controller.player_sbj  import PlayerSbj, PlayersSbjs
 from src.view.elems_view        import DeckView
 from src.view.game_view         import GameView
-from src.view.card_convert      import CardConverter
 
 
 class Player:
@@ -30,8 +29,8 @@ class Player:
             deal(self.view, self.view.deck)
             # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
-            self.view.stock.cards[0] = CardConverter.card2cardView(
-                new_context.stock.last, self.view.is_graphic)
+            self.view.stock.cards[0] =  self.view.stock.card2cardView(
+                new_context.stock.last)
             self.view.stock.setTrump()
             setOrderOfMoving(self.view, [ResultOfRaund.NEW_GAME])
             self.view.players.getPlayerById(self.sbj.id).sortHand()
@@ -56,19 +55,8 @@ class Player:
         
         self.view.update()
 
-    # def replaceDummyCards(self, pile_v: Pile):
-    #     new_hand = self.context.players.getPlayerById(self.sbj.id).cards
-    #     old_hand = self.hand
-    #     unknown_cards = []
-    #     for card in new_hand:
-    #         if not card in old_hand:
-    #             unknown_cards.append(card)
-    #     for card in unknown_cards:
-    #         card_v = CardConverter.card2cardView(card, self.view.is_graphic)
-            
-    
     def openCardsInMyHand(self):
-        is_graphic = self.view.is_graphic
+        my_hand_v = self.view.players.getPlayerById(self.sbj.id)
         # find closed cards in self.hand, 
         old_hand_v = self.view.players.getPlayerById(self.sbj.id).cards
         closed_cards_ids = [i for i in range(len(old_hand_v)) if not old_hand_v[i].open]
@@ -79,7 +67,6 @@ class Player:
         known_cards = []
         for card_v in old_hand_v:
             if card_v.open:
-                # known_cards.append(CardConverter.cardView2card(card_v, is_graphic))
                 known_cards.append(card_v)
         
         new_hand = self.context.players.getPlayerById(self.sbj.id).cards
@@ -91,17 +78,18 @@ class Player:
         # replace closed dummy cards by found in diff
         j = 0
         for i in closed_cards_ids:
-            old_hand_v[i] = CardConverter.card2cardView(unknown_cards[j], is_graphic)
+            old_hand_v[i] = my_hand_v.card2cardView(unknown_cards[j])
             j += 1
         self.view.players.getPlayerById(self.sbj.id).sortHand()
     
     
     def _flipRivalCards(self, rival_id: int, card: Card = None):
-        rivals_hand = self.view.players.getPlayerById(rival_id).cards
+        rival = self.view.players.getPlayerById(rival_id)
+        rivals_hand = rival.cards
         if card and rivals_hand:
-            rivals_hand[0] = CardConverter.card2cardView(card, self.view.is_graphic)
+            rivals_hand[0] = rival.card2cardView(card)
         else:        
-            self.view.players.getPlayerById(rival_id).flipCards()
+            rival.flipCards()
                 
         
 

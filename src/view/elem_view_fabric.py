@@ -13,34 +13,34 @@ class ElemViewFabric:
         if is_graphic:
             return None
         else:
-            return StockViewConsole(False)
+            return StockViewConsole()
     
     def getTableView(is_graphic: bool) -> TableView:
         if is_graphic:
             return None
         else:
-            return TableViewConsole(False)
+            return TableViewConsole()
 
     def getPlayerView(is_graphic: bool) -> PlayerView:
         if is_graphic:
             return None
         else:
-            return PlayerViewConsole(False)
+            return PlayerViewConsole()
     
     def getPlayerSbjView(is_graphic: bool, name: str, id: int) -> PlayerSbjView:
         if is_graphic:
             return None
         else:
-            return PlayerSbjViewConsole(False, name, id)
+            return PlayerSbjViewConsole(name, id)
     
     def getPileView(is_graphic: bool) -> PileView:
         if is_graphic:
             return None
         else:
-            return PileViewConsole(False)
+            return PileViewConsole()
 
     def getDeckView(is_graphic: bool) -> DeckView:
         if is_graphic:
             return None
         else:
-            return DeckViewConsole(False)
+            return DeckViewConsole()

@@ -25,10 +25,6 @@ class CardViewGraph(CardView, pygame.sprite.Sprite):
         self.rect.y = pos[1]
         self.target_pos = pos
     
-    def cardView2card(card_view):
-        return Card(CardViewGraph.suit, CardViewGraph.rank)
-    
-    
     def draw(self):
         pass
     

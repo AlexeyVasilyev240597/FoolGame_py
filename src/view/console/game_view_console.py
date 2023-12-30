@@ -1,4 +1,6 @@
-from src.view.elems_view import ItemView, PileView, StockView, TableView, DeckView
+from src.core.card import Card
+from src.view.card_view import CardView
+from src.view.elems_view import PileView, StockView, TableView, DeckView
 from src.view.player_view import PlayerView, PlayerSbjView
 
 
@@ -10,21 +12,17 @@ def display_set(cards):
     return cards_repr
 
 
-# class PileViewConsole(ItemView):
-#     def __init__(self):
-#         ItemView.__init__(self, False)
-
-
 class PileViewConsole(PileView):
-    def draw(self):
-        pass
-        # print(self.vol)
-
-class DeckViewConsole(DeckView):
+    def card2cardView(self, card: Card):
+        return CardView(card)
+    
     def draw(self):
         pass
 
-class StockViewConsole(StockView):    
+class DeckViewConsole(DeckView, PileViewConsole):
+    pass
+
+class StockViewConsole(StockView, PileViewConsole):    
     def draw(self):
         stock_repr = '|'
         stock_repr += str(self.vol) + ': '
@@ -37,7 +35,7 @@ class StockViewConsole(StockView):
         print(stock_repr)
 
 
-class PlayerViewConsole(PlayerView):        
+class PlayerViewConsole(PlayerView, PileViewConsole):        
     def draw(self):
         player_repr = ''
         player_repr += display_set(self.cards)
@@ -45,7 +43,7 @@ class PlayerViewConsole(PlayerView):
         print(player_repr)
 
 
-class PlayerSbjViewConsole(PlayerSbjView):    
+class PlayerSbjViewConsole(PlayerSbjView, PileViewConsole):    
     def draw(self):
         player_sbj_repr = ''
         player_sbj_repr += self.name + ': '
@@ -60,7 +58,7 @@ class PlayerSbjViewConsole(PlayerSbjView):
         print(player_sbj_repr)
         
 
-class TableViewConsole(TableView):    
+class TableViewConsole(TableView, PileViewConsole):    
     def draw(self):
         table_repr = ''
         table_repr += display_set(self.low.cards)

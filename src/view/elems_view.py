@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 
 from src.core.card import Side, Card
-from src.view.card_convert import CardConverter
 from src.core.elems import Pile, Deck, Stock, Table
 
 
 class ItemView(ABC):
-    def __init__(self, is_graphic: bool):
+    def __init__(self):
         ABC.__init__(self)
-        self.is_graphic = is_graphic
+    
+    @abstractmethod
+    def card2cardView(card: Card):
+        pass
     
     @abstractmethod
     def draw(self):
@@ -19,75 +21,27 @@ class ItemView(ABC):
     #     pass
 
 class PileView(Pile, ItemView):
-    def __init__(self, is_graphic: bool):
+    def __init__(self):
         Pile.__init__(self)
-        ItemView.__init__(self, is_graphic)
+        ItemView.__init__(self)
 
 class DeckView(Deck, ItemView):
-    def __init__(self, is_graphic: bool):
+    def __init__(self):
         Deck.__init__(self)
-        ItemView.__init__(self, is_graphic)
+        ItemView.__init__(self)
         [card.hide() for card in self.cards]
         for i in range(len(self.cards)):
-            self.cards[i] = CardConverter.card2cardView(self.cards[i], self.is_graphic)
+            self.cards[i] = self.card2cardView(self.cards[i])
         
-# def syncPile(pile_v: PileView, pile: Pile):
-#     # remove absent cards
-#     for card_v in pile_v.cards:
-#         card = CardConverter.cardView2card(card_v, pile_v.is_graphic)
-#         if not card in pile.cards:
-#             pile_v.cards.remove(card_v)
-        
-#     # add new cards
-#     for card in pile.cards:
-#         card_v = CardConverter.card2cardView(card, pile_v.is_graphic)
-#         if not card_v in pile_v.cards:
-#             pile_v.cards.append(card_v)
-
-            
-    
-    # def syncDeck(self, deck: Deck):
-    #     [card.flip() for card in self.cards]
-    #     [card.flip() for card in deck.cards]
-    #     for i in range(len(self.cards)):
-    #         card = Card(self.cards[i].suit, self.cards[i].rank, Side.FACE)
-    #         j = deck.cards.index(card)
-    #         self.cards[i], self.cards[j] = self.cards[j], self.cards[i]
-    #     # for c, c_v in zip(deck.cards, self.cards):
-    #     #         print(f'deck: {c.rank}-{c.suit}, deck_view: {c_v.rank}-{c_v.suit}')
-    #     [card.flip() for card in self.cards]
-    #     [card.flip() for card in deck.cards]
-        # NOTE: you need to pass deepcopy of deck 
-        # (for don't changing cards in original deck)
-        # or need to call card.flip for stay deck closed!
-
-    # def update(self, deck: Deck):
-    #     self.vol = deck.vol
-    
-
 class StockView(Stock, ItemView):
-    def __init__(self, is_graphic: bool):
+    def __init__(self):
         Stock.__init__(self)
-        ItemView.__init__(self, is_graphic)
-        
-    
-    # def update(self, stock: Stock):
-    #     self.trump = stock.trump
-    #     if stock.last:
-    #         self.last  = CardConverter.card2cardView(stock.last, self.is_graphic)
-    #     else:
-    #         self.last = None
-    #     self.vol   = stock.vol
+        ItemView.__init__(self)
     
 
 # maybe you don't need dublate the constructor
 # TODO: check it!
 class TableView(Table, ItemView):
-    def __init__(self, is_graphic: bool):
+    def __init__(self):
         Table.__init__(self)
-        ItemView.__init__(self, is_graphic)
-
-    # def update(self, table: Table):
-    #     self.top = [CardConverter.card2cardView(card, self.is_graphic) for card in table.top.cards]
-    #     self.low = [CardConverter.card2cardView(card, self.is_graphic) for card in table.low.cards]
-    
+        ItemView.__init__(self)

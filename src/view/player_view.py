@@ -1,26 +1,17 @@
 from abc import ABC, abstractmethod
 
-# from .card_view import CardView
 from src.view.elems_view import ItemView
-from src.view.card_convert import CardConverter
 from src.core.players_hand import PlayersHand
 
 
 class PlayerView(PlayersHand, ItemView):
-    def __init__(self, is_graphic):
+    def __init__(self):
         PlayersHand.__init__(self)
-        ItemView.__init__(self, is_graphic)
-    
-    # def update(self, player: PlayersHand):
-    #     self.status = player.status
-    #     # game params
-    #     self.trump  = player.trump
-    #     self.cards  = [CardConverter.card2cardView(card, self.is_graphic) for card in player.cards]
-    
+        ItemView.__init__(self)
     
 class PlayerSbjView(ItemView):
-    def __init__(self, is_graphic: bool, name: str, id: int) -> None:
-        ItemView.__init__(self, is_graphic)
+    def __init__(self, name: str, id: int) -> None:
+        ItemView.__init__(self)
         self.name   = name
         self.id = id
         self.word = None
