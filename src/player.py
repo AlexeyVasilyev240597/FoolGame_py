@@ -2,7 +2,7 @@ from src.core.card              import Card
 from src.core.elems             import Pile
 from src.core.players_hand      import Word, PlayersHand, PlayersHands
 from src.core.context           import Context
-from src.core.rules             import GameStage, deal, setOrderOfMoving, react2Move, ResultOfRaund
+from src.core.rules             import GameStage, deal, setOrderOfMoving, react2Move, ResultOfRaund, whoIsFool, collect
 from src.controller.player_sbj  import PlayerSbj, PlayersSbjs
 from src.view.elems_view        import DeckView
 from src.view.game_view         import GameView
@@ -26,6 +26,9 @@ class Player:
         last_move = new_context.last_move
         
         if stage == GameStage.START:
+            print('\n\n')
+            print('-----------start of round-----------')
+            
             deal(self.view, self.view.deck)
             # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
@@ -41,17 +44,36 @@ class Player:
             
             react2Move(last_move, self.view)
 
-            if last_move['pl_id'] == self.sbj.id:
-                if 'word' in last_move and last_move['word'] == Word.TAKE_AWAY:
-                    self._flipRivalCards(rival_id)
-                    self.openCardsInMyHand()
+            # if last_move['pl_id'] == self.sbj.id:
+            #     if 'word' in last_move and last_move['word'] == Word.TAKE_AWAY:
+                    # self._flipRivalCards(rival_id)
+                    # self.openCardsInMyHand()
             
             
-            if 'word' in last_move and (last_move['word'] == Word.BEATEN):
-                self.openCardsInMyHand()
+            # if 'word' in last_move and (last_move['word'] == Word.BEATEN):
+            self._flipRivalCards(rival_id)
+            self.openCardsInMyHand()
         # TODO: process it!
         elif stage == GameStage.GAME_OVER:
-            pass
+            react2Move(last_move, self.view)
+            self.view.update()
+            
+            result = whoIsFool(self.view)
+            # TODO: replace those prints by words!
+            if result[0] == ResultOfRaund.FOOL_EXISTS:
+                if result[1] == self.sbj.id:
+                    print('I am a Fool')
+                else:
+                    print('You are a Fool')
+            else:
+                print(result[0].name)
+                    
+            collect(self.view, self.view.deck)
+            [card.hide() for card in self.view.deck.cards]
+            
+            print('------------end of round------------')
+            print('\n\n')
+            print('\n\n')
         
         self.view.update()
 

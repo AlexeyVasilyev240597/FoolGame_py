@@ -77,7 +77,7 @@ class PlayersSbjs(ABC):
             # say = {}
             # say['word'] = fool.sayWord(Status.FOOL)
             # say['pl_id'] = fool_id
-            print(f'{fool.name} is a Fool')
+            # print(f'{fool.name} is a Fool')
         # return say
     
     def print_score(self):

@@ -1,16 +1,16 @@
 from enum import IntEnum, Enum, Flag
 
 class Suit(Enum):
-    SPADES   = 'S'
+    # SPADES   = 'S'
     HEARTS   = 'H'
     DIAMONDS = 'D'
     CLUBS    = 'C'
 
 class Rank(IntEnum):
-    SIX   = 6
-    SEVEN = 7
-    EIGHT = 8
-    NINE  = 9
+    # SIX   = 6
+    # SEVEN = 7
+    # EIGHT = 8
+    # NINE  = 9
     TEN   = 10
     JACK  = 11
     QUEEN = 12

@@ -32,17 +32,14 @@ class FoolGame:
         if result[0] == ResultOfRaund.FOOL_EXISTS:
             fool_id = result[1]
             self.pls.setFoolStatus(fool_id)
-            self.updatePlayersContexts(GameStage.GAME_OVER)
-        else:
-            print(result[0].name)
+        # else:
+        #     print(result[0].name)
+        # TODO: pass score to Player.view to display it
         self.pls.print_score()
     
     
     def playGameRound(self, prev_res: dict) -> dict:
         self.deck.shuffle()
-        
-        print('\n\n')
-        print('-----------start of round-----------')
         
         deal(self.context, self.deck)
         setOrderOfMoving(self.context, prev_res)
@@ -66,10 +63,6 @@ class FoolGame:
         result = whoIsFool(self.context)
         self.processingRoundResult(result)
         collect(self.context, self.deck)
-        
-        print('------------end of round------------')
-        print('\n\n')
-        print('\n\n')
         
         return result
 
