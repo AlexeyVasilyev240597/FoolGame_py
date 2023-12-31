@@ -54,7 +54,7 @@ class FoolGame:
             while (wrong_move := isMoveCorrect(
                     (move := self.pls.getPlayerById(actv_id).sbj.move(context_p)), 
                     context_p)):
-                print(wrong_move)
+                print(wrong_move.name)
                         
             react2Move(move, self.context)
             game_stage = gameIsOver(self.context)

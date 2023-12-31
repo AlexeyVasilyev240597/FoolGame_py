@@ -17,6 +17,7 @@ class Player:
         # view and controller: will set after meetinf with a rival
         self.view = None
         self.sbj = pl_sbj
+        self.prev_res = [ResultOfRaund.NEW_GAME]
         
         
     def updateContext(self, new_context: Context, stage: GameStage) -> None:
@@ -30,12 +31,11 @@ class Player:
             print('-----------start of round-----------')
             
             deal(self.view, self.view.deck)
-            # TODO: fix it! prevRes should be stored into Player
             self.openCardsInMyHand()
             self.view.stock.cards[0] =  self.view.stock.card2cardView(
                 new_context.stock.last)
             self.view.stock.setTrump()
-            setOrderOfMoving(self.view, [ResultOfRaund.NEW_GAME])
+            setOrderOfMoving(self.view, self.prev_res)
             self.view.players.getPlayerById(self.sbj.id).sortHand()
         elif stage == GameStage.PLAYING:
             if (last_move['pl_id'] == rival_id and
@@ -58,15 +58,15 @@ class Player:
             react2Move(last_move, self.view)
             self.view.update()
             
-            result = whoIsFool(self.view)
+            self.prev_res = whoIsFool(self.view)
             # TODO: replace those prints by words!
-            if result[0] == ResultOfRaund.FOOL_EXISTS:
-                if result[1] == self.sbj.id:
+            if self.prev_res[0] == ResultOfRaund.FOOL_EXISTS:
+                if self.prev_res[1] == self.sbj.id:
                     print('I am a Fool')
                 else:
                     print('You are a Fool')
             else:
-                print(result[0].name)
+                print(self.prev_res[0].name)
                     
             collect(self.view, self.view.deck)
             [card.hide() for card in self.view.deck.cards]
